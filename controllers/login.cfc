@@ -43,7 +43,7 @@ component accessors=true {
         session.auth.fullname = user.getName();
         session.auth.user = user;
 
-        variables.fw.redirect( "main" );
+        variables.fw.redirect( application.start_page );
     }    
 
     function login( rc ) {
@@ -70,7 +70,7 @@ component accessors=true {
         session.auth.fullname = user.getName();
         session.auth.user = user;
 
-        variables.fw.redirect( "main" );
+        variables.fw.redirect( application.start_page );
     }
 
     /*

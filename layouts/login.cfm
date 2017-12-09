@@ -5,17 +5,9 @@
 <html ng-app="ddApp" xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<title>Compound (Alpha v0.7)</title>
+	<title><cfoutput>#application.app_name#</cfoutput></title>
 	
     <link href="/bootstrap/css/bootstrap.css" rel="stylesheet">	
-<!--
-	<script src="jquery/js/jquery-1.7.2.min.js" type="text/javascript"></script>
-    <script src="bootstrap/js/bootstrap.js"></script>    
-	<script src="angular/angular.min.js" type="text/javascript"></script>	
-	<script>
-	var ddApp = angular.module('ddApp', []);	
-	</script>	
--->
 	
 </head>
 <body ng-controller="ddCtrl">
@@ -29,7 +21,7 @@
       <span class="icon-bar"></span>
     </button>
 	<span class="navbar-brand">
-	Compound (Alpha v0.7)
+	<cfoutput>#application.app_name#</cfoutput>
     </span>
   </div>
 

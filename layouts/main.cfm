@@ -6,22 +6,20 @@
 <head>
 
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<title>Compound (Alpha v0.7)</title>
+	<title><cfoutput>#application.app_name#</cfoutput></title>
 
 	<!-- styles -->	
-	<link href="bootstrap/css/bootstrap.css" rel="stylesheet">	
+	<link href="/bootstrap/css/bootstrap.css" rel="stylesheet">
 
 	<!-- scripts -->
-	<script src="jquery/js/jquery-1.7.2.min.js" type="text/javascript"></script>
-	<script src="bootstrap/js/bootstrap.js"></script>    
+	<script src="/jquery/js/jquery-1.7.2.min.js" type="text/javascript"></script>
+	<script src="/bootstrap/js/bootstrap.js"></script>
 
-	<script src="angular/angular.min.js" type="text/javascript"></script>	
-	<!--<script src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.9.0.js"></script>-->
-	<!-- <script src="angular/ui-bootstrap-tpls-0.13.0.min.js"></script> -->
+	<script src="/angular/angular.min.js" type="text/javascript"></script>
 
-	<script src="node_modules/angular-tooltips/lib/angular-tooltips.js"></script>
+	<script src="/node_modules/angular-tooltips/lib/angular-tooltips.js"></script>
 
-	<script src="node_modules/moment/min/moment.min.js" type="text/javascript"></script>
+	<script src="/node_modules/moment/min/moment.min.js" type="text/javascript"></script>
 
 	<script>
 	var ddApp = angular.module('ddApp', ['720kb.tooltips']);
@@ -40,17 +38,18 @@
         <span class="icon-bar"></span>
       </button>
       <span class="navbar-brand">
-	     Compound (Alpha v0.7)
+	     <cfoutput>#application.app_name#</cfoutput>
       </span>
     </div>
 
     <div class="collapse navbar-collapse" id="bs-esample-navbar-collapse-1">
       <ul class="nav navbar-nav">
-        <li class="active"><a href="index.cfm?action=main">Update <span class="sr-only">(current)</span></a></li>
-        <li><a href="index.cfm?action=plan">Plan</a></li>
+        <li class="active"><cfoutput><a href="#buildUrl('main.default')#"></cfoutput>Update <span class="sr-only">(current)</span></a></li>
+        <li><cfoutput><a href="#buildUrl('plan.default')#"></cfoutput>Plan</a></li>
+        <li><cfoutput><a href="#buildUrl('pay')#">Pay</a></cfoutput></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li><a href="index.cfm?action=login.logout">Logout</a></li>
+        <li><cfoutput><a href="#buildUrl('login.logout')#"></cfoutput>Logout</a></li>
       </ul>
     </div>
   </div>
@@ -68,7 +67,6 @@
 			#body#
 		</cfoutput>
 </div>
-
 
 </body>
 
@@ -110,35 +108,10 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http ) {
 
 	});
 	
-
-	/*	
-	$http.get( 'index.cfm/card/' ).success( function( data ) { 
-
-		$scope.cards = data;
-
-		// make an array 'keylist' of the keys in the order received (eg. 0:"10",1:"9",2:"8",3:"6",4:"2")
-		$scope.keylist = Object.keys($scope.cards).sort(function(a, b){return b-a});
-
-		for (key in $scope.keylist) {
-			if ( $scope.cards[$scope.keylist[key]].is_emergency ) {
-				$scope.selected = $scope.keylist[key];
-			}
-		}
-
-		// chain into the preferences load
-		$http.get( 'index.cfm/prefs/' ).success( function ( data ) {
-
-			$scope.preferences = data;
-
-		});
-
-	});
-	*/
-
 	$scope.saveCard = function( key, data ) { 
 
 		console.log($scope.cards);
-		
+
 		$http({
 			method: 'POST',
 			url: 'index.cfm/card/',
@@ -154,8 +127,22 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http ) {
 		});
 
 		console.log($scope.cards);			
-				
+
 	};
+
+	$scope.deletePlan = function( user_id ) {
+
+		// purge the plan cache whenever a card
+		$http({
+			method: 'DELETE',
+			url: 'index.cfm/plan/' + user_id,
+		}).success( function( data ) {
+
+			// do whatever you need to do on the client to flag the cache is purged/nonexistent
+
+		});
+
+	}
 
 	$scope.setAsEmergency = function( eid, uid ) { 
 
@@ -194,10 +181,9 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http ) {
 			    }
 			}*/		
 
-		});			
-	
+		});
 				
-		};
+	};
 
 	$scope.newCard = function( uid ) { 
 		

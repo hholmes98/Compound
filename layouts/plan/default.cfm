@@ -6,29 +6,28 @@
 <head>
 	
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<title>Compound (Alpha v0.7)</title>
+	<title><cfoutput>#application.app_name#</cfoutput></title>
 
 	<!-- styles -->	
-  <link href="bootstrap/css/bootstrap.css" rel="stylesheet">	
-  <link href="node_modules/fullcalendar/dist/fullcalendar.css" rel="stylesheet">
+  <link href="/bootstrap/css/bootstrap.css" rel="stylesheet">
+  <link href="/node_modules/fullcalendar/dist/fullcalendar.css" rel="stylesheet">
 
   <!-- scripts -->
-	<script src="jquery/js/jquery-1.7.2.min.js" type="text/javascript"></script>
-  <script src="bootstrap/js/bootstrap.js"></script>    
+	<script src="/jquery/js/jquery-1.7.2.min.js" type="text/javascript"></script>
+  <script src="/bootstrap/js/bootstrap.js"></script>
 
-	<script src="angular/angular.min.js" type="text/javascript"></script>	
-	<!--<script src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.9.0.js"></script>-->
-  <script src="angular/ui-bootstrap-tpls-0.13.0.min.js"></script>
+	<script src="/angular/angular.min.js" type="text/javascript"></script>
+  <script src="/angular/ui-bootstrap-tpls-0.13.0.min.js"></script>
 
-	<script src="node_modules/moment/min/moment.min.js" type="text/javascript"></script>
+	<script src="/node_modules/moment/min/moment.min.js" type="text/javascript"></script>
 
 	<!-- calendar -->	
-	<script type="text/javascript" src="node_modules/angular-ui-calendar/src/calendar.js"></script>
-	<script type="text/javascript" src="node_modules/fullcalendar/dist/fullcalendar.min.js"></script>
-	<script type="text/javascript" src="node_modules/fullcalendar/dist/gcal.js"></script>
+	<script type="text/javascript" src="/node_modules/angular-ui-calendar/src/calendar.js"></script>
+	<script type="text/javascript" src="/node_modules/fullcalendar/dist/fullcalendar.min.js"></script>
+	<script type="text/javascript" src="/node_modules/fullcalendar/dist/gcal.js"></script>
 
 	<!-- graphing -->
-	<script type="text/javascript" src="node_modules/highcharts/highstock.js"></script>
+	<script type="text/javascript" src="/node_modules/highcharts/highstock.js"></script>
 
 	<script>
 	var ddApp = angular.module('ddApp', ['ui.calendar', 'ui.bootstrap']);
@@ -47,17 +46,18 @@
         <span class="icon-bar"></span>
       </button>
       <span class="navbar-brand">
-	     Compound (Alpha v0.7)
+	     <cfoutput>#application.app_name#</cfoutput>
       </span>
     </div>
 
     <div class="collapse navbar-collapse" id="bs-esample-navbar-collapse-1">
       <ul class="nav navbar-nav">
-        <li><a href="index.cfm?action=main">Update</a></li>
-        <li class="active"><a href="index.cfm?action=plan">Plan <span class="sr-only">(current)</span></a></li>
+        <li><cfoutput><a href="#buildUrl('main')#">Update</a></cfoutput></li>
+        <li class="active"><cfoutput><a href="#buildUrl('plan')#"></cfoutput>Plan <span class="sr-only">(current)</span></a></li>
+        <li><cfoutput><a href="#buildUrl('pay')#">Pay</a></cfoutput></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li><a href="index.cfm?action=login.logout">Logout</a></li>
+        <li><cfoutput><a href="#buildUrl('login.logout')#"></cfoutput>Logout</a></li>
       </ul>
     </div>
   </div>

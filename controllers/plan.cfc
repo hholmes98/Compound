@@ -20,7 +20,7 @@ component accessors = true {
 	
 	}
 
-	public void function events( struct rc ) {
+	public void function schedule( struct rc ) {
 
 		var events = planservice.events( arguments.rc.user_id );
 
@@ -28,11 +28,19 @@ component accessors = true {
 
 	}
 
-	public void function schedule( struct rc ) {
+	public void function journey( struct rc ) {
 
 		var milestones = planservice.milestones( arguments.rc.user_id );
 
 		framework.renderdata("JSON", milestones);
+
+	}
+
+	public void function delete( struct rc ) {
+
+		var ret = planservice.delete( arguments.rc.user_id );
+
+		framework.renderdata("JSON", ret);
 
 	}	
 

@@ -2,12 +2,6 @@ component accessors=true {
 		
 	public any function init( beanFactory ) {
 
-		/* PC: this was the original line that was /examples/cards/assets/todo.json that required a url-mapping
-		in tomcat for. Beware! this may be something that must be adjusted/mapped for in the future. */
-		//variables.ddFile = expandPath( "/assets/dd-dataset.json" ); 
-
-		//variables.data = deserializeJSON( fileRead( variables.ddFile ) );
-
 		variables.beanFactory = beanFactory;
 
 		variables.defaultOptions = {
@@ -40,40 +34,24 @@ component accessors=true {
 
 		for (i = 1; i lte result.recordcount; i++) {
 			card = variables.beanFactory.getBean('cardBean');
-			
+
 			card.setCard_Id(result.card_id[i]);
 			card.setUser_Id(result.user_id[i]);
 			card.setLabel(result.card_label[i]);
 			card.setMin_Payment(result.min_payment[i]);
 			card.setIs_Emergency(result.is_emergency[i]);
 			card.setBalance(result.balance[i]);
-			card.setInterest_Rate(result.interest_rate[i]);			
+			card.setInterest_Rate(result.interest_rate[i]);
 
 			cards[card.getCard_id()] = card;
 		}
 
 		return cards;
 
-		/*
-		var ret = structCopy( variables.data.cards );
-
-		ret['keylist'] = structKeyArray( variables.data.cards );
-		arraySort( ret['keylist'], "numeric", "desc" );
-		
-		return variables.data.cards;
-		*/
-	
 	}
 
 	public any function get( string id ) {
 		
-		/*       		
-		if ( structKeyExists( variables.data.cards, arguments.id ) ) {
-			return variables.data.cards[ arguments.id ];
-		} else
-			return 0;
-		*/
-
 		sql = '
 			SELECT c.*
 			FROM "pCards" c			
@@ -91,7 +69,7 @@ component accessors=true {
 		card = variables.beanFactory.getBean('cardBean');
 
 		if (result.recordcount) {
-		
+
 			card.setCard_Id(result.card_id[1]);
 			card.setUser_Id(result.user_id[1]);
 			card.setLabel(result.card_label[1]);
@@ -99,7 +77,7 @@ component accessors=true {
 			card.setIs_Emergency(result.is_emergency[1]);
 			card.setBalance(result.balance[1]);
 			card.setInterest_Rate(result.interest_rate[1]);
-		
+
 		}
 
 		return card;
@@ -180,37 +158,6 @@ component accessors=true {
 
 	public any function setAsEmergency( required string card_id, required string user_id ) {
 
-		/*
-		for (card in variables.data.cards) {
-			variables.data.cards[card]["is_emergency"] = 0;
-		}
-						
-		variables.data.cards[arguments.id]["is_emergency"] = 1;		
-		
-		FileWrite( variables.ddFile, serializeJson( variables.data ) );
-		
-		return variables.data.cards[id];
-		
-
-		sql = '
-			SELECT u.user_id
-			FROM "pUsers" u
-			INNER JOIN "pCards" c ON
-				u.user_id = c.user_id
-			WHERE c.card_id = :cid
-		';
-
-		params = {
-			cid = {
-				value = arguments.id, sqltype = 'integer'
-			}
-		};
-
-		result = queryExceute(sql, params, variables.defaultOptions);
-
-		var user_id = result.user_id[1];
-		*/
-
 		// blank out all the cards' emergency
 		// then set the new one
 
@@ -243,14 +190,6 @@ component accessors=true {
 
 	public any function delete( required string card_id ) {
 
-		/*
-		structDelete(variables.data.cards, id);		
-
-		FileWrite( variables.ddFile, serializeJson( variables.data ) );		
-		
-		return variables.data.cards;
-		*/
-
 		sql = '
 			DELETE FROM "pCards" c			
 			WHERE c.card_id = :cid
@@ -267,5 +206,142 @@ component accessors=true {
 		return 0;		
 	
 	}
+
+	/* **
+
+	** */
 		
+	public query function qryGetNonZeroCardsByUser( string user_id, string include_list='', boolean prioritize_emergency=false ) {
+
+		var i = 0;
+
+		var sql = '
+			SELECT c.*
+			FROM "pCards" c
+			WHERE c.user_id = :uid
+			AND c.balance > 0
+			';
+
+		if ( Len( arguments.include_list ) ) {
+			sql = sql & '
+				AND c.card_id IN ( #arguments.include_list# )
+			';
+
+		}
+
+		if ( arguments.prioritize_emergency ) {
+
+			sql = sql & '
+				ORDER BY c.is_emergency DESC, c.balance ASC, c.interest_rate DESC
+			';
+
+		} else {
+
+			sql = sql & '
+				ORDER BY c.balance ASC, c.interest_rate DESC
+			';
+
+		}
+
+		var params = {
+			uid = {
+				value = arguments.user_id, sqltype = 'integer' 
+			}
+		};
+
+		var card = {};
+
+		var result = queryExecute(sql, params, variables.defaultOptions);
+
+		return result;
+
+	}
+
+	public any function getEmergencyCardByUser( string user_id ) {
+
+		var sql = '
+			SELECT c.*
+			FROM "pCards" c
+			WHERE c.user_id = :uid
+			AND c.is_emergency = 1
+		';
+
+		var params = {
+			uid = {
+				value = arguments.user_id, sqltype = 'integer'
+			}
+		};
+
+		var result = queryExecute(sql, params, variables.defaultOptions);
+
+		var card = variables.beanFactory.getBean('cardBean');
+
+		if (result.recordcount) {
+
+			card.setCard_Id(result.card_id[1]);
+			card.setUser_Id(result.user_id[1]);
+			card.setLabel(result.card_label[1]);
+			card.setMin_Payment(result.min_payment[1]);
+			card.setIs_Emergency(result.is_emergency[1]);
+			card.setBalance(result.balance[1]);
+			card.setInterest_Rate(result.interest_rate[1]);
+
+		}
+
+		return card;
+	}
+
+	public string function dbGetCardIDs( struct cards, require_nonzero_balance=false ) {
+
+		var res = '';
+		var card = 0;
+
+		for ( card in arguments.cards ) {
+
+			if ( !arguments.require_nonzero_balance ) {
+				res = ListAppend(res, arguments.cards[card].getCard_Id() );
+			} else {
+				if ( arguments.cards[card].getBalance() > 0 ) {
+					res = ListAppend(res, arguments.cards[card].getCard_Id() );
+				}
+			}
+
+		}
+
+		return res;
+
+	}
+
+	public string function dbGetNonZeroCardIDs( struct cards ) {
+
+		var res = dbGetCardIDs( arguments.cards, true );
+
+		return res;
+
+	}
+
+	public numeric function dbCalculateTotalBalance( struct cards ) {
+
+		var tot=0;
+
+		for ( card in arguments.cards ) {
+			tot += arguments.cards[card].getBalance();
+		}
+
+		return tot;
+
+	}
+
+	public numeric function dbCalculateTotalRemainingBalance( struct cards ) {
+
+		var rtot=0;
+
+		for ( card in arguments.cards ) {
+			rtot += arguments.cards[card].getRemaining_Balance();
+		}
+
+		return rtot;
+
+	}
+
 }

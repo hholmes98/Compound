@@ -60,9 +60,9 @@
 							<input type="text" class="form-control" ng-model="cards[key].min_payment">
 						</td>
 						<td>
-							<button class="btn button btn-default" ng-class="{'btn-success': !myForm.$pristine }" ng-disabled="myForm.$pristine" ng-click="saveCard(key , cards[key]);myForm.$setPristine(true)" ><span class="glyphicon glyphicon-ok"></span> Save</button>
+							<button class="btn button btn-default" ng-class="{'btn-success': !myForm.$pristine }" ng-disabled="myForm.$pristine" ng-click="saveCard(key, cards[key]);deletePlan(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>);myForm.$setPristine(true)" ><span class="glyphicon glyphicon-ok"></span> Save</button>
 							<button class="btn button btn-default" ng-class="{'btn-warning': !myForm.$pristine }" ng-disabled="myForm.$pristine" ng-click="resetCard(key);myForm.$setPristine(true)" ><span class="glyphicon glyphicon-remove"></span> Cancel</button>
-							<button class="btn button btn-default" ng-click="deleteCard(key)"><span class="glyphicon glyphicon-plus"></span> Delete</button>
+							<button class="btn button btn-default" ng-click="deleteCard(key);deletePlan(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>);"><span class="glyphicon glyphicon-plus"></span> Delete</button>
 						</td>
 					</tr>					
 					</tbody>	
@@ -85,7 +85,7 @@
 							</select>
 						</td>
 						<td>
-							<button class="btn button btn-default" ng-class="{'btn-success': !myForm2.$pristine }" ng-disabled="myForm2.$pristine" ng-click="setAsEmergency(cards[selected].card_id,<cfoutput>#session.auth.user.getUser_id()#</cfoutput>);myForm2.$setPristine(true)"><span class="glyphicon glyphicon-save"></span> Select This Card</button>
+							<button class="btn button btn-default" ng-class="{'btn-success': !myForm2.$pristine }" ng-disabled="myForm2.$pristine" ng-click="setAsEmergency(cards[selected].card_id,<cfoutput>#session.auth.user.getUser_id()#</cfoutput>);deletePlan(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>);myForm2.$setPristine(true)"><span class="glyphicon glyphicon-save"></span> Select This Card</button>
 						</td>
 					</tr>
 					</tbody>
@@ -105,10 +105,10 @@
 					<tbody>
 					<tr class="align-top" ng-form name="myForm3">
 						<td>
-							<input type="text" ng-model="preferences.budget" />
+							$<input type="text" ng-model="preferences.budget" />
 						</td>
 						<td>
-							<button class="btn button btn-default" ng-class="{'btn-success': !myForm3.$pristine }" ng-disabled="myForm3.$pristine" ng-click="setBudget(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>, preferences.budget);myForm3.$setPristine(true)"><span class="glyphicon glyphicon-save"></span> Update Budget</button>
+							<button class="btn button btn-default" ng-class="{'btn-success': !myForm3.$pristine }" ng-disabled="myForm3.$pristine" ng-click="setBudget(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>, preferences.budget);deletePlan(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>);myForm3.$setPristine(true)"><span class="glyphicon glyphicon-save"></span> Update Budget</button>
 						</td>
 					</tr>
 					</tbody>

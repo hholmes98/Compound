@@ -13,6 +13,7 @@ component accessors = true {
     function password( rc ) {
 
         rc.id = session.auth.user.getId();
+
     }
 
     function change( rc ) {
