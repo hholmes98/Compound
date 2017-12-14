@@ -7,8 +7,7 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<title><cfoutput>#application.app_name#</cfoutput></title>
 	
-    <link href="/bootstrap/css/bootstrap.css" rel="stylesheet">	
-	
+    <link href="/bootstrap/css/bootstrap.css" rel="stylesheet">
 </head>
 <body ng-controller="ddCtrl">
 <nav class="navbar navbar-inverse navbar-static-top" role="navigation">

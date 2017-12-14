@@ -22,7 +22,7 @@ component accessors="true" {
 
 		return plan;
 
-	}	
+	}
 
 	/* ***
 	events()
@@ -319,7 +319,7 @@ component accessors="true" {
 		for (card in _cards) {
 			min_payment_total += _cards[card].getMin_Payment();
 		}
-
+		
 
 		//6. Subtrack the minimum payment of the "hot" card. this is the "available_min_spread" alotted for all remaining minimum balances.
 		var available_min_spread = min_payment_total - hot_card.getMin_Payment();
@@ -456,7 +456,7 @@ component accessors="true" {
 
 		for ( i=1; i lte result.recordcount; i++ ) {
 			card = variables.beanFactory.getBean('cardBean');
-
+			
 			card.setCard_Id(result.card_id[i]);
 			card.setUser_Id(result.user_id[i]);
 			card.setLabel(result.card_label[i]);
@@ -530,7 +530,7 @@ component accessors="true" {
 
 	/* **
 	BIZLOG
-	** */
+	** */	
 
 	public any function dbCalculatePlan( string user_id, no_cache=false ) {
 
@@ -702,7 +702,7 @@ component accessors="true" {
 			} catch (any e) {
 				if ( e.errorCode == "ERR_BUDGET_OVERRUN" ) {
 					//writeDump( qSmallerDeck );
-					//writeOutput('SUBCAUGHT/FIXED');
+					//writeOutput('SUBCAUGHT/FIXED');					
 					this_deck = dbCalculatePayments( this_deck, smaller_budget, false, arguments.emergency_priority );
 				} else {
 					rethrow;
@@ -734,7 +734,7 @@ component accessors="true" {
 		}
 
 		if ( arguments.interest_rate > 0 ) {
-
+		
 			// 1. calculate the interest for 1 month
 			var month_interest = dbCalculateMonthInterest( arguments.balance, arguments.interest_rate, arguments.target_date );
 
@@ -751,7 +751,7 @@ component accessors="true" {
 		if ( payment > arguments.balance ) {
 			payment = arguments.balance;
 		} else {
-
+			
 			// set a min balance threshold allowed on a card, to prevent a single month from allowing a card to have a
 			// balance of 11 cents. :P, something like a min. threshold of $10.00
 			// eg. use case: calculated payment: 12.72, balance: 13.04
@@ -763,14 +763,9 @@ component accessors="true" {
 
 		// protection
 		if ( payment < 0 ) {
-			Throw( type="Custom", 
-					errorCode="ERR_NEGATIVE_CALCULATE_PAYMENT", 
-					message="dbCalculatePayment negative value.", 
-					detail="dbCalculatePayment produced a negative value.", 
-					var={balance:arguments.balance,interest_rate:arguments.interest_rate,target_date:arguments.target_date}
-			);
+			Throw( type="Custom", errorCode="ERR_NEGATIVE_CALCULATE_PAYMENT", message="dbCalculatePayment negative value.", detail="dbCalculatePayment produced a negative value.", var={balance:arguments.balance,interest_rate:arguments.interest_rate,target_date:arguments.target_date});
 		}
-		
+
 		return payment;
 
 	}
@@ -884,7 +879,7 @@ component accessors="true" {
 		var budget 					= preferenceservice.getBudget( arguments.user_id );
 
 		// 1. init an events array
-		var events 					= ArrayNew(1);
+		var events 					= ArrayNew(1);		
 
 		// 2. start with today's date
 		var next_date 				= Now();
@@ -956,13 +951,13 @@ component accessors="true" {
 
 				next_plan = new_payment_plan;
 
-			}
+			}			
 
 			// 8c. Convert next_plan into a next_event, using the new date.
 			next_event = dbCalculateEvent( next_plan, next_date );
 
 			// 8d. Add the new event to the events array
-			ArrayAppend( events, next_event );
+			ArrayAppend( events, next_event );			
 
 			// 8f. re-assign total_remaining_balance
 			total_remaining_balance = cardservice.dbCalculateTotalRemainingBalance( next_event );

@@ -8,9 +8,15 @@ replaces /plan.html
 	<div class="panel panel-default form-horizontal" ng-controller="ddCtrl">
 
 		<ul class="nav nav-tabs" role="tablist">
-			<li role="presentation"><a href="#card-manager" aria-controls="card-manager" role="tab" data-toggle="tab">Payments Per Card</a></li>
+			<li role="presentation"><a href="#plan" aria-controls="plan" role="tab" data-toggle="tab">Payments Per Card</a></li>
+			<!---
+			if you make any tab *other* than the calendar tab active by default, the calendar won't render until "today" is
+  			clicked.
+
+  			there are online workarounds for this, so be aware you may need to leverage one.
+  			--->
 			<li role="presentation" class="active"><a href="#schedule" aria-controls="schedule" role="tab" data-toggle="tab">Schedule By Month</a></li>
-			<li role="presentation"><a href="#milestones" aria-controls="milestones" role="tab" data-toggle="tab">Milestones</a></li>
+			<li role="presentation"><a href="#journey" aria-controls="journey" role="tab" data-toggle="tab">Milestones</a></li>
 		</ul>
 
 		<div class="tab-content">
@@ -19,7 +25,7 @@ replaces /plan.html
 
 			List out the cards, and display the calculated payment for each card.
 			-->
-			<div role="tabpanel" class="panel-body tab-pane" id="card-manager">
+			<div role="tabpanel" class="panel-body tab-pane" id="plan">
 				<div align="center">
 					<h2><cfoutput>For This Month (#MonthAsString(Month(Now()))# #Year(Now())#)</cfoutput></h2>
 				</div>
@@ -32,12 +38,12 @@ replaces /plan.html
 					</thead>					
 					<tbody>
 						
-					<tr class="align-top" ng-form name="myForm" ng-repeat="key in keylist">
+					<tr class="align-top" ng-form name="myForm" ng-repeat="card in keylist">
 						<td>
-							{{cards[key].label}}
+							{{plan[card].label}}
 						</td>
 						<td>
-							{{cards[key].calculated_payment | currency}}
+							{{plan[card].calculated_payment | currency}}
 						</td>
 					</tr>					
 					</tbody>	
@@ -52,10 +58,10 @@ replaces /plan.html
 			 -->
 			<div role="tabpanel" class="panel-body tab-pane active" id="schedule">
 				<!-- using https://github.com/angular-ui/ui-calendar -->
-        <div class="alert-success calAlert" ng-show="alertMessage != undefined && alertMessage != ''">
-          <h4>{{alertMessage}}</h4>
-        </div>
-				<div ui-calendar="uiConfig.calendar" class="span8 calendar" ng-model="eventSources"></div>
+		        <div class="alert-success calAlert" ng-show="alertMessage != undefined && alertMessage != ''">
+		          <h4>{{alertMessage}}</h4>
+		        </div>
+				<div ui-calendar="uiConfig.calendar" class="span8 calendar" ng-model="schedule"></div>
 			</div>
 
 
@@ -65,16 +71,11 @@ replaces /plan.html
 			(where certain cards are paid off) to convey a sense of progression, regardless of debt load.
 
 			 -->
-			<div role="tabpanel" class="panel-body tab-pane" id="milestones">
+			<div role="tabpanel" class="panel-body tab-pane" id="journey">
 
 				<div id="milestones"></div>
 				
 			</div>
 
-			
-
-
-
 		</div>
 	</div>
-

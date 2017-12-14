@@ -86,7 +86,7 @@
 
 <script>
 
-ddApp.controller( 'ddCtrl' , function ( $scope, $http, $q ) {
+ddApp.controller( 'ddCtrl' , function ( $scope, $http, $q, $location ) {
 
 	$scope.fail = false;
 
@@ -124,6 +124,19 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http, $q ) {
 
 	});
 
+	// compatibility bridge between angular $location and fw/1 buildUrl()
+	$scope.navigateTo = function( path ) {
+
+		//$location.url( path ); // FIXME:this is angular pro-hash navigation
+		location.href = path;
+
+	}
+
+	$scope.panTo = function( pageIndex ) {
+
+		AnimatePage.panForward( pageIndex );
+
+	}
 
 	$scope.selectCard = function( cid ) {
 

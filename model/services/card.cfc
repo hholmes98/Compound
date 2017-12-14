@@ -158,9 +158,6 @@ component accessors=true {
 
 	public any function setAsEmergency( required string card_id, required string user_id ) {
 
-		// blank out all the cards' emergency
-		// then set the new one
-
 		sql = '
 			UPDATE "pCards"
 			SET 
@@ -191,7 +188,7 @@ component accessors=true {
 	public any function delete( required string card_id ) {
 
 		sql = '
-			DELETE FROM "pCards" c			
+			DELETE FROM "pCards" c
 			WHERE c.card_id = :cid
 		';
 
@@ -203,7 +200,7 @@ component accessors=true {
 
 		result = queryExecute(sql, params, variables.defaultOptions);
 
-		return 0;		
+		return 0;
 	
 	}
 

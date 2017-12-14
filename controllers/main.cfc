@@ -8,7 +8,7 @@ component accessors = true {
 
         variables.fw = fw;
 
-    }
+    }	
 
     function password( rc ) {
 
@@ -52,9 +52,25 @@ component accessors = true {
 	public void function get( struct rc ) {
 
 		var cardbean = cardservice.get( arguments.rc.id );
-		
+
+		/* consider:
+
+		https://docs.angularjs.org/api/ng/service/$http#jsonp
+
+		A JSON vulnerability allows third party website to turn your JSON resource URL into JSONP request under some conditions. To counter this your server can prefix all JSON requests with following string ")]}',\n". AngularJS will automatically strip the prefix before processing it as JSON.
+
+		For example if your server needs to return:
+
+		['one','two']
+		which is vulnerable to attack, your server can return:
+
+		)]}',
+		['one','two']
+		AngularJS will strip the prefix, before processing the JSON.
+		*/
+
 		framework.renderdata("JSON", cardbean);
-	
+
 	}
 
 	public void function delete( struct rc ) {

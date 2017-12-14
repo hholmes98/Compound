@@ -1,5 +1,5 @@
 <!--- layouts/plan/default --->
-<cfparam name="rc.message" default="#arrayNew(1)#">
+<cfparam name="rc.message" default="#ArrayNew(1)#">
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html ng-app="ddApp" xmlns="http://www.w3.org/1999/xhtml">
@@ -85,280 +85,276 @@ var formatter = new Intl.NumberFormat('en-US', {
   minimumFractionDigits: 2, /* this might not be necessary */
 });
 
+// http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/highcharts/plotoptions/series-animation-easing/
+Math.easeOutBounce = function (pos) {
+    if ((pos) < (1 / 2.75)) {
+        return (7.5625 * pos * pos);
+    }
+    if (pos < (2 / 2.75)) {
+        return (7.5625 * (pos -= (1.5 / 2.75)) * pos + 0.75);
+    }
+    if (pos < (2.5 / 2.75)) {
+        return (7.5625 * (pos -= (2.25 / 2.75)) * pos + 0.9375);
+    }
+    return (7.5625 * (pos -= (2.625 / 2.75)) * pos + 0.984375);
+};
+
+// take an arbitrary fixed index, and return a color. allows color syncing across disparate arrays. supports an array of any length
+function getColor(index) {
+
+  // highcharts 3.x
+  var masterColors3 = ['#2f7ed8', '#0d233a', '#8bbc21', '#910000', '#1aadce', '#492970', '#f28f43', '#77a1e5', '#c42525', '#a6c96a'];
+
+  // highcharts 2.x
+  var masterColors2 = ['#4572A7', '#AA4643', '#89A54E', '#80699B', '#3D96AE', '#DB843D', '#92A8CD', '#A47D7C', '#B5CA92'];
+
+  // highcarts default
+  var masterColors = ["#7cb5ec", "#434348", "#90ed7d", "#f7a35c", "#8085e9", "#f15c80", "#e4d354", "#2b908f", "#f45b5b", "#91e8e1"];
+
+  var all = masterColors.concat(masterColors2.concat(masterColors3));
+
+  return ( all[ index % all.length ] );
+
+}
+
+// Angular Controller
 ddApp.controller( 'ddCtrl' , function ( $scope , $http  ) {
 
-	/* Calendar */
- 	  var date = new Date();
-    var d = date.getDate();
-    var m = date.getMonth();
-    var y = date.getFullYear();
+  /* Calendar */
+  var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-    // for the calendar init
-    $scope.eventSources = [];
-    $scope.events = [];
+  var date = new Date();
+  var d = date.getDate();
+  var m = date.getMonth();
+  var y = date.getFullYear();
 
-    $http.get( 'index.cfm/plan/events/<cfoutput>#session.auth.user.getUser_id()#</cfoutput>' ).success( function( data ) { 
+  // Calendar: for the calendar init
+  $scope.schedule = [];
+  $scope.events   = [];
 
-      for(var i=0; i< data.length; i++){
-        $scope.events.push({
-          title:data[i].title,
-          start:new Date(data[i].start)    
-        });
-      };
+  // Calendar: alert on eventClick
+  $scope.alertOnEventClick = function( date, jsEvent, view ){
+      $scope.alertMessage = date.title;
+  };
+  
+  // Calendar: config object
+  $scope.uiConfig = {
+    calendar:{
+      eventClick: $scope.alertOnEventClick,
+    }
+  };  
 
-      $scope.eventSources.push($scope.events);
+  // FIXME : Plan, Calendar, and Chart init() should all be promise-chained
+  // Intended Step 2
+  // Calendar: main()
+  $http.get( 'index.cfm/plan/events/<cfoutput>#session.auth.user.getUser_id()#</cfoutput>' ).success( function( data ) { 
 
-    });
- 
-    
-  $scope.changeTo = 'Hungarian';
-    
-  /*
-    $scope.calEventsExt = {
-       color: '#f00',
-       textColor: 'yellow',
-       events: [ 
-          {type:'party',title: 'Lunch',start: new Date(y, m, d, 12, 0),end: new Date(y, m, d, 14, 0),allDay: false},
-          {type:'party',title: 'Lunch 2',start: new Date(y, m, d, 12, 0),end: new Date(y, m, d, 14, 0),allDay: false},
-          {type:'party',title: 'Click for Google',start: new Date(y, m, 28),end: new Date(y, m, 29),url: 'http://google.com/'}
-        ]
-    };
-    */
-    
-    /* alert on eventClick */
-    $scope.alertOnEventClick = function( date, jsEvent, view ){
-        $scope.alertMessage = (date.title + ' was clicked ');
-    };
-    
-    /* alert on Drop */
-    /*
-     $scope.alertOnDrop = function(event, delta, revertFunc, jsEvent, ui, view){
-       $scope.alertMessage = ('Event Droped to make dayDelta ' + delta);
-    };
-    */
-   
-    /* alert on Resize */
-    /*
-    $scope.alertOnResize = function(event, delta, revertFunc, jsEvent, ui, view ){
-       $scope.alertMessage = ('Event Resized to make dayDelta ' + delta);
-    };
-    */
-    
-    /* add and removes an event source of choice */
-    /*
-    $scope.addRemoveEventSource = function(sources,source) {
-      var canAdd = 0;
-      angular.forEach(sources,function(value, key){
-        if(sources[key] === source){
-          sources.splice(key,1);
-          canAdd = 1;
-        }
-      });
-      if(canAdd === 0){
-        sources.push(source);
-      }
-    };
-    */
-    
-    /* add custom event*/
-    /*
-    $scope.addEvent = function() {
+    for(var i=0; i< data.length; i++){
       $scope.events.push({
-        title: 'Open Sesame',
-        start: new Date(y, m, 28),
-        end: new Date(y, m, 29),
-        className: ['openSesame']
+        title:data[i].title,
+        start:new Date(data[i].start)
       });
     };
-    */
+
+    $scope.schedule.push($scope.events);
+
+  });
+  
+  /* Chart */
+
+  /*
+    format is:
     
-    /* remove event */
-    /*
-    $scope.remove = function(index) {
-      $scope.events.splice(index,1);
-    };
-    *?
-    
-    /* Change View */
-    /*
-    $scope.changeView = function(view,calendar) {
-      uiCalendarConfig.calendars[calendar].fullCalendar('changeView',view);
-    };
-    */
-    
-    /* Change View */
-    /*
-    $scope.renderCalender = function(calendar) {
-      if(uiCalendarConfig.calendars[calendar]){
-        uiCalendarConfig.calendars[calendar].fullCalendar('render');
+    [
+      {
+        id: 'id_1',
+        name: 'name of card',
+        data:
+        [
+          100.00, 75.00, 50.00, 25.00, 10.00, 5.00, 2.50, 1.00  // balance at the end of each month
+        ],
+      },
+      {
+        id: 'id_2',
+        name: 'name of card 2',
+        data:
+        [
+          100.00, 75.00, 50.00, 25.00, 10.00, 5.00, 2.50, 1.00  // balance at the end of each month
+        ],
+      },
+      ...
+      {
+        id: 'milestone_1',
+        type: 'flags',
+        data:
+        [
+        ],
+        onSeries: 'id_1',  // the id of the data that just ended - ran out of data[]
+        shape: 'circlepin',
+        width: 16
       }
-    };
-    */
-    
-    /* Render Tooltip */
-    /*
-    $scope.eventRender = function( event, element, view ) { 
-        element.attr({'tooltip': event.title,
-                     'tooltip-append-to-body': true});
-        //$compile(element)($scope);
-    };
-    */
-    
-    /* config object */
-    $scope.uiConfig = {
-      calendar:{
-        eventClick: $scope.alertOnEventClick,
-      }
-    };
- 
-    /*
-    $scope.changeLang = function() {
-      if($scope.changeTo === 'Hungarian'){
-        $scope.uiConfig.calendar.dayNames = ["Vasárnap", "Hétfő", "Kedd", "Szerda", "Csütörtök", "Péntek", "Szombat"];
-        $scope.uiConfig.calendar.dayNamesShort = ["Vas", "Hét", "Kedd", "Sze", "Csüt", "Pén", "Szo"];
-        $scope.changeTo= 'English';
-      } else {
-        $scope.uiConfig.calendar.dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-        $scope.uiConfig.calendar.dayNamesShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-        $scope.changeTo = 'Hungarian';
-      }
-    };
-    */
-    
-    /* event sources array*/
-    //$scope.eventSources = [$scope.events, $scope.eventSource, $scope.eventsF];
-    
-    //$scope.eventSources2 = [$scope.calEventsExt, $scope.eventsF, $scope.events];
+    ]
 
-    /********
-    charting
-    ********/
-
-      $http.get( 'index.cfm/plan/sched/<cfoutput>#session.auth.user.getUser_Id()#</cfoutput>' ).success( function( data ) { 
-
-        $scope.schedule = data;
-
-        $scope.milestones = Highcharts.stockChart('milestones', {
-
-          title: {
-            text: 'Payoff Milestones'
-          },
-
-          rangeSelector: {
-            enabled: false
-          },
-
-          // this is the visual display of the spline graph, and will only visibly show a smaller, selected range of the full timeline
-          xAxis: {
-            type: 'datetime',
-            ordinal: false,
-            min: Date.UTC(y,m,1), // note: initial range start (today)
-            max: Date.UTC(y,m+4,1)   // TODO: calculate this range to be 1/5th of the complete timeline (so that the initial selection 1/5th of the navigator bar)
-          },
-
-          // this start and end should be equal-to-or-longer than the visual display of the spline (set above in xAxis)
-          navigator: {
-            xAxis: {
-              type: 'datetime',
-              ordinal: false,
-              min: Date.UTC(y,m,1), // full range start (today)
-              tickInterval: 2 * 30 * 24 * 3600 * 1000 // a tick every 2 month
-            }
-          },
-
-          yAxis: {
-            type: 'linear',
-            min: 0
-          },
-
-          plotOptions: {
-            series: {
-              pointStart: Date.UTC(y,m,1), // we begin plotting on the 1st of the current month
-              pointIntervalUnit: 'month',  // every point along the x axis represents 1 month
-              tooltip: {
-                pointFormatter: function() {
-                  return '<span style="color:' + this.color + '">\u25CF</span> ' + this.series.name + '\'s Balance: <b>' + formatter.format(this.y) + '</b><br/>';
-                }
-              }
-            }
-          },
-
-          series : $scope.schedule
-
-        });
-
-      });
-
-
-    /*******
-    main
-    ********/
-
-    /* PC : Note to future self
-	if you make any tab *other* than the calendar tab active by default, the calendar won't render until "today" is
-	clicked.
-
-	there are online workarounds for this, so be aware you may need to leverage one.
-    */
-
-    /*
-  $http.get( 'index.cfm/plan/' ).success( function( data ) { 
-
-		$scope.cards = data;
-
-		// make an array 'keylist' of the keys in the order received (eg. 0:"10",1:"9",2:"8",3:"6",4:"2")
-		$scope.keylist = Object.keys($scope.cards).sort(function(a, b){return b-a});
-
-		for (key in $scope.keylist) {
-			if ( $scope.cards[$scope.keylist[key]].is_emergency ) {
-				$scope.selected = $scope.keylist[key];
-			}
-		}
-
-		// chain into the preferences load
-		$http.get( 'index.cfm/prefs/' ).success( function ( data ) {
-
-			$scope.preferences = data;
-
-		});
-
-	});
   */
 
+  // Chart: main()
+  // Intended Step 3
+  // FIXME: this should be $http.jsonp(), whitelist the URL: https://docs.angularjs.org/api/ng/service/$http#jsonp
+  $http.get( 'index.cfm/plan/sched/<cfoutput>#session.auth.user.getUser_Id()#</cfoutput>' ).success( function( result ) {
+
+    var wins = [];
+
+    for (var i=0; i<result.length;i++) {
+
+      // inject id
+      result[i]['id'] = 'id_' + i;
+
+      // inject color
+      result[i]['color'] = getColor(i);
+
+      // if this card has elements...
+      if ( result[i].data.length > 0 ) {
+
+        // ..it needs one more element to indicate $0.00
+        result[i].data.push(0);
+
+        // ..and it needs a partner series to display a milestone flag
+        var win = {
+          id: 'milestone_' + i,
+          type: 'flags',      
+          shape: 'squarepin',
+          width: 82,
+          onSeries: 'id_' + i,
+          tooltip: {
+            pointFormatter: function() {
+              return this.text;
+            }
+          },
+          data: []
+        };
+
+        payOffDate = Date.UTC(y,m,1) + ( (30 * 24 * 3600 * 1000) * (result[i].data.length-1) ); // fixme: couldn't i use the actual plan's payoff date, and convert this, since it is going to change for certain folks, based on their pay periods?
+        dateReadable = new Date(payOffDate);
+
+        win.data.push({
+          color: getColor(i),
+          x: payOffDate,
+          title: 'CHECKPOINT!!',
+          text: (result[i].name + ' paid off in: <b>' + monthNames[dateReadable.getMonth()] + ' of ' + dateReadable.getFullYear() + '</b>' )
+        });
+
+        wins.push(win);
+
+      }
+
+    }
+
+    // cat the two arrays together
+    result = result.concat(wins);
+
+    Highcharts.stockChart('milestones', {
+
+      title: {
+        text: 'Payoff Milestones'
+      },
+
+      chart: {
+        type: 'spline'
+      },
+
+      rangeSelector: {
+        enabled: false
+      },
+
+      // this is the visual display of the spline graph, and will only visibly show a smaller, selected range of the full timeline
+      xAxis: {
+        type: 'datetime',
+        ordinal: false,
+        min: Date.UTC(y,m,1),     // note: initial range start (today)
+        max: Date.UTC(y,m+4,1),    // TODO: calculate this range to be 1/5th of the complete timeline (so that the initial selection 1/5th of the navigator bar)
+        //tickInterval: 30 * 24 * 3600 * 1000 // a tick every month
+      },
+
+      // this start and end should be equal-to-or-longer than the visual display of the spline (set above in xAxis)
+      navigator: {
+        xAxis: {
+          type: 'datetime',
+          ordinal: false,
+          min: Date.UTC(y,m,1), // full range start (today)
+          tickInterval: 2 * 30 * 24 * 3600 * 1000 // a tick every 2 month
+        }
+      },
+
+      yAxis: {
+        type: 'linear',
+        min: 0
+      },
+
+      tooltip: {
+        split: true,
+        distance: 70, // undocumented, distance in pixels away from the point (calculated either + or -, based on best positioning of cursor)
+        padding: 5
+      },
+
+      plotOptions: {
+        series: {
+          pointStart: Date.UTC(y,m,1), // we begin plotting on the 1st of the current month
+          pointIntervalUnit: 'month',  // every point along the x axis represents 1 month
+          tooltip: {
+            pointFormatter: function() {
+              return '<span style="color:' + this.color + '">\u25CF</span> ' + this.series.name + '\'s Balance: <b>' + formatter.format(this.y) + '</b><br/>';
+            }
+          },
+          animation: {
+            duration: 6200,
+            //easing: 'easeOutBounce'
+          }
+        }
+      },
+
+      series: result
+
+      /*
+      REF 1 (adding something on the end): http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/highcharts/point/datalabels/
+      REF 2 (a 2nd series of flags): http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/stock/demo/flags-general/
+      REF 3 (multiple series, loaded asynchronously): http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/stock/demo/compare/
+      REF 4 (diff flags on diff series): http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/stock/demo/flags-placement/
+      */
+
+    });
+
+  });
+
+  // Intended Step 1
+  // Plan : main()
+  // FIXME: separate global handler that verifies person is logged in / redirects them if fails, from plan/events/milestones init.
   $http({
-    method: 'GET',
-    url: 'index.cfm/plan/<cfoutput>#session.auth.user.getUser_Id()#</cfoutput>' 
+      method: 'GET',
+      url: 'index.cfm/plan/<cfoutput>#session.auth.user.getUser_Id()#</cfoutput>' 
   }).then( function onSuccess( response ) {
-    
-    if ( response.data.toString().indexOf('DOCTYPE') != -1) {
+  
+    if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
       throw 'TIMEOUT';
     }
 
-    $scope.cards = response.data;
+    $scope.plan = response.data;
 
     // make an array 'keylist' of the keys in the order received (eg. 0:"10",1:"9",2:"8",3:"6",4:"2")
-    $scope.keylist = Object.keys($scope.cards).sort(function(a, b){return b-a});
+    $scope.keylist = Object.keys($scope.plan).sort(function(a, b){return b-a});
 
-    for (key in $scope.keylist) {
-      if ( $scope.cards[$scope.keylist[key]].is_emergency ) {
-        $scope.selected = $scope.keylist[key];
+    for (card in $scope.keylist) {
+      if ( $scope.plan[$scope.keylist[card]].is_emergency ) {
+        $scope.selected = $scope.keylist[card];
       }
     }
 
-    // chain into the preferences load
-    $http.get( 'index.cfm/prefs/uid/<cfoutput>#session.auth.user.getUser_Id()#</cfoutput>' ).success( function ( data ) {
-
-      $scope.preferences = data;
-
-    });
-
   }).catch ( function onError( response ) {
+
     //failure
     window.location.href = 'index.cfm/login';
 
   });  
 
-});
-
+}); // controller
 </script>
 </html>

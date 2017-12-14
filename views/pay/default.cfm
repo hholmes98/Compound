@@ -10,11 +10,23 @@
 		</div>
 
 		<cfoutput>
-		<div>
-			<ul>
-				<li id="pay"><strong><a href="#buildUrl('pay.choose')#">PAY</a></strong> bills</li>
-				<li id="update"><strong><a href="#buildUrl('main')#">UPDATE</a></strong> the budget</li>
-			</ul>
+		<div align="center">
+
+			<span align="left">
+
+				<button class="btn button btn-default" ng-click="panTo(2)"><span class="glyphicon glyphicon-wrench"></span> PAY bills</button>
+
+			</span>
+
+			<br/>
+			<br/>
+
+			<span align="right">
+
+				<button class="btn button btn-default" ng-click="navigateTo('#buildUrl('main')#')"><span class="glyphicon glyphicon-wrench"></span> UPDATE the budget</button>
+
+			</span>
+
 		</div>
 		</cfoutput>
 
@@ -34,22 +46,15 @@
 		<div class="panel panel-default form-horizontal">
 
 			<div class="panel-body tab-pane" id="card-list">
-				<!---<div align="center">
-					<h2><cfoutput>#session.auth.user.getName()#'s Cards</cfoutput></h2>
-				</div>--->
+
 				<table class="table table-striped table-bordered table-valign-middle">
-					<!--<thead>
-					<tr>
-						<th class="col-md-6">Card Name</th>
-					</tr>
-					</thead>-->
 					<tbody>
 						
 					<tr class="align-top" ng-form name="myForm" ng-repeat="key in keylist">
 						<td>
 							<button class="btn button btn-default" ng-click="selectCard(key);">{{cards[key].label}}</button>
 						</td>
-					</tr>					
+					</tr>
 					</tbody>
 				</table>
 			</div>
@@ -63,7 +68,7 @@
 <!-- pay.card -->
 <div class="pan-page pan-page-3">
 
-	<div class="container">	
+	<div class="container">
 
 		<div class="panel panel-default form-horizontal">
 
@@ -108,7 +113,7 @@
 						</td>
 					</tr>
 
-					</tbody>	
+					</tbody>
 
 				</table>
 

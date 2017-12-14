@@ -29,13 +29,8 @@ var AnimatePage = (function() {
 			var $page = $( this );
 			$page.data( 'originalClassList', $page.attr( 'class' ) );
 		} );
-
+		
 		$pages.eq( current ).addClass( 'pan-page-current' );
-
-		$( '.pan-perspective #pay a' ).click( function( e ) {
-			e.preventDefault();
-			panForward(2);
-		});
 
 	}
 
