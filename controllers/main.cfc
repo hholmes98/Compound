@@ -8,12 +8,12 @@ component accessors = true {
 
         variables.fw = fw;
 
-    }	
+    }
 
     function password( rc ) {
 
         rc.id = session.auth.user.getId();
-
+        
     }
 
     function change( rc ) {

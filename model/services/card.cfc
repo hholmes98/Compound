@@ -1,5 +1,5 @@
 component accessors=true {
-		
+
 	public any function init( beanFactory ) {
 
 		variables.beanFactory = beanFactory;
@@ -34,7 +34,7 @@ component accessors=true {
 
 		for (i = 1; i lte result.recordcount; i++) {
 			card = variables.beanFactory.getBean('cardBean');
-
+			
 			card.setCard_Id(result.card_id[i]);
 			card.setUser_Id(result.user_id[i]);
 			card.setLabel(result.card_label[i]);
@@ -51,10 +51,10 @@ component accessors=true {
 	}
 
 	public any function get( string id ) {
-		
+
 		sql = '
 			SELECT c.*
-			FROM "pCards" c			
+			FROM "pCards" c
 			WHERE c.card_id = :cid
 		';
 
@@ -69,7 +69,7 @@ component accessors=true {
 		card = variables.beanFactory.getBean('cardBean');
 
 		if (result.recordcount) {
-
+		
 			card.setCard_Id(result.card_id[1]);
 			card.setUser_Id(result.user_id[1]);
 			card.setLabel(result.card_label[1]);
@@ -77,7 +77,7 @@ component accessors=true {
 			card.setIs_Emergency(result.is_emergency[1]);
 			card.setBalance(result.balance[1]);
 			card.setInterest_Rate(result.interest_rate[1]);
-
+		
 		}
 
 		return card;
@@ -111,7 +111,7 @@ component accessors=true {
 					#card.is_emergency#,
 					#card.balance#,
 					#card.interest_rate#
-				) RETURNING card_id AS card_id_out;			
+				) RETURNING card_id AS card_id_out;
 			';
 
 			params = {
@@ -158,6 +158,9 @@ component accessors=true {
 
 	public any function setAsEmergency( required string card_id, required string user_id ) {
 
+		// blank out all the cards' emergency
+		// then set the new one
+
 		sql = '
 			UPDATE "pCards"
 			SET 
@@ -182,7 +185,7 @@ component accessors=true {
 
 		result = queryExecute(sql, params, variables.defaultOptions);
 
-		return arguments.card_id;	
+		return arguments.card_id;
 	}
 
 	public any function delete( required string card_id ) {
@@ -247,7 +250,6 @@ component accessors=true {
 		};
 
 		var card = {};
-
 		var result = queryExecute(sql, params, variables.defaultOptions);
 
 		return result;
@@ -255,7 +257,7 @@ component accessors=true {
 	}
 
 	public any function getEmergencyCardByUser( string user_id ) {
-
+			
 		var sql = '
 			SELECT c.*
 			FROM "pCards" c
@@ -274,7 +276,7 @@ component accessors=true {
 		var card = variables.beanFactory.getBean('cardBean');
 
 		if (result.recordcount) {
-
+		
 			card.setCard_Id(result.card_id[1]);
 			card.setUser_Id(result.user_id[1]);
 			card.setLabel(result.card_label[1]);
@@ -282,7 +284,7 @@ component accessors=true {
 			card.setIs_Emergency(result.is_emergency[1]);
 			card.setBalance(result.balance[1]);
 			card.setInterest_Rate(result.interest_rate[1]);
-
+		
 		}
 
 		return card;

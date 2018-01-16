@@ -4,13 +4,15 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html ng-app="ddApp" xmlns="http://www.w3.org/1999/xhtml">
 <head>
-	
+
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<title><cfoutput>#application.app_name#</cfoutput></title>
 
-	<!-- styles -->	
+  <!-- styles -->
+  <link href="https://fonts.googleapis.com/css?family=Ultra" rel="stylesheet">
   <link href="/bootstrap/css/bootstrap.css" rel="stylesheet">
   <link href="/node_modules/fullcalendar/dist/fullcalendar.css" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="/assets/css/dd.css" />
 
   <!-- scripts -->
 	<script src="/jquery/js/jquery-1.7.2.min.js" type="text/javascript"></script>
@@ -32,14 +34,16 @@
 	<script>
 	var ddApp = angular.module('ddApp', ['ui.calendar', 'ui.bootstrap']);
 	</script>
-	
+
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0" />
+
 </head>
 <body>
-<nav class="navbar navbar-inverse navbar-static-top" role="navigation">
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
   <div class="container-fluid">
     <!-- Brand and toggle get grouped for better mobile display -->
     <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
         <span class="sr-only">Toggle navigation</span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
@@ -52,9 +56,9 @@
 
     <div class="collapse navbar-collapse" id="bs-esample-navbar-collapse-1">
       <ul class="nav navbar-nav">
-        <li><cfoutput><a href="#buildUrl('main')#">Update</a></cfoutput></li>
-        <li class="active"><cfoutput><a href="#buildUrl('plan')#"></cfoutput>Plan <span class="sr-only">(current)</span></a></li>
-        <li><cfoutput><a href="#buildUrl('pay')#">Pay</a></cfoutput></li>
+        <li><cfoutput><a href="#buildUrl('main')#"><span class="glyphicon glyphicon-cog"></span></a></cfoutput></li>
+        <li class="active"><cfoutput><a href="#buildUrl('plan')#"></cfoutput><span class="glyphicon glyphicon-stats"></span> <span class="sr-only">(current)</span></a></li>
+        <li><cfoutput><a href="#buildUrl('pay')#"><span class="glyphicon glyphicon-money"></span></a></cfoutput></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li><cfoutput><a href="#buildUrl('login.logout')#"></cfoutput>Logout</a></li>
@@ -349,7 +353,7 @@ ddApp.controller( 'ddCtrl' , function ( $scope , $http  ) {
     }
 
   }).catch ( function onError( response ) {
-
+    
     //failure
     window.location.href = 'index.cfm/login';
 

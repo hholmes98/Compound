@@ -56,7 +56,7 @@ component accessors="true" {
 		var schedule = dbCalculateSchedule( arguments.user_id );
 
 		for ( event in schedule ) {
-
+			
 			for ( item in event ) {
 
 				var sItem = StructNew();
@@ -90,7 +90,7 @@ component accessors="true" {
 		// (with the implication that the schedule conveyed in events() is committed to by the user)
 
 		// format is:
-
+		
 		/*
 		data = [
 
@@ -501,7 +501,7 @@ component accessors="true" {
 		}
 
 		sql = Left( sql, Len(sql)-1 ); // trim trailing comma off
-		sql = sql & ';'; 			// add a semi-colon to the end
+		sql = sql & ';'; // add a semi-colon to the end
 
 		//trace( category="SQL", type="Information", text=sql );
 
@@ -765,7 +765,7 @@ component accessors="true" {
 		if ( payment < 0 ) {
 			Throw( type="Custom", errorCode="ERR_NEGATIVE_CALCULATE_PAYMENT", message="dbCalculatePayment negative value.", detail="dbCalculatePayment produced a negative value.", var={balance:arguments.balance,interest_rate:arguments.interest_rate,target_date:arguments.target_date});
 		}
-
+		
 		return payment;
 
 	}
@@ -846,12 +846,12 @@ component accessors="true" {
 		// TODO: later, look at the date and get a *portion* of the cached schedule from the db (if it exists)
 		var card 		= 0;
 		var this_plan 	= duplicate( arguments.plan );
-
+		
 		//var the_first = CreateDate( Year( arguments.calculated_for ), Month( arguments.calculated_for ), 1 );
 
 		// by default (which applies to preference=1 and preference=4 {monthly,its complicated}) is to set the pay date
 		// to the *last* day of the specified month
-
+		
 		// TODO: examine the user's preferences, and calculate each card's pay_date.
 		var the_last = CreateDate( Year( arguments.calculated_for ), Month( arguments.calculated_for ), DaysInMonth( arguments.calculated_for ) );
 

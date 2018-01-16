@@ -2,13 +2,14 @@
 replaces /plan.html
  --->
 	<div class="page-header">
-	  <h1><cfoutput>#session.auth.user.getName()#'s Plan Of Attack</cfoutput></h1>
+	  <h1><cfoutput>#session.auth.user.getName()#'s Debt-Free Future</cfoutput></h1>
+	  <h3>Chin up. The end is in sight.</h3>
 	</div>
 
 	<div class="panel panel-default form-horizontal" ng-controller="ddCtrl">
 
 		<ul class="nav nav-tabs" role="tablist">
-			<li role="presentation"><a href="#plan" aria-controls="plan" role="tab" data-toggle="tab">Payments Per Card</a></li>
+			<li role="presentation"><a href="#plan" aria-controls="plan" role="tab" data-toggle="tab">This Month (At A Glance)</a></li>
 			<!---
 			if you make any tab *other* than the calendar tab active by default, the calendar won't render until "today" is
   			clicked.
@@ -16,7 +17,7 @@ replaces /plan.html
   			there are online workarounds for this, so be aware you may need to leverage one.
   			--->
 			<li role="presentation" class="active"><a href="#schedule" aria-controls="schedule" role="tab" data-toggle="tab">Schedule By Month</a></li>
-			<li role="presentation"><a href="#journey" aria-controls="journey" role="tab" data-toggle="tab">Milestones</a></li>
+			<li role="presentation"><a href="#journey" aria-controls="journey" role="tab" data-toggle="tab">Future Milestones</a></li>
 		</ul>
 
 		<div class="tab-content">
@@ -26,9 +27,10 @@ replaces /plan.html
 			List out the cards, and display the calculated payment for each card.
 			-->
 			<div role="tabpanel" class="panel-body tab-pane" id="plan">
-				<div align="center">
-					<h2><cfoutput>For This Month (#MonthAsString(Month(Now()))# #Year(Now())#)</cfoutput></h2>
-				</div>
+				<span>
+					<h3>For This Month</h3>
+					<cfoutput><h2 shadow-text="#MonthAsString(Month(Now()))# #Year(Now())#">#MonthAsString(Month(Now()))# #Year(Now())#</h2></cfoutput>
+				</span>
 				<table class="table table-striped table-bordered table-valign-middle">
 					<thead>
 					<tr>

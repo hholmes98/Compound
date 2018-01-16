@@ -5,18 +5,8 @@
 	</div>
 
 	<div class="panel panel-default form-horizontal">
-		<!--<div class="panel-heading">
-			<h3 class="panel-title">Manage Your Credit Cards</h3>
-		</div>-->
 
-		<div id="top-banner">
-		<!-- should be 99 tall
-		border-bottom: 1px solid #555555;
-		text-align: center;
-		padding-top: 4px;
-		padding-bottom: 4px;
-		-->
-		</div>
+		<div id="top-banner"></div>
 
 		<ul class="nav nav-tabs" role="tablist">
 			<li role="presentation" class="active"><a href="#card-manager" aria-controls="card-manager" role="tab" data-toggle="tab">1. Manage Your Credit Cards</a></li>
@@ -29,11 +19,16 @@
 
 			<!-- tab 1 -->
 			<div role="tabpanel" class="panel-body tab-pane active" id="card-manager">				
-				<p>
-					<button tooltips tooltip-side="top right" tooltip-template="message goes here" type="button" class="btn button btn-default" ng-click="newCard(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>)"><span class="glyphicon glyphicon-plus"></span> Add a card</button>
-				</p>
 				<table class="table table-striped table-bordered table-valign-middle">
 					<thead>
+					<tr>
+						<th colspan="5">
+							<h3>These are your cards. There are many like them. But these ones are yours.</h3>
+						Update your entire budget here. Change any card's name, balance, interest rate or minimum payment. Click 'Add a new card' to for more debt. Click 'Delete' to remove the entire card from your profile. While changing info, click 'Reset' if you need to start over.</h2></th>
+					</tr>
+					<tr>
+						<th colspan="5"><button tooltips tooltip-side="top right" tooltip-template="message goes here" type="button" class="btn button btn-default" ng-click="newCard(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>)"><span class="glyphicon glyphicon-plus"></span> Add a new card</button></th>
+					</tr>
 					<tr>
 						<th class="col-md-4">Card</th>
 						<th class="col-md-2">Balance</th>
@@ -43,7 +38,6 @@
 					</tr>
 					</thead>					
 					<tbody>
-						
 					<tr class="align-top" ng-form name="myForm" ng-repeat="key in keylist">
 						<input type="hidden" ng-model="cards[key].id">
 						<input type="hidden" ng-model="cards[key].is_emergency">
@@ -51,18 +45,27 @@
 							<input type="text" class="form-control" ng-model="cards[key].label">
 						</td>
 						<td>
-							<input type="text" class="form-control" ng-model="cards[key].balance">
+							<div class="input-group">
+								<span class="input-group-addon">$</span>
+								<input type="text" class="form-control" ng-model="cards[key].balance">
+							</div>
 						</td>
 						<td>
-							<input type="text" class="form-control" ng-model="cards[key].interest_rate">
+							<div class="input-group">
+								<input type="text" class="form-control" ng-model="cards[key].interest_rate">
+								<span class="input-group-addon">%</span>
+							</div>
 						</td>
 						<td>
-							<input type="text" class="form-control" ng-model="cards[key].min_payment">
+							<div class="input-group">
+								<span class="input-group-addon">$</span>
+								<input type="text" class="form-control" ng-model="cards[key].min_payment">
+							</div>
 						</td>
 						<td>
-							<button class="btn button btn-default" ng-class="{'btn-success': !myForm.$pristine }" ng-disabled="myForm.$pristine" ng-click="saveCard(key, cards[key]);deletePlan(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>);myForm.$setPristine(true)" ><span class="glyphicon glyphicon-ok"></span> Save</button>
-							<button class="btn button btn-default" ng-class="{'btn-warning': !myForm.$pristine }" ng-disabled="myForm.$pristine" ng-click="resetCard(key);myForm.$setPristine(true)" ><span class="glyphicon glyphicon-remove"></span> Cancel</button>
-							<button class="btn button btn-default" ng-click="deleteCard(key);deletePlan(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>);"><span class="glyphicon glyphicon-plus"></span> Delete</button>
+							<button class="btn button btn-default" ng-class="{'btn-success': !myForm.$pristine }" ng-disabled="myForm.$pristine" ng-click="saveCard(key, cards[key]);deletePlan(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>);myForm.$setPristine(true)" ><span class="glyphicon glyphicon-ok"></span> Save Changes</button>
+							<button class="btn button btn-default" ng-class="{'btn-warning': !myForm.$pristine }" ng-disabled="myForm.$pristine" ng-click="resetCard(key);myForm.$setPristine(true)" ><span class="glyphicon glyphicon-refresh"></span> Reset</button>
+							<button class="btn button btn-default" ng-click="deleteCard(key);deletePlan(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>);"><span class="glyphicon glyphicon-remove"></span> Delete</button>
 						</td>
 					</tr>					
 					</tbody>	
@@ -74,8 +77,13 @@
 				<table class="table table-striped table-bordered table-valign-middle">
 					<thead>
 					<tr>
-						<th>Cards</th>
-						<th></th>
+						<th colspan="2"><h3>When The Chips Are Down</h3>
+							Your emergency card is the one card that you'll lean on when you have an unexpected medical bill, car trouble, etc.
+							<ol>
+								<li>It must be usable anywhere (so don't pick a Gas card!)</li>
+								<li>Casual shopping is not an emergency! (think: food, shelter, safety)</li>
+							</ol>
+						</th>
 					</tr>
 					</thead>
 					<tbody>
@@ -85,7 +93,7 @@
 							</select>
 						</td>
 						<td>
-							<button class="btn button btn-default" ng-class="{'btn-success': !myForm2.$pristine }" ng-disabled="myForm2.$pristine" ng-click="setAsEmergency(cards[selected].card_id,<cfoutput>#session.auth.user.getUser_id()#</cfoutput>);deletePlan(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>);myForm2.$setPristine(true)"><span class="glyphicon glyphicon-save"></span> Select This Card</button>
+							<button class="btn button btn-default" ng-class="{'btn-success': !myForm2.$pristine }" ng-disabled="myForm2.$pristine" ng-click="setAsEmergency(cards[selected].card_id,<cfoutput>#session.auth.user.getUser_id()#</cfoutput>);deletePlan(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>);myForm2.$setPristine(true)"><span class="glyphicon glyphicon-ok"></span> Select This Card</button>
 						</td>
 					</tr>
 					</tbody>
@@ -98,17 +106,19 @@
 				<table class="table table-striped table-bordered table-valign-middle">
 					<thead>
 					<tr>
-						<th>How much have you budgeted to pay off debt each month?</th>
-						<th></th>
+						<th colspan="2"><h3>Everything Counts in Large Amounts</h3>
+						How much have you budgeted to pay off debt each month? Enter the dollar and cent value below.<br/><br/>
+						Make it count! The more, the better...but make sure <i>you continue to live within your means!</i>
+					</th>
 					</tr>
 					</thead>
 					<tbody>
 					<tr class="align-top" ng-form name="myForm3">
 						<td>
-							$<input type="text" ng-model="preferences.budget" />
+							I'll commit $<input type="text" ng-model="preferences.budget" /> a month to decimate my debt.
 						</td>
 						<td>
-							<button class="btn button btn-default" ng-class="{'btn-success': !myForm3.$pristine }" ng-disabled="myForm3.$pristine" ng-click="setBudget(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>, preferences.budget);deletePlan(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>);myForm3.$setPristine(true)"><span class="glyphicon glyphicon-save"></span> Update Budget</button>
+							<button class="btn button btn-default" ng-class="{'btn-success': !myForm3.$pristine }" ng-disabled="myForm3.$pristine" ng-click="setBudget(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>, preferences.budget);deletePlan(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>);myForm3.$setPristine(true)"><span class="glyphicon glyphicon-ok"></span> Save Changes</button>
 						</td>
 					</tr>
 					</tbody>
@@ -120,22 +130,24 @@
 				<table class="table table-striped table-bordered table-valign-middle">
 					<thead>
 					<tr>
-						<th>How frequently are you paid?</th>
-						<th></th>
+						<th colspan="2"><h3>What's The Frequency, <cfoutput>#session.auth.user.getName()#</cfoutput>?</h3>
+							In order to determine what you'll pay and when, the frequency of your income is key. It's not ok to pay off debt <i>but also go hungry at the same time</i>.
+							Based on what you tell us here, we'll calculate the smartest pay schedule that doesn't cripple your day-to-day life.
+						</th>
 					</tr>
 					</thead>
 					<tbody>
 					<tr class="align-top" ng-form name="myForm4">
-						<td>I'm paid
+						<td>My income arrives:
 							<select style="background:#fff;" ng-model="preferences.pay_frequency">
 								<option value="1">Once a month (12 paychecks per year)
 								<option value="2">Twice a month (24 paychecks per year)
-								<option value="3">Every two Weeks (26 paychecks per year)
-								<option value="0">It's complicated
+								<option value="3">Every two weeks (26 paychecks per year)
+								<option value="0">It's complicated (can't or don't want to say)
 							</select>
 						</td>
 						<td>
-							<button class="btn button btn-default" ng-class="{'btn-success': !myForm4.$pristine }" ng-disabled="myForm4.$pristine" ng-click="setPayFrequency(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>,preferences.pay_frequency);myForm4.$setPristine(true)"><span class="glyphicon glyphicon-save"></span> Confirm</button>
+							<button class="btn button btn-default" ng-class="{'btn-success': !myForm4.$pristine }" ng-disabled="myForm4.$pristine" ng-click="setPayFrequency(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>,preferences.pay_frequency);myForm4.$setPristine(true)"><span class="glyphicon glyphicon-ok"></span> Save Changes</button>
 						</td>
 					</tr>
 					</tbody>

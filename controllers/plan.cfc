@@ -37,11 +37,11 @@ component accessors = true {
 	}
 
 	public void function delete( struct rc ) {
-
+		
 		var ret = planservice.delete( arguments.rc.user_id );
-
+		
 		framework.renderdata("JSON", ret);
-
+	
 	}	
 
 }

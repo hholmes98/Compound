@@ -8,8 +8,12 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<title><cfoutput>#application.app_name#</cfoutput></title>
 
-	<!-- styles -->	
-	<link href="/bootstrap/css/bootstrap.css" rel="stylesheet">
+	<!-- styles -->
+	<link href="https://fonts.googleapis.com/css?family=Ultra" rel="stylesheet">
+	<link href="/bootstrap/css/bootstrap.css" rel="stylesheet">	
+	<link rel="stylesheet" type="text/css" href="/assets/css/dd.css" />
+
+	<link href="https://fonts.googleapis.com/css?family=Ultra" rel="stylesheet">
 
 	<!-- scripts -->
 	<script src="/jquery/js/jquery-1.7.2.min.js" type="text/javascript"></script>
@@ -24,14 +28,16 @@
 	<script>
 	var ddApp = angular.module('ddApp', ['720kb.tooltips']);
 	</script>
-	
+
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0" />
+
 </head>
 <body ng-controller="ddCtrl">
-<nav class="navbar navbar-inverse navbar-static-top" role="navigation">
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
   <div class="container-fluid">
     <!-- Brand and toggle get grouped for better mobile display -->
     <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
         <span class="sr-only">Toggle navigation</span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
@@ -44,9 +50,9 @@
 
     <div class="collapse navbar-collapse" id="bs-esample-navbar-collapse-1">
       <ul class="nav navbar-nav">
-        <li class="active"><cfoutput><a href="#buildUrl('main.default')#"></cfoutput>Update <span class="sr-only">(current)</span></a></li>
-        <li><cfoutput><a href="#buildUrl('plan.default')#"></cfoutput>Plan</a></li>
-        <li><cfoutput><a href="#buildUrl('pay')#">Pay</a></cfoutput></li>
+        <li class="active"><cfoutput><a href="#buildUrl('main')#"><span class="glyphicon glyphicon-cog"></span> <span class="sr-only">(current)</span></a></cfoutput></li>
+        <li><cfoutput><a href="#buildUrl('plan')#"></cfoutput><span class="glyphicon glyphicon-stats"></span></a></li>
+        <li><cfoutput><a href="#buildUrl('pay')#"><span class="glyphicon glyphicon-money"></span></a></cfoutput></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li><cfoutput><a href="#buildUrl('login.logout')#"></cfoutput>Logout</a></li>
@@ -56,16 +62,16 @@
 </nav>
 
 <div class="container">	
-		<cfoutput>
-			<!--- display any messages to the user --->
-			<cfif not arrayIsEmpty(rc.message)>
-				<cfloop array="#rc.message#" index="msg">
-					<p>#msg#</p>
-				</cfloop>
-			</cfif>
+	<cfoutput>
+		<!--- display any messages to the user --->
+		<cfif not arrayIsEmpty(rc.message)>
+			<cfloop array="#rc.message#" index="msg">
+				<p>#msg#</p>
+			</cfloop>
+		</cfif>
 
-			#body#
-		</cfoutput>
+		#body#
+	</cfoutput>
 </div>
 
 
@@ -109,6 +115,7 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http ) {
 
 	});
 	
+
 	$scope.saveCard = function( key, data ) { 
 
 		console.log($scope.cards);
@@ -127,7 +134,7 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http ) {
 
 		});
 
-		console.log($scope.cards);			
+		console.log($scope.cards);
 
 	};
 
@@ -158,32 +165,23 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http ) {
 			// actually set the card
 			$scope.cards[eid].is_emergency = 1;
 
-		});			
-				
-	};	
+		});
+
+	};
 
 	$scope.deleteCard = function( card_id ) { 
-		
+
 		$http({
 			method: 'DELETE',
 			url: 'index.cfm/card/' + card_id
 		}).success( function( data ) {
 
 			delete $scope.cards[ card_id ];
-	
-			//for modern browsers ( > IE8 )
-	
-			$scope.keylist.splice( $scope.keylist.indexOf(card_id), 1 );		
-	
-			//Otherwise
-			/*for(var i = 0; i <= keylist.length; i++) {
-			    if(keylist[i] === id) {
-			       keylist.splice(i, 1);
-			    }
-			}*/		
+
+			$scope.keylist.splice( $scope.keylist.indexOf(card_id), 1 )
 
 		});
-				
+
 	};
 
 	$scope.newCard = function( uid ) { 

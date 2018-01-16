@@ -9,21 +9,19 @@
 	<title><cfoutput>#application.app_name#</cfoutput></title>
 
 	<!-- styles -->	
-	<link href="/bootstrap/css/bootstrap.css" rel="stylesheet">	
+	<link href="https://fonts.googleapis.com/css?family=Ultra" rel="stylesheet">
+	<link href="/bootstrap/css/bootstrap.css" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="/assets/css/dd.css" />
 
 	<!-- scripts -->
 	<script src="/jquery/js/jquery-1.7.2.min.js" type="text/javascript"></script>
 	<script src="/bootstrap/js/bootstrap.js"></script>    
 
-	<script src="/angular/angular.min.js" type="text/javascript"></script>	
-	<!-- <script src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.9.0.js"></script> -->
-	<!-- <script src="angular/ui-bootstrap-tpls-0.13.0.min.js"></script> -->
+	<script src="/angular/angular.min.js" type="text/javascript"></script>
 
 	<script src="/node_modules/angular-tooltips/lib/angular-tooltips.js"></script>
 
 	<script src="/node_modules/moment/min/moment.min.js" type="text/javascript"></script>
-
-	<link rel="stylesheet" type="text/css" href="/assets/css/dd.css" />
 
 	<!-- goes in head -->
 	<script src="/assets/js/modernizr.js"></script>
@@ -31,14 +29,16 @@
 	<script>
 	var ddApp = angular.module('ddApp', ['720kb.tooltips']);
 	</script>
-	
+
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0" />
+
 </head>
 <body ng-controller="ddCtrl">
-<nav class="navbar navbar-inverse navbar-static-top" role="navigation">
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
   <div class="container-fluid">
     <!-- Brand and toggle get grouped for better mobile display -->
     <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
         <span class="sr-only">Toggle navigation</span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
@@ -51,11 +51,9 @@
 
     <div class="collapse navbar-collapse" id="bs-esample-navbar-collapse-1">
       <ul class="nav navbar-nav">
-      	<cfoutput>
-        <li><a href="#buildUrl('main')#">Update</a></li>
-        <li><a href="#buildUrl('plan')#">Plan</a></li>
-        <li class="active"><a href="#buildUrl('pay')#">Pay <span class="sr-only">(current)</span></a><li>
-        </cfoutput>
+        <li><cfoutput><a href="#buildUrl('main')#"><span class="glyphicon glyphicon-cog"></span></a></cfoutput></li>
+        <li><cfoutput><a href="#buildUrl('plan')#"></cfoutput><span class="glyphicon glyphicon-stats"></span></a></li>
+        <li class="active"><cfoutput><a href="#buildUrl('pay')#"><span class="glyphicon glyphicon-money"></span> <span class="sr-only">(current)</span></a></cfoutput></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li><cfoutput><a href="#buildUrl('login.logout')#"></cfoutput>Logout</a></li>
@@ -150,14 +148,6 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http, $q, $location ) {
 				AnimatePage.panForward( 3 );
 			});
 
-		/*
-		$http.get( 'index.cfm/card/' + cid ).success( function( data ) { 
-
-			$scope.card = data;
-
-		});
-		*/
-
 	};
 	
 
@@ -179,7 +169,7 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http, $q, $location ) {
 
 		});
 
-		console.log($scope.cards);			
+		console.log($scope.cards);
 
 	};
 
@@ -193,11 +183,11 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http, $q, $location ) {
 
 			// do whatever you need to do on the client to flag the cache is purged/nonexistent
 
-		});			
+		});
 
 	}
 
-	$scope.setAsEmergency = function( eid, uid ) { 
+	$scope.setAsEmergency = function( eid, uid ) {
 
 		$http({
 			method: 'POST',
@@ -210,11 +200,11 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http, $q, $location ) {
 			// actually set the card
 			$scope.cards[eid].is_emergency = 1;
 
-		});			
-				
-	};	
+		});
 
-	$scope.deleteCard = function( card_id ) { 
+	};
+
+	$scope.deleteCard = function( card_id ) {
 		
 		$http({
 			method: 'DELETE',
@@ -222,23 +212,13 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http, $q, $location ) {
 		}).success( function( data ) {
 
 			delete $scope.cards[ card_id ];
-	
-			//for modern browsers ( > IE8 )
-	
-			$scope.keylist.splice( $scope.keylist.indexOf(card_id), 1 );		
-	
-			//Otherwise
-			/*for(var i = 0; i <= keylist.length; i++) {
-			    if(keylist[i] === id) {
-			       keylist.splice(i, 1);
-			    }
-			}*/		
+			$scope.keylist.splice( $scope.keylist.indexOf(card_id), 1 );
 
 		});
-				
+
 	};
 
-	$scope.newCard = function( uid ) { 
+	$scope.newCard = function( uid ) {
 		
 		console.log($scope.cards);
 
@@ -264,23 +244,12 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http, $q, $location ) {
 
 			if ( data.card_id == 0 ) {
 				delete $scope.cards[ eid ];
-				
-				// for modern browsers ( > IE8)
-				
-				$scope.keylist.splice( $scope.keylist.indexOf(eid), 1 );		
-		
-				//Otherwise
-				/*for(var i = 0; i <= keylist.length; i++) {
-				    if(keylist[i] === id) {
-				       keylist.splice(i, 1);
-				    }
-				}*/		
-				
+				$scope.keylist.splice( $scope.keylist.indexOf(eid), 1 );
 			}
 
 			else $scope.cards[ eid ] = data;
 			
-		} );		
+		} );
 
 	}
 
@@ -290,27 +259,9 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http, $q, $location ) {
 
 			$scope.plan = data;
 
-			//if ( data.card_id == 0 ) {
-			//	delete $scope.cards[ eid ];
-				
-				// for modern browsers ( > IE8)
-				
-			//	$scope.keylist.splice( $scope.keylist.indexOf(eid), 1 );		
-		
-				//Otherwise
-				/*for(var i = 0; i <= keylist.length; i++) {
-				    if(keylist[i] === id) {
-				       keylist.splice(i, 1);
-				    }
-				}*/		
-				
-			//}
+		} );
 
-			//else $scope.cards[ eid ] = data;
-			
-		} );		
-
-	}	
+	}
 
 	$scope.setBudget = function( id, val ) { 
 
@@ -325,9 +276,9 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http, $q, $location ) {
 			// actually set the budget
 			$scope.preferences.budget = val;
 
-		});			
-				
-	};		
+		});
+
+	};
 
 	$scope.setPayFrequency = function( id, freq ) { 
 
@@ -342,9 +293,9 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http, $q, $location ) {
 			// actually set the pay frequency
 			$scope.preferences.pay_frequency = freq;
 
-		});			
-				
-	};	
+		});
+
+	};
 
 	$scope.returnToList = function() {
 
@@ -387,7 +338,7 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http, $q, $location ) {
 			// do whatever you need to do on the client to flag the cache is purged/nonexistent
 			deferred.resolve({user_id: data.user_id});
 
-		});		
+		});
 
 		return deferred.promise;
 
@@ -425,6 +376,6 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http, $q, $location ) {
 	}
 
 });
-	
+
 </script>
 </html>

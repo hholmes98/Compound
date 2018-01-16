@@ -1,5 +1,210 @@
-html, body { height: 100%; }
+/* mobile-first mentality:
 
+.content {
+  // Properties for smaller screens.
+  // Nothing is required here because we can use the default styles
+
+  // Properties for larger screens
+  @media (min-width: 800px) {
+    float: left;
+    width: 60%;
+  }
+
+  //NOTE! You can't embed media queries withing styles unless using SASS! Otherwise they must be outer shell!
+}
+
+Greens
+#171717 - near black - default font color, horizontal rules, button borders, some icons
+#19482c - forest - default icons color - some font - all upper case (button labels?) - ID numbers, could be good for anything fixed width (dollar values)
+#1c6a3a - go signal - few icons
+#839178 - dulled gray-green
+#acc3a2 - washed out green (gray)
+#e0e9dd - super pale green - default background color. button bg colors. panel bg colors. to give the sense of hollowness
+
+Peach
+#dcc9b6 - alt bg color? maybe gradient from washed out green?
+
+Ultra Light Blue 
+#bbd1ea - perhaps some bg icongraphy?
+
+Gold
+#D2691E - chocolate (goldenrod is too bright)
+
+
+*/
+.glyphicon-money:before {
+	font-size: 16px;
+	font-weight: 700;
+	content: "$";
+}
+
+html, body { 
+	height: 120%;	/* FIXME: scrolling now wacked out! Sometimes too much, other times too little! */
+	padding-top: 35px;	/* to consider for the fixed nav */
+
+	background-color: #e0e9dd;
+	color: #171717;
+}
+
+p {
+	font-size: 16px;
+}
+
+.nav-tabs a {
+	color: #000;
+	font-weight: 700;
+}
+
+@media screen and (max-width: 480px) {
+	html, body {
+		height: 130%;
+		padding-top: 22px;
+	}
+
+	p {
+		font-size: 42px;
+	}
+}
+
+
+
+
+/* the money font */
+h1, h2, h3 {
+	font-family: 'Ultra', serif;
+	margin: 0.5em;
+	opacity: 0.9;
+}
+
+/* H1: Look at the no. '20' in the upper left corner of a 20 dollar bill */
+h1 {
+	font-size: 52px;
+
+   	-webkit-text-fill-color: #e0e9dd;
+	-webkit-text-stroke-width: 2px;
+	-webkit-text-stroke-color: #171717;
+
+	text-shadow:
+		3px 3px 0 #000,
+		-1px -1px 0 #000,
+		1px -1px 0 #000,
+		-1px 1px 0 #000,
+		1px 1px 0 #000
+}
+
+/* H2: like H1, but with a horizontal line fill */
+/* Look at 'the united states of america' text in the upper right quadrant of a 20 dollar bill */
+h2 {
+	font-size: 46px;
+
+	background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%,#ffffff), color-stop(100%, #171717));
+	background-image: repeating-linear-gradient(to bottom,
+    	#ffffff,
+    	#171717 1%,
+    	#ffffff 3%);
+
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	
+	-webkit-text-stroke-width: 2px;
+	-webkit-text-stroke-color: #171717;
+
+	color: #171717;
+	position: relative;
+}
+
+/* place a solid (screen) copy of the text behind the gradient text; use *that* text as the drop-shadow */
+h2:after {
+	mix-blend-mode: screen;
+	background: none;
+	display: inline-block;
+	content: attr(shadow-text);
+	position: absolute;	/* FIXME: this aligns to the parent element, not the *actual text*, so center alignments break! */;
+	text-shadow: 5px 5px 0 rgba(0,0,0,1);
+	top: 0;
+	left: 0;
+	z-index: -1;
+}
+
+/* H3: the smaller 'The' above 'the united states of america' in the upper right quadrant of the $20 */
+h3 {
+	font-size: 24px;
+}
+
+/* restyling bootstrap */
+.page-header {
+	border-bottom: 1px solid #171717;
+}
+
+/* input */
+.input-group-addon {
+	background-color: #acc3a2;
+	border: 1px solid #839178;
+}
+
+/* buttons */
+.btn-default {
+  color: #1c6a3a;
+  background-color: #e0e9dd;
+  border-color: #cccccc;
+  border: 2px solid #171717;
+  border-radius: 8px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.btn-default[disabled] {
+	background-color: #ffffff; /* bootstrap default */
+	border-color: #cccccc; /* boostrap default */
+	color: #839178;
+}
+
+/* glyphs */
+.glyphicon {
+	color: #19482c;
+}
+
+/* glyphs that specifically show up on buttons */
+.btn > .glyphicon {
+	color: #D2691E;
+}
+
+/* glyphs in the fixed nav */
+.navbar-nav > li > a > .glyphicon {
+	color: #fff;
+}
+
+.btn[disabled] > .glyphicon {
+	color: #dcc9b6;
+}
+
+/* tables with alternating rows */
+.table-striped > tbody > tr:nth-child(odd) > td,
+.table-striped > tbody > tr:nth-child(odd) > th {
+  background-color: #acc3a2;
+}
+
+/* panels */
+.panel
+{
+    background: #839178;
+    border-radius: 8px;
+    border: 2px solid #171717;
+}
+
+.panel-default
+{
+	border-color: #171717;
+}
+
+/* form fields */
+.form-control {
+	color: #1c6a3a;
+	font-weight: 600;
+}
+
+
+/* the panning functionality */
 .pan-perspective {
 	position: relative;
 	width: 100%;

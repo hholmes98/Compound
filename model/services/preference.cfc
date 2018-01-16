@@ -12,6 +12,19 @@ component accessors=true  {
 
 	}
 
+	/*
+	public any function list( ) {
+
+		var ret = structCopy( variables.data.cards );
+
+		ret['keylist'] = structKeyArray( variables.data.cards );
+		arraySort( ret['keylist'], "numeric", "desc" );
+		
+		return variables.data.cards;
+	
+	}
+	*/
+
 	public any function get( id ) {
 
 		sql = '
@@ -33,7 +46,7 @@ component accessors=true  {
 		if ( result.recordcount ) {
 		
 			preference.setUser_id( result.user_id[1] );
-			preference.setBudget( DecimalFormat( result.budget[1]) );
+			preference.setBudget( DecimalFormat(result.budget[1]) );
 			preference.setPay_Frequency( result.pay_frequency[1] );
 		
 		}

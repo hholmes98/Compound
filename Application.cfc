@@ -26,7 +26,6 @@ component extends="framework.one" {
 		  { "$GET/plan/events/:user_id" = "/plan/schedule/user_id/:user_id" },
 		  { "$GET/plan/:user_id" = "/plan/list/user_id/:user_id" },
 		  { "$DELETE/plan/:user_id" = "/plan/delete/user_id/:user_id" },
-		  
 		],
 		
 		reloadApplicationOnEveryRequest = true // set this to false when in PROD!
@@ -36,17 +35,17 @@ component extends="framework.one" {
 	function setupApplication() {
 		application.admin_email = 'support@debtdecimator.com';
 
-		application.app_name = 'Compound (Alpha v0.81)';
+		application.app_name = 'Compound (Alpha v0.82)';
 
- 		// a single hot card and/or an emergency card *must* stay over this percentage of the budget.
+		// a single hot card and/or an emergency card *must* stay over this percentage of the budget.
 		application.emergency_balance_threshold = 0.33;
 
- 		// in a given month, never allow a payment to drop the balance of a card below this number 
- 		// (to prevent things like carrying an .11 cent balance)
+		// in a given month, never allow a payment to drop the balance of a card below this number 
+		// (to prevent things like carrying an .11 cent balance)
 		application.min_card_threshold = 10; // hey, 10 bucks is 10 bucks.
 
- 		// when this is true, I consistently add on several more months to the payout plan, as hot card 
- 		// payments are spread more thinly, month-to-month.
+		// when this is true, I consistently add on several more months to the payout plan, as hot card 
+		// payments are spread more thinly, month-to-month.
 		application.consider_interest_when_calculating_payments = false;
 
 		application.start_page = 'pay';

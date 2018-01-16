@@ -14,7 +14,7 @@
 
 			<span align="left">
 
-				<button class="btn button btn-default" ng-click="panTo(2)"><span class="glyphicon glyphicon-wrench"></span> PAY bills</button>
+				<button class="btn button btn-default" ng-click="panTo(2)"><span class="glyphicon glyphicon-money"></span> PAY bills</button>
 
 			</span>
 
@@ -23,7 +23,16 @@
 
 			<span align="right">
 
-				<button class="btn button btn-default" ng-click="navigateTo('#buildUrl('main')#')"><span class="glyphicon glyphicon-wrench"></span> UPDATE the budget</button>
+				<button class="btn button btn-default" ng-click="navigateTo('#buildUrl('main')#')"><span class="glyphicon glyphicon-cog"></span> UPDATE budget</button>
+
+			</span>
+
+			<br/>
+			<br/>
+
+			<span align="right">
+
+				<button class="btn button btn-default" ng-click="navigateTo('#buildUrl('plan')#')"><span class="glyphicon glyphicon-stats"></span> SEE my future</button>
 
 			</span>
 
@@ -46,7 +55,6 @@
 		<div class="panel panel-default form-horizontal">
 
 			<div class="panel-body tab-pane" id="card-list">
-
 				<table class="table table-striped table-bordered table-valign-middle">
 					<tbody>
 						
@@ -68,14 +76,17 @@
 <!-- pay.card -->
 <div class="pan-page pan-page-3">
 
-	<div class="container">
+	<div class="container">	
 
 		<div class="panel panel-default form-horizontal">
 
 			<div class="panel-body tab-pane" id="card-pay" ng-form name="myForm4">
 				
-				<div align="center">
-					<h2><cfoutput>{{card.label}}: Confirm & Pay</cfoutput></h2>
+				<div>
+					<span>
+						<h3>Confirm & Pay:</h3>
+						<h2 shadow-text="{{card.label}}"><cfoutput>{{card.label}}</cfoutput></h2>
+					</span>
 				</div>
 				
 				<table class="table table-striped table-bordered table-valign-middle">
