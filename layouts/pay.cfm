@@ -1,7 +1,7 @@
 <!--- pay.cfm :: for all main.* actions--->
 <cfparam name="rc.message" default="#arrayNew(1)#">
 
-<DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html ng-app="ddApp" xmlns="http://www.w3.org/1999/xhtml">
 <head>
 
@@ -15,7 +15,7 @@
 
 	<!-- scripts -->
 	<script src="/jquery/js/jquery-1.7.2.min.js" type="text/javascript"></script>
-	<script src="/bootstrap/js/bootstrap.js"></script>    
+	<script src="/bootstrap/js/bootstrap.js"></script>
 
 	<script src="/angular/angular.min.js" type="text/javascript"></script>
 
@@ -32,6 +32,18 @@
 
 	<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0" />
 
+	<script>
+	window.onload = function(){ 
+		setTimeout(function() { 
+			var ad = document.querySelector("ins.adsbygoogle");
+			if (ad && ad.innerHTML.replace(/\s/g, "").length == 0) {
+	    		ad.style.cssText = 'display:block !important'; 
+	    		ad.parentNode.innerHTML += '<div style="padding:5px; background-color:#171717; border:1px solid #fff; margin:5px 5px 10px 5px; display:inline-block; text-align:left">You appear to be blocking our ads with an Ad Blocker. <cfoutput>#application.locale[application.default_locale]['name']#</cfoutput> depends on these ads to help cover our high server costs. Please add *.<cfoutput>#application.site_domain#</cfoutput> to your ad blocker\'s whitelist or consider upgrading to a paid account.</div>';
+			}
+		}, 1000);
+	};
+	</script>	
+	
 </head>
 <body ng-controller="ddCtrl">
 <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -56,11 +68,25 @@
         <li class="active"><cfoutput><a href="#buildUrl('pay')#"><span class="glyphicon glyphicon-money"></span> <span class="sr-only">(current)</span></a></cfoutput></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li><cfoutput><a href="#buildUrl('login.logout')#"></cfoutput>Logout</a></li>
+        <li><cfoutput><a href="#buildUrl('profile.basic')#"><span class="glyphicon glyphicon-user"></span></a></cfoutput></li>
       </ul>
     </div>
   </div>
 </nav>
+
+<cfif session.auth.user.getAccount_Type_Id() EQ 1>
+<div id="top-banner">
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- DD_Responsive -->
+<ins class="adsbygoogle responsive_ad"
+     style="display:inline-block;"
+     data-ad-client="ca-pub-6215660586764867"
+     data-ad-slot="9656584127"  
+     ></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+</div></cfif>
 
 <div id="pan-main" class="pan-perspective">
 
@@ -148,6 +174,14 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http, $q, $location ) {
 				AnimatePage.panForward( 3 );
 			});
 
+		/*
+		$http.get( 'index.cfm/card/' + cid ).success( function( data ) { 
+
+			$scope.card = data;
+
+		});
+		*/
+
 	};
 	
 
@@ -187,7 +221,7 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http, $q, $location ) {
 
 	}
 
-	$scope.setAsEmergency = function( eid, uid ) {
+	$scope.setAsEmergency = function( eid, uid ) { 
 
 		$http({
 			method: 'POST',
@@ -204,7 +238,7 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http, $q, $location ) {
 
 	};
 
-	$scope.deleteCard = function( card_id ) {
+	$scope.deleteCard = function( card_id ) { 
 		
 		$http({
 			method: 'DELETE',
@@ -212,18 +246,28 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http, $q, $location ) {
 		}).success( function( data ) {
 
 			delete $scope.cards[ card_id ];
+
+			//for modern browsers ( > IE8 )
+
 			$scope.keylist.splice( $scope.keylist.indexOf(card_id), 1 );
+
+			//Otherwise
+			/*for(var i = 0; i <= keylist.length; i++) {
+			    if(keylist[i] === id) {
+			       keylist.splice(i, 1);
+			    }
+			}*/
 
 		});
 
 	};
 
-	$scope.newCard = function( uid ) {
-		
+	$scope.newCard = function( uid ) { 
+
 		console.log($scope.cards);
 
 		console.log($scope.keylist);
-		
+
 		if ( $scope.keylist.length ) {
 			var newid = parseInt( $scope.keylist[0] ) + 1;
 		}
@@ -244,11 +288,22 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http, $q, $location ) {
 
 			if ( data.card_id == 0 ) {
 				delete $scope.cards[ eid ];
+
+				// for modern browsers ( > IE8)
+
 				$scope.keylist.splice( $scope.keylist.indexOf(eid), 1 );
+
+				//Otherwise
+				/*for(var i = 0; i <= keylist.length; i++) {
+				    if(keylist[i] === id) {
+				       keylist.splice(i, 1);
+				    }
+				}*/
+
 			}
 
 			else $scope.cards[ eid ] = data;
-			
+
 		} );
 
 	}
@@ -258,6 +313,24 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http, $q, $location ) {
 		$http.get( '/index.cfm/plan/' + uid ).success( function( data ) { 
 
 			$scope.plan = data;
+
+			//if ( data.card_id == 0 ) {
+			//	delete $scope.cards[ eid ];
+
+				// for modern browsers ( > IE8)
+
+			//	$scope.keylist.splice( $scope.keylist.indexOf(eid), 1 );
+
+				//Otherwise
+				/*for(var i = 0; i <= keylist.length; i++) {
+				    if(keylist[i] === id) {
+				       keylist.splice(i, 1);
+				    }
+				}*/
+
+			//}
+
+			//else $scope.cards[ eid ] = data;
 
 		} );
 
@@ -376,6 +449,15 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http, $q, $location ) {
 	}
 
 });
+	
+</script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-112744491-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
 
+  gtag('config', 'UA-112744491-1');
 </script>
 </html>

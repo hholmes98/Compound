@@ -345,14 +345,14 @@ component accessors="true" {
 						//StructInsert( _cards[card], "calculated_payment", bal, true );
 						_cards[card].setCalculated_Payment( bal );
 						total_paid += bal;
-					
+
 					} else {
 
 						//StructInsert( _cards[card], "calculated_payment", min, true );
 						_cards[card].setCalculated_Payment( min );
 						total_paid += min;
 					}
-				
+
 				} else {
 
 					//StructInsert( _cards[card], "calculated_payment", 0, true );
@@ -363,7 +363,7 @@ component accessors="true" {
 			}
 
 //			writeoutput(total_paid & "<br>");
-		
+
 		}
 
 		var hot_paid = arguments.available_budget - total_paid;
@@ -501,7 +501,7 @@ component accessors="true" {
 		}
 
 		sql = Left( sql, Len(sql)-1 ); // trim trailing comma off
-		sql = sql & ';'; // add a semi-colon to the end
+		sql = sql & ';'; 			// add a semi-colon to the end
 
 		//trace( category="SQL", type="Information", text=sql );
 

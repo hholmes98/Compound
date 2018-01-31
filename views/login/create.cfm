@@ -1,7 +1,7 @@
 <!--- create.cfm --->
 
 	<div class="page-header">
-		<h2 shadow-text="Get Started!">Get Started!</h1>
+		<h1>Create an Account</h1>
 	</div>
 
 	<div class="panel panel-default form-horizontal">

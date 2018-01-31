@@ -1,24 +1,24 @@
 component accessors=true {
 
-    function init( roleService, mailService, beanFactory  ) {
-        
-        variables.beanFactory = beanFactory;
-		
-		variables.roleService = roleService;
-		variables.mailService = mailService;
+    function init( roleService, account_typeService, mailService, beanFactory  ) {
+      variables.beanFactory = beanFactory;
 
-		variables.defaultOptions = {
-			datasource = 'dd'
-		};
+      variables.roleService = roleService;
+      variables.account_TypeService = account_TypeService;
+      variables.mailService = mailService;
 
-		return this;
-        
+      variables.defaultOptions = {
+        datasource = 'dd'
+      };
+
+      return this;
+
     }
 
     function delete( string id ) {
 
         sql = '
-			DELETE FROM "pUsers" u			
+			DELETE FROM "pUsers" u
 			WHERE u.user_id = :uid
 		';
 
@@ -35,7 +35,7 @@ component accessors=true {
 			WHERE ur.user_id = :uid
 		';
 
-		result = queryExecute(sql, params, variables.defaultOptions);		
+		result = queryExecute(sql, params, variables.defaultOptions);
 
 		return result;
     }
@@ -43,10 +43,12 @@ component accessors=true {
     function get( string id ) {
 
         sql = '
-			SELECT u.*, r.role_id, r.name AS role_name
+			SELECT u.*, r.role_id, r.name AS role_name, at.account_type_id, at.name AS account_type_name
 			FROM "pUsers" u
 			INNER JOIN "pUserRoles" ur ON (u.user_id = ur.user_id)
-			INNER JOIN "pRoles" r ON (ur.role_id = r.role_id)
+				INNER JOIN "pRoles" r ON (ur.role_id = r.role_id)
+			INNER JOIN "pUserAccountTypes" uat ON (u.user_id = uat.user_id)
+				INNER JOIN "pAccountTypes" at ON (uat.account_type_id = at.account_type_id)
 			WHERE u.user_id = :uid
 		';
 
@@ -65,8 +67,13 @@ component accessors=true {
 			user.setUser_Id(result.user_id[1]);
 			user.setName(result.name[1]);
 			user.setEmail(result.email[1]);
-			user.setRole_id(result.role_id[1]);
+
+			user.setRole_Id(result.role_id[1]);
 			user.setRole(variables.roleService.get(user.getRole_Id()));
+
+			user.setAccount_Type_Id(result.account_type_id[1]);
+			user.setAccount_Type(variables.account_TypeService.get(user.getAccount_Type_Id()));
+
 			user.setPassword_Hash(result.password_hash[1]);
 			user.setPassword_Salt(result.password_salt[1]);
 		
@@ -75,11 +82,22 @@ component accessors=true {
 		return user;
     }
 
+    function getTemp() {
+
+		var user = variables.beanFactory.getBean('userBean');
+
+		user.setUser_Id(CreateUUID());
+		user.setName("Guest");
+
+		return user;
+
+    }
+
 	function getByEmail( string email ) {
         
 		sql = '
 			SELECT u.user_id
-			FROM "pUsers" u			
+			FROM "pUsers" u
 			WHERE u.email = :email
 		';
 
@@ -110,10 +128,12 @@ component accessors=true {
         user = {};
 
 		sql = '
-			SELECT u.*, r.role_id, r.name
+			SELECT u.*, r.role_id, r.name AS role_name, at.account_type_id, at.name AS account_type_name
 			FROM "pUsers" u
 			INNER JOIN "pUserRoles" ur ON (u.user_id = ur.user_id)
-			INNER JOIN "pRoles" r ON (ur.role_id = r.role_id)
+				INNER JOIN "pRoles" r ON (ur.role_id = r.role_id)
+			INNER JOIN "pUserAccountTypes" uat ON (u.user_id = uat.user_id)
+				INNER JOIN "pAccountTypes" at ON (uat.account_type_id = at.account_type_id)
 			ORDER BY u.user_id
 		';
 
@@ -131,6 +151,8 @@ component accessors=true {
 			user.setEmail(result.email[i]);
 			user.setRole_id(result.role_id[i]);
 			user.setRole(variables.roleService.get(user.getRole_id()));
+			user.setAccount_Type_Id(result.account_type_id[i]);
+			user.setAccount_Type(variables.account_TypeService.get(user.getAccount_Type_Id()));
 
 			users[user.getUser_id()] = user;
 		}
@@ -139,6 +161,7 @@ component accessors=true {
 
     }
 
+    /* get into the habit of **not** returning anything from a save - get() is the central point-of-truth for an object */
     function save( user ) {
 
         if ( len( user.getUser_Id() ) && user.getUser_Id() GT 0 ) {
@@ -164,6 +187,9 @@ component accessors=true {
 						},
 						rid = {
 							value = user.getRole_id(), sqltype = 'integer'
+						},
+						atid = {
+							value = user.getAccount_Type_Id(), sqltype = 'integer'
 						}
 					};
 
@@ -173,6 +199,16 @@ component accessors=true {
 						UPDATE "pUserRoles"
 						SET
 							role_id = :rid
+						WHERE
+							user_id = :uid
+					';
+
+					result = queryExecute(sql, params, variables.defaultOptions);
+
+					sql = '
+						UPDATE "pUserAccountTypes"
+						SET
+							account_type_id = :atid
 						WHERE
 							user_id = :uid
 					';
@@ -199,7 +235,7 @@ component accessors=true {
         		//try {
 
 		 			sql = '
-						INSERT INTO "pUsers" 				
+						INSERT INTO "pUsers"
 						(
 							name,
 							email,
@@ -253,6 +289,23 @@ component accessors=true {
 
 					result = queryExecute(sql, params, variables.defaultOptions);
 
+					sql = '
+						INSERT INTO "pUserAccountTypes"
+						(
+							user_id,
+							account_type_id
+						)
+						VALUES
+						(
+							#user.getUser_id()#,
+							#user.getAccount_Type_Id()#
+						)
+					';
+
+					params = {};
+
+					result = queryExecute(sql, params, variables.defaultOptions);
+
 //					transaction action="commit";
 
 				//}
@@ -275,11 +328,12 @@ component accessors=true {
 
     	// do user / pass prep
     	var user = variables.beanFactory.getBean('userBean');
+    	
     	user.setName( arguments.name );
     	user.setEmail( arguments.email );
 
     	// create a temp password that's rando
-        var password = "smile89"; // TODO
+        var password = createTempPassword();
         var newPassword = hashPassword( password );
         
         user.setPassword_Hash(newPassword.hash);
@@ -288,12 +342,36 @@ component accessors=true {
         // save the new user
         newUser = save( user );
 
-    	// kick off verification email
-        // TODO: fire off the verification email 
-        // variables.mailService.verifyUser( newUser, password ); // we pass in the plain-text password generated, this is the *only* time it is ever seen/displayed, never stored.
+		// now, for safety, let's do a nice clean get
+		// we do this so that we have a central sql call to pull a user, rather
+		// than risk duplicating code and increasing maintenance.
+		real_user = get( newUser.getUser_Id() );
 
-    	// return user populdated object
-    	return newUser;
+    	// kick off verification email
+        variables.mailService.verifyUser( real_user.getEmail(), password ); // we pass in the plain-text password generated, this is the *only* time it is ever seen/displayed, never stored.
+
+    	// return user populated object
+    	return real_user;
+    }
+
+    function createTempPassword() {
+
+    	var tmpPass = ArrayNew(1);
+
+    	for ( var i=1; i < 6; i++ ) {
+
+    		var e = RandRange(1,2);
+
+    		if (e == 1) {
+    			ArrayAppend(tmpPass, Chr(RandRange(48,57))); // 0-9
+    		} else {
+    			ArrayAppend(tmpPass, Chr(RandRange(65,90))); // A-Z
+    		}
+
+    	}
+
+    	return ArrayToList(tmpPass,"");
+
     }
 
 	function validate( any user, string firstName = "", string lastName = "", string email = "",
@@ -342,7 +420,8 @@ component accessors=true {
 	*/
 
     function hashPassword( string password ) {
-        var returnVar = { };
+
+        var returnVar = {};
 
         returnVar.salt = createUUID();
         returnVar.hash = hash( password & returnVar.salt, "SHA-512" );
@@ -359,99 +438,61 @@ component accessors=true {
         return !compare( inputHash, user.getPassword_Hash() );
     }
 
-    function checkPassword( any user, string currentPassword = "",
-                            string newPassword = "", string retypePassword = "" ) {
+    function checkPassword( any user, string new_password = "" ) {
 
 		// Initialize return variable
-		var aErrors = arrayNew(1);
+		var aErrors = ArrayNew(1);
 		var inputHash = '';
 		var count = 0;
+		var entropyCount = 0;
 
-		// if the password fields to not have values, add an error and return
-		if (not len(arguments.newPassword) or not len(arguments.retypePassword)) {
-			arrayAppend(aErrors, "Please fill out all form fields");
-			return aErrors;
+		// https://xato.net/10-000-top-passwords-6d6380716fe0 - disallowed passwords
+		var disallowed_pass = ['password','123456','12345678','1234','pussy','12345','qwerty','dragon','696969','mustang','baseball','football','letmein','pass123','password123'];
+
+		// too short or too long
+		if ( Len(new_password) < 2 OR Len(new_password) > 60 ) {
+			ArrayAppend( aErrors, "Your password must be longer than 2 characters and shortern than 60 characters." );
 		}
 
-		if (len(arguments.currentPassword) and isObject(user)) {
-			// If the user is changing their password, compare the current password to the saved hash
-			inputHash = hash(trim(arguments.currentPassword) & trim(user.getPasswordSalt()), 'SHA-512');
-
-			/* Compare the inputHash with the hash in the user object. if they do not match,
-				then the correct password was not passed in */
-			if (not compare(inputHash, user.getPasswordHash()) IS 0) {
-				arrayAppend(aErrors, "Your current password does not match the current password entered");
-				// Return now, there is no point testing further
-				return aErrors;
+		// too guessable via top ten (above)
+		for (var a=1; a < ArrayLen(disallowed_pass); a++) {
+			if ( !CompareNoCase(new_password,disallowed_pass[a]) ) {
+				ArrayAppend( aErrors, "The password you chose was not allowed (too guessable)." );
 			}
-
-			// Compare the current password to the new password, if they match add an error
-			if (compare(arguments.currentPassword, arguments.newPassword) IS 0)
-				arrayAppend(aErrors, "The new password can not match your current password");
 		}
 
-		// Check the password rules
-		// *** to change the strength of the password required, uncomment as needed
+		for ( var b=1; b < Len(new_password); b++ ) {
+			
+			// get the char
+			var char = Mid(new_password,b,1);
 
-		// Check to see if the two passwords match
-		if (not compare(arguments.newPassword, arguments.retypePassword) IS 0) {
-			arrayAppend(aErrors, "The new passwords you entered do not match");
-			// Return now, there is no point testing further
-			return aErrors;
+			if ( b > 1 ) {
+				var last_char = Mid(new_password,b-1,1);
+
+				if ( char == last_char ) {
+					entropyCount++;
+				}
+
+			}
+		
 		}
 
-		// If the password is more than X and less than Y, add an error.
-		if (len(arguments.newPassword) LT 8)// OR Len(arguments.newPassword) GT 25
-			arrayAppend(aErrors, "Your password must be at least 8 characters long");// between 8 and 25
+		// check for basic entropy
+		if ( entropyCount > 3 ) {
+			ArrayAppend( aErrors, "The password uses too many matching characters in succession (avoid 'aaaabbbbcccc')." );
+		}
 
-		// Check for atleast 1 uppercase or lowercase letter
-		/* if (NOT REFind('[A-Z]+', arguments.newPassword) AND NOT REFind('[a-z]+', arguments.newPassword))
-			ArrayAppend(aErrors, "Your password must contain at least 1 letter"); */
+		// Check to see if the password contains the email
+		if ( Len(session.auth.user.getEmail() ) and arguments.new_password CONTAINS user.getEmail() )
+			ArrayAppend( aErrors, "Your password cannot contain your email address.");
 
-		// check for at least 1 letter
-		if (reFind('[A-Z]+',arguments.newPassword))
-			count++;
-		if (reFind('[a-z]+', arguments.newPassword))
-			count++;
-		if (not count)
-			arrayAppend(aErrors, "Your password must contain at least 1 letter");
-
-		// Check for at least 1 uppercase letter
-		/*if (NOT REFind('[A-Z]+', arguments.newPassword))
-			ArrayAppend(aErrors, "Your password must contain at least 1 uppercase letter");*/
-
-		// Check for at least 1 lowercase letter
-		/*if (NOT REFind('[a-z]+', arguments.newPassword))
-			ArrayAppend(aErrors, "Your password must contain at least 1 lowercase letter");*/
-
-		// check for at least 1 number or special character
-		count = 0;
-		if (reFind('[1-9]+', arguments.newPassword))
-			count++;
-		if (reFind("[;|:|@|!|$|##|%|^|&|*|(|)|_|-|+|=|\'|\\|\||{|}|?|/|,|.]+", arguments.newPassword))
-			count++;
-		if (not count)
-			arrayAppend(aErrors, "Your password must contain at least 1 number or special character");
-
-		// Check for at least 1 numeral
-		/*if (NOT REFind('[1-9]+', arguments.newPassword))
-			ArrayAppend(aErrors, "Your password must contain at least 1 number");*/
-
-		// Check for one of the predfined special characters, you can add more by seperating each character with a pipe(|)
-		/* if (NOT REFind("[;|:|@|!|$|##|%|^|&|*|(|)|_|-|+|=|\'|\\|\||{|}|?|/|,|.]+", arguments.newPassword))
-			ArrayAppend(aErrors, "Your password must contain at least 1 special character"); */
-
-		// Check to see if the password contains the username
-		if (len(user.getEmail()) and arguments.newPassword CONTAINS user.getEmail())
-			arrayAppend(aErrors, "Your password cannot contain your email address");
+		// Check to see if the password contains the Nickname
+		if ( Len(session.auth.user.getName() ) and arguments.new_password CONTAINS user.getName() )
+			ArrayAppend( aErrors, "Your password cannot contain your account name (nickname).");
 
 		// Check to see if password is a date
-		if (isDate(arguments.newPassword))
-			arrayAppend(aErrors, "Your password cannot be a date");
-
-		// Make sure password contains no spaces
-		if (arguments.newPassword CONTAINS " ")
-			arrayAppend(aErrors, "Your password cannot contain spaces");
+		if ( IsDate(arguments.new_password) )
+			arrayAppend( aErrors, "Your password cannot be a date.");
 
         return aErrors;
     }

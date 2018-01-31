@@ -18,7 +18,8 @@
 		</div>
 		<button class="btn button btn-default" form="login"><span class="glyphicon glyphicon-log-in"></span> Login</button>
 	</cfform>
-	<button class="btn button btn-default" onClick="location.href='#buildUrl('login.create')#';"><span class="glyphicon glyphicon-exclamation-sign"></span> I don't have an account yet</button>
+	<button class="btn button btn-default" onClick="location.href='#buildUrl('login.create')#';"><span class="glyphicon glyphicon-exclamation-sign"></span> I don't have an account yet</button><br/>
+	<button class="btn button btn-default" onClick="location.href='#buildUrl('login.reset')#';"><span class="glyphicon glyphicon-question-sign"></span> I forgot my password</button>
 	</cfoutput>
 
 	</div>

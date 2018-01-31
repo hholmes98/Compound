@@ -4,14 +4,7 @@ component accessors = true {
 	property framework;
 	property planservice;
 
-	/*
-	public void function default( struct rc ) {
-		
-		location(url:"index.cfm?action=plan", addtoken:false);
-	
-	}
-	*/
-
+	/* raw json methods */
 	public void function list( struct rc ) {
 		
 		var cards = planservice.list( arguments.rc.user_id );
@@ -42,6 +35,13 @@ component accessors = true {
 		
 		framework.renderdata("JSON", ret);
 	
-	}	
+	}
+
+	/* front end-methods */
+
+	/*
+	public void function default( struct rc ) {
+	}
+	*/
 
 }

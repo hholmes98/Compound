@@ -12,7 +12,7 @@ component accessors=true {
     property calculated_payment;
     property pay_date;
 
-	function init( string card_id = 0, string user_id = 0, string label = "", string balance = 0, string interest_rate = 0, string is_emergency = 0, string min_payment = 0, string is_hot = 0, string calculated_payment = 0, date pay_date='1900-1-1' ) {
+	function init( string card_id = 0, string user_id = 0, string label = "", string balance = 0, string interest_rate = 0.29, string is_emergency = 0, string min_payment = "", string is_hot = 0, string calculated_payment = 0, date pay_date='1900-1-1' ) {
 	    
 	    variables.card_id = card_id;
 	    variables.user_id = user_id;
@@ -24,7 +24,7 @@ component accessors=true {
 	    variables.is_hot = is_hot;
 	    variables.calculated_payment = calculated_payment;
 	    variables.pay_date = pay_date;
-	    
+
 	    return this;
 	}
 
@@ -46,6 +46,27 @@ component accessors=true {
 
 		return variables.is_emergency;
 
+	}
+
+	function getMin_Payment() {
+
+		// if instatiated with defaults, there'll be no min. payment. The first get will set it.
+		if ( variables.min_payment is "" ) {
+
+			// if there's a balance...
+			if ( variables.balance > 0 ) {
+				// ...set a default to 3% of balance
+				variables.min_payment = (variables.balance * 0.03);
+				// ...and return it.
+				return variables.min_payment;
+			} else {
+				// there's no balance and no min payment, so $0, but leave the private var "".
+				return 0;
+			}
+		} else {
+
+			return variables.min_payment;
+		}
 	}
 
 }

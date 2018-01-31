@@ -10,7 +10,7 @@
 
 	<!-- styles -->
 	<link href="https://fonts.googleapis.com/css?family=Ultra" rel="stylesheet">
-	<link href="/bootstrap/css/bootstrap.css" rel="stylesheet">	
+	<link href="/bootstrap/css/bootstrap.css" rel="stylesheet">
 	<link rel="stylesheet" type="text/css" href="/assets/css/dd.css" />
 
 	<link href="https://fonts.googleapis.com/css?family=Ultra" rel="stylesheet">
@@ -44,7 +44,7 @@
         <span class="icon-bar"></span>
       </button>
       <span class="navbar-brand">
-	     <cfoutput>#application.app_name#</cfoutput>
+				<cfoutput>#application.app_name#</cfoutput>
       </span>
     </div>
 
@@ -55,11 +55,28 @@
         <li><cfoutput><a href="#buildUrl('pay')#"><span class="glyphicon glyphicon-money"></span></a></cfoutput></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li><cfoutput><a href="#buildUrl('login.logout')#"></cfoutput>Logout</a></li>
+        <li><cfoutput><a href="#buildUrl('profile.basic')#"><span class="glyphicon glyphicon-user"></span></a></cfoutput></li>
       </ul>
     </div>
   </div>
 </nav>
+
+<cfif session.auth.user.getAccount_Type_Id() EQ 1>
+<div id="top-banner">
+	
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- DD_Responsive -->
+<ins class="adsbygoogle responsive_ad"
+     style="display:inline-block;"
+     data-ad-client="ca-pub-6215660586764867"
+     data-ad-slot="9656584127"  
+     ></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+	
+</div>
+</cfif>
 
 <div class="container">	
 	<cfoutput>
@@ -114,7 +131,6 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http ) {
 		window.location.href = 'index.cfm/login';
 
 	});
-	
 
 	$scope.saveCard = function( key, data ) { 
 
@@ -170,7 +186,7 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http ) {
 	};
 
 	$scope.deleteCard = function( card_id ) { 
-
+		
 		$http({
 			method: 'DELETE',
 			url: 'index.cfm/card/' + card_id
@@ -178,18 +194,20 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http ) {
 
 			delete $scope.cards[ card_id ];
 
-			$scope.keylist.splice( $scope.keylist.indexOf(card_id), 1 )
+			//for modern browsers ( > IE8 )
+
+			$scope.keylist.splice( $scope.keylist.indexOf(card_id), 1 );
 
 		});
 
 	};
 
 	$scope.newCard = function( uid ) { 
-		
+
 		console.log($scope.cards);
 
 		console.log($scope.keylist);
-		
+
 		if ( $scope.keylist.length ) {
 			var newid = parseInt( $scope.keylist[0] ) + 1;
 		}
@@ -210,23 +228,16 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http ) {
 
 			if ( data.card_id == 0 ) {
 				delete $scope.cards[ eid ];
-				
+
 				// for modern browsers ( > IE8)
-				
-				$scope.keylist.splice( $scope.keylist.indexOf(eid), 1 );		
-		
-				//Otherwise
-				/*for(var i = 0; i <= keylist.length; i++) {
-				    if(keylist[i] === id) {
-				       keylist.splice(i, 1);
-				    }
-				}*/		
-				
+
+				$scope.keylist.splice( $scope.keylist.indexOf(eid), 1 );
+
 			}
 
 			else $scope.cards[ eid ] = data;
-			
-		} );		
+
+		} );
 
 	}
 
@@ -243,9 +254,9 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http ) {
 			// actually set the budget
 			$scope.preferences.budget = val;
 
-		});			
-				
-	};		
+		});
+
+	};
 
 	$scope.setPayFrequency = function( id, freq ) { 
 
@@ -260,11 +271,20 @@ ddApp.controller( 'ddCtrl' , function ( $scope, $http ) {
 			// actually set the pay frequency
 			$scope.preferences.pay_frequency = freq;
 
-		});			
-				
-	};	
+		});
+
+	};
 
 });
-	
+
+</script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-112744491-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-112744491-1');
 </script>
 </html>

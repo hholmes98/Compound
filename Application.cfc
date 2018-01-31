@@ -12,6 +12,8 @@ component extends="framework.one" {
         unhandledPaths = "/fonts",
 		
 		generateSES = 'true',
+
+		home = 'debt',
 		
 		routes = [ //Just for fun.....
 		  { "$GET/card/user_id/:user_id" = "/main/list/id/:user_id" },
@@ -26,6 +28,7 @@ component extends="framework.one" {
 		  { "$GET/plan/events/:user_id" = "/plan/schedule/user_id/:user_id" },
 		  { "$GET/plan/:user_id" = "/plan/list/user_id/:user_id" },
 		  { "$DELETE/plan/:user_id" = "/plan/delete/user_id/:user_id" },
+		  { "$GET/debt/sched/" = "/debt/journey/" },
 		],
 		
 		reloadApplicationOnEveryRequest = true // set this to false when in PROD!
@@ -33,22 +36,41 @@ component extends="framework.one" {
 	};
 	
 	function setupApplication() {
-		application.admin_email = 'support@debtdecimator.com';
+		application.admin_email = 'support@some-website.com';
+		application.site_domain = 'some-website.com';
 
-		application.app_name = 'Compound (Alpha v0.82)';
+		application.app_name = 'Compound (Alpha v0.9)';
 
-		// a single hot card and/or an emergency card *must* stay over this percentage of the budget.
+		// locale
+		application.default_locale = 'EN_us';
+
+		application.locale['EN_us'] =  StructNew();
+		application.locale['EN_us']['name'] = 'Compound';
+
+ 		// a single hot card and/or an emergency card *must* stay over this percentage of the budget.
 		application.emergency_balance_threshold = 0.33;
 
-		// in a given month, never allow a payment to drop the balance of a card below this number 
-		// (to prevent things like carrying an .11 cent balance)
+ 		// in a given month, never allow a payment to drop the balance of a card below this number
+ 		// (to prevent things like carrying an .11 cent balance)
 		application.min_card_threshold = 10; // hey, 10 bucks is 10 bucks.
 
-		// when this is true, I consistently add on several more months to the payout plan, as hot card 
-		// payments are spread more thinly, month-to-month.
+ 		// when this is true, I consistently add on several more months to the payout plan, as hot card
+ 		// payments are spread more thinly, month-to-month.
 		application.consider_interest_when_calculating_payments = false;
 
-		application.start_page = 'pay';
+		application.start_page = variables.framework.home;	// if you're anonymous/non-authorized, this is where you start
+		application.auth_start_page = 'pay';				// if you're logged-in/authorized, this is where you start
+
+		application.base_url = CGI.SERVER_NAME;
+		if ( CGI.SERVER_PORT_SECURE ) {
+			application.base_url = "https://" & application.base_url;
+		} else {
+			application.base_url = "http://" & application.base_url;
+		}
+		if ( CGI.SERVER_PORT <> 80 ) {
+			application.base_url = application.base_url & ":" & CGI.SERVER_PORT;
+		}
+
 	}
 
 	function setupSession() {

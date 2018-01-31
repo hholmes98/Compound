@@ -1,17 +1,25 @@
 component accessors=true {
 
     property userService;
+    property mailService;
+    property preferenceService;
+    property cardService;
 
     function init( fw ) {
+
         variables.fw = fw;
+
         return this;
+
     }
 
     function before( rc ) {
+
         if ( structKeyExists( session, "auth" ) && session.auth.isLoggedIn &&
-             variables.fw.getItem() != "logout" ) {
+             variables.fw.getItem() != "logout" && variables.fw.getItem() != "updateConfirm" ) {
             variables.fw.redirect( "main" );
         }
+
     }
 
     function new( rc ) {
@@ -35,15 +43,41 @@ component accessors=true {
             variables.fw.redirect( "login.create", "message" );
         }
 
-        // if you're here, create checks pass, create the user and log 'em in!
+        // if you're here, create checks pass, create the user...
         user = variables.userService.createUser( rc.name, rc.email );
 
-        // log the user in (same as below)
+        // ...if they came via the onboarding process:
+        if ( !StructIsEmpty(session.tmp.cards) ) {
+
+            // 1. capture the tmp.preferences.budget
+            variables.preferenceService.setBudget( session.tmp.preferences.budget, user.getUser_Id() );
+
+            // 2. convert to legit (new) cards and save
+            for ( tmpCard in session.tmp.cards ) {
+
+                // card_id to 0
+                session.tmp.cards[tmpCard].setCard_Id(0);
+
+                // user_id to legit id
+                session.tmp.cards[tmpCard].setUser_Id( user.getUser_Id() );
+
+                // flatten bean to struct, pass to save service
+                variables.cardService.save( variables.cardService.flatten( session.tmp.cards[tmpCard] ) );
+
+            }
+
+            // 3. wipe the tmp session clean
+            StructClear(session.tmp);
+
+        }
+
+        // ... and log 'em in!
         session.auth.isLoggedIn = true;
         session.auth.fullname = user.getName();
         session.auth.user = user;
 
-        variables.fw.redirect( application.start_page );
+        // off to the default authenticated start page
+        variables.fw.redirect( application.auth_start_page );
     }    
 
     function login( rc ) {
@@ -70,36 +104,90 @@ component accessors=true {
         session.auth.fullname = user.getName();
         session.auth.user = user;
 
-        variables.fw.redirect( application.start_page );
+        // off to the default authenticated start page
+        variables.fw.redirect( application.auth_start_page );
     }
 
-    /*
-    function change( rc ) {
-        
-        rc.user = variables.userService.getByEmail( rc.email );
+    function resetConfirm( rc ) {
 
-        var newPassword = "smile89";
-        var newPasswordHash = variables.userService.hashPassword( newPassword );
+        // first, verify the user exists
+        var user = variables.userService.getByEmail( rc.email );
         
-        rc.password_hash = newPasswordHash.hash;
-        rc.password_salt = newPasswordHash.salt;
+        // if that's a real user, verify their password is also correct
+        var userValid = user.getUser_Id();
 
-        // this will update any user fields from RC so it's a bit overkill here
-        variables.fw.populate( cfc = rc.user, trim = true );
+        var tmpKey = CreateUUID();
+
+        session.tempPasswordReset[tmpKey] = userValid;
+        
+        // fire the temp password off in an email
+        destUrl = variables.fw.buildUrl('login.passwordReset');
+        variables.mailService.sendPasswordResetEmail( rc.email, tmpKey, destUrl );
+
+        // redirect to message
+        rc.message = ["An email was sent to your account to help you confirm & reset your password."];
+        variables.fw.redirect( "login.default", "message" );
+
+    }
+
+    function changeConfirm( rc ) {
+
+        if ( StructKeyExists(rc, 'q') && StructKeyExists(session.tempPasswordReset, rc.q) ) {
+
+            var userId = session.tempPasswordReset[rc.q];
+            
+            rc.user = variables.userService.get( userId );
+            
+            var newPassword = variables.userService.hashPassword( rc.new_password );
+
+            rc.user.setPassword_Hash( newPassword.hash );
+            rc.user.setPassword_Salt( newPassword.salt );
+
+            variables.userService.save( rc.user );
+
+            rc.message = ["Your account password was succesfully reset!"];
+            variables.fw.redirect( "login.default", "message" );
+
+        } else {
+
+            rc.message = ["There was some kind of error with your password reset! Wait a few minutes and try again."];
+            variables.fw.redirect( "login.default", "message" );
+
+        }
+
+    }
+
+    function updateConfirm( rc ) {
+
+        rc.user = session.auth.user;
+
+        rc.message = variables.userService.checkPassword( argumentCollection = rc );
+        
+        if ( !ArrayIsEmpty( rc.message ) ) {
+            variables.fw.redirect( "profile.basic", "message" );
+        }
+
+        var newPassword = variables.userService.hashPassword( rc.new_password );
+
+        rc.user.setPassword_Hash( newPassword.hash );
+        rc.user.setPassword_Salt( newPassword.salt );
 
         variables.userService.save( rc.user );
-
-        rc.message = ["Your password was changed to " & newPassword];
         
-        variables.fw.redirect( "userManagerAccessControl:login", "message" );
-    } 
-    */      
+        rc.message = ["Your password was successfully updated."];
+
+        variables.fw.redirect( "profile.basic", "message" );
+
+    }
 
     function logout( rc ) {
         // reset session variables
         session.auth.isLoggedIn = false;
         session.auth.fullname = "Guest";
-        structdelete( session.auth, "user" );
+
+        StructDelete( session.auth, "user" );
+        session.auth.user = userservice.getTemp();
+
         rc.message = ["You have safely logged out"];
         variables.fw.redirect( "login", "message" );
     }

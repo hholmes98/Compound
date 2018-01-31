@@ -1,5 +1,7 @@
 component accessors=true {
 
+	property userservice;
+
 	public any function init( beanFactory ) {
 
 		variables.beanFactory = beanFactory;
@@ -28,7 +30,7 @@ component accessors=true {
 		};
 
 		var card = {};
-		var cards = {};
+		var cards = {}; // do not change to an array! json populates gaps in the ids, which dumps a bunch of routines!!
 
 		var result = queryExecute(sql, params, variables.defaultOptions);
 
@@ -51,22 +53,22 @@ component accessors=true {
 	}
 
 	public any function get( string id ) {
-
-		sql = '
+		
+		var sql = '
 			SELECT c.*
 			FROM "pCards" c
 			WHERE c.card_id = :cid
 		';
 
-		params = {
+		var params = {
 			cid = {
 				value = arguments.id, sqltype = 'integer'
 			}
 		};
 
-		result = queryExecute(sql, params, variables.defaultOptions);
+		var result = queryExecute(sql, params, variables.defaultOptions);
 
-		card = variables.beanFactory.getBean('cardBean');
+		var card = variables.beanFactory.getBean('cardBean');
 
 		if (result.recordcount) {
 		
@@ -77,10 +79,33 @@ component accessors=true {
 			card.setIs_Emergency(result.is_emergency[1]);
 			card.setBalance(result.balance[1]);
 			card.setInterest_Rate(result.interest_rate[1]);
-		
+
 		}
 
 		return card;
+
+	}
+
+	public any function toBean( struct in_card ) {
+
+		return variables.beanFactory.getBean( 'cardBean', in_card );
+
+	}
+
+	/* convenience to have a bean's getters fire in order to populate a flatten struct of bean */
+	public struct function flatten( any card ) {
+
+		var c_data = StructNew();
+
+		c_data.card_id = card.getCard_Id();
+		c_data.user_id = card.getUser_Id();
+		c_data.label = card.getLabel();
+		c_data.min_payment = card.getMin_Payment();
+		c_data.is_emergency = card.getIs_Emergency();
+		c_data.balance = card.getBalance();
+		c_data.interest_rate = card.getInterest_Rate();
+
+		return c_data;
 
 	}
 
@@ -89,9 +114,9 @@ component accessors=true {
 		param name="card.card_id" default=0;
 		param name="card.user_id" default=0;
 		param name="card.label" default="";
-		param name="card.balance" default="";
-		param name="card.interest_rate" default="";
-		param name="card.min_payment" default="";
+		param name="card.balance" default=0;
+		param name="card.interest_rate" default=0;
+		param name="card.min_payment" default=0;
 		param name="card.is_emergency" default=0;
 
 		if ( card.card_id lte 0 ) {
@@ -190,6 +215,14 @@ component accessors=true {
 
 	public any function delete( required string card_id ) {
 
+		/*
+		structDelete(variables.data.cards, id);
+
+		FileWrite( variables.ddFile, serializeJson( variables.data ) );
+		
+		return variables.data.cards;
+		*/
+
 		sql = '
 			DELETE FROM "pCards" c
 			WHERE c.card_id = :cid
@@ -204,7 +237,7 @@ component accessors=true {
 		result = queryExecute(sql, params, variables.defaultOptions);
 
 		return 0;
-	
+
 	}
 
 	/* **
@@ -212,8 +245,6 @@ component accessors=true {
 	** */
 		
 	public query function qryGetNonZeroCardsByUser( string user_id, string include_list='', boolean prioritize_emergency=false ) {
-
-		var i = 0;
 
 		var sql = '
 			SELECT c.*
@@ -250,6 +281,7 @@ component accessors=true {
 		};
 
 		var card = {};
+
 		var result = queryExecute(sql, params, variables.defaultOptions);
 
 		return result;
@@ -284,7 +316,7 @@ component accessors=true {
 			card.setIs_Emergency(result.is_emergency[1]);
 			card.setBalance(result.balance[1]);
 			card.setInterest_Rate(result.interest_rate[1]);
-		
+
 		}
 
 		return card;

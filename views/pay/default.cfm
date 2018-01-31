@@ -34,7 +34,7 @@
 
 				<button class="btn button btn-default" ng-click="navigateTo('#buildUrl('plan')#')"><span class="glyphicon glyphicon-stats"></span> SEE my future</button>
 
-			</span>
+			</span>			
 
 		</div>
 		</cfoutput>
@@ -55,14 +55,22 @@
 		<div class="panel panel-default form-horizontal">
 
 			<div class="panel-body tab-pane" id="card-list">
+				<!---<div align="center">
+					<h2><cfoutput>#session.auth.user.getName()#'s Cards</cfoutput></h2>
+				</div>--->
 				<table class="table table-striped table-bordered table-valign-middle">
+					<!--<thead>
+					<tr>
+						<th class="col-md-6">Card Name</th>
+					</tr>
+					</thead>-->
 					<tbody>
 						
 					<tr class="align-top" ng-form name="myForm" ng-repeat="key in keylist">
 						<td>
 							<button class="btn button btn-default" ng-click="selectCard(key);">{{cards[key].label}}</button>
 						</td>
-					</tr>
+					</tr>					
 					</tbody>
 				</table>
 			</div>
@@ -124,7 +132,7 @@
 						</td>
 					</tr>
 
-					</tbody>
+					</tbody>	
 
 				</table>
 

@@ -6,8 +6,6 @@
 
 	<div class="panel panel-default form-horizontal">
 
-		<div id="top-banner"></div>
-
 		<ul class="nav nav-tabs" role="tablist">
 			<li role="presentation" class="active"><a href="#card-manager" aria-controls="card-manager" role="tab" data-toggle="tab">1. Manage Your Credit Cards</a></li>
 			<li role="presentation"><a href="#emergency" aria-controls="emergency" role="tab" data-toggle="tab">2. Select Emergency Card</a></li>
@@ -18,7 +16,7 @@
 		<div class="tab-content">
 
 			<!-- tab 1 -->
-			<div role="tabpanel" class="panel-body tab-pane active" id="card-manager">				
+			<div role="tabpanel" class="panel-body tab-pane active" id="card-manager">
 				<table class="table table-striped table-bordered table-valign-middle">
 					<thead>
 					<tr>
@@ -36,7 +34,7 @@
 						<th class="col-md-2">Min. Payment</th>
 						<th></th>
 					</tr>
-					</thead>					
+					</thead>
 					<tbody>
 					<tr class="align-top" ng-form name="myForm" ng-repeat="key in keylist">
 						<input type="hidden" ng-model="cards[key].id">
@@ -67,8 +65,8 @@
 							<button class="btn button btn-default" ng-class="{'btn-warning': !myForm.$pristine }" ng-disabled="myForm.$pristine" ng-click="resetCard(key);myForm.$setPristine(true)" ><span class="glyphicon glyphicon-refresh"></span> Reset</button>
 							<button class="btn button btn-default" ng-click="deleteCard(key);deletePlan(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>);"><span class="glyphicon glyphicon-remove"></span> Delete</button>
 						</td>
-					</tr>					
-					</tbody>	
+					</tr>
+					</tbody>
 				</table>
 			</div>
 

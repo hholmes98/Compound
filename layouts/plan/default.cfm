@@ -8,7 +8,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<title><cfoutput>#application.app_name#</cfoutput></title>
 
-  <!-- styles -->
+	<!-- styles -->
   <link href="https://fonts.googleapis.com/css?family=Ultra" rel="stylesheet">
   <link href="/bootstrap/css/bootstrap.css" rel="stylesheet">
   <link href="/node_modules/fullcalendar/dist/fullcalendar.css" rel="stylesheet">
@@ -23,7 +23,7 @@
 
 	<script src="/node_modules/moment/min/moment.min.js" type="text/javascript"></script>
 
-	<!-- calendar -->	
+	<!-- calendar -->
 	<script type="text/javascript" src="/node_modules/angular-ui-calendar/src/calendar.js"></script>
 	<script type="text/javascript" src="/node_modules/fullcalendar/dist/fullcalendar.min.js"></script>
 	<script type="text/javascript" src="/node_modules/fullcalendar/dist/gcal.js"></script>
@@ -50,7 +50,7 @@
         <span class="icon-bar"></span>
       </button>
       <span class="navbar-brand">
-	     <cfoutput>#application.app_name#</cfoutput>
+        <cfoutput>#application.app_name#</cfoutput>
       </span>
     </div>
 
@@ -61,11 +61,28 @@
         <li><cfoutput><a href="#buildUrl('pay')#"><span class="glyphicon glyphicon-money"></span></a></cfoutput></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li><cfoutput><a href="#buildUrl('login.logout')#"></cfoutput>Logout</a></li>
+        <li><cfoutput><a href="#buildUrl('profile.basic')#"><span class="glyphicon glyphicon-user"></span></a></cfoutput></li>
       </ul>
     </div>
   </div>
 </nav>
+
+<cfif session.auth.user.getAccount_Type_Id() EQ 1>
+<div id="top-banner">
+  
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- DD_Responsive -->
+<ins class="adsbygoogle responsive_ad"
+     style="display:inline-block;"
+     data-ad-client="ca-pub-6215660586764867"
+     data-ad-slot="9656584127"  
+     ></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+  
+</div>
+</cfif>
 
 <div class="container">	
 		<cfoutput>
@@ -360,5 +377,14 @@ ddApp.controller( 'ddCtrl' , function ( $scope , $http  ) {
   });  
 
 }); // controller
+</script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-112744491-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-112744491-1');
 </script>
 </html>

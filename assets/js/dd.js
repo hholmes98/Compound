@@ -1,15 +1,19 @@
 var AnimatePage = (function() {
 
-	var $pan = $( '#pan-main' ),
-		
-	animEndEventNames = {
+	var $pan = $( '#pan-main form' );
+
+	if (!$pan.length) {
+		$pan = $('#pan-main');
+	}
+
+	var animEndEventNames = {
 		'WebkitAnimation' : 'webkitAnimationEnd',
 		'OAnimation' : 'oAnimationEnd',
 		'msAnimation' : 'MSAnimationEnd',
 		'animation' : 'animationend'
 	},
-	
-	animEndEventName = animEndEventNames[ Modernizr.prefixed( 'animation' ) ],		
+
+	animEndEventName = animEndEventNames[ Modernizr.prefixed( 'animation' ) ],
 
 	support = Modernizr.cssanimations;
 
@@ -17,9 +21,11 @@ var AnimatePage = (function() {
 	endCurr 	= false,
 	endNext 	= false,
 	animcursor 	= 1,
-	current 	= 0,	
+	current 	= 0,
 
 	$pages 		= $pan.children( 'div.pan-page' );
+
+
 
 	/* public */
 	
@@ -32,6 +38,49 @@ var AnimatePage = (function() {
 		
 		$pages.eq( current ).addClass( 'pan-page-current' );
 
+	}
+
+	function addAnother( ) {
+
+		var newMsg = ['Keep \'em coming!', 'Need more cards!', 'You\'re killing it! (and by "it" we mean "debt")', 'Give us your cards!', 'Somebody set up us the cards!'];
+		var tMsg = Math.floor(Math.random() * newMsg.length);
+
+		var $last_div = $('div[id^="page"]:last');
+		var num = parseInt( $last_div.prop('id').match(/\d+/g), 10 ) + 1;
+
+		var $div = $last_div.clone()
+		
+		// re-id it
+		$div.prop('id','page' + num);
+
+		// re-class it.
+		$div.prop('class','pan-page pan-page-' + num);
+
+		// attach data for panning
+		$div.data( 'originalClassList', $div.attr( 'class' ) );
+
+		// re-id the form fields
+		$div.find('input').each( function(index) {
+
+			var tClass = $(this).attr('class'); // the base field name is the class (the actual name already has a number)
+
+			var fieldName = tClass.substring(tClass.indexOf('credit-card'));
+
+			var newFieldId = fieldName + (num-1); // the fields are -1 of the page itself (eg. page-2 has fieldnames named credit-card-label1)
+
+			// re-id it
+			$(this).prop('id', newFieldId);
+
+			// and then re-name it
+			$(this).prop('name', newFieldId);
+
+		});
+
+		$div.find('.card-content h3').text(newMsg[tMsg]);
+
+		$pan.append( $div );
+
+		return num;
 	}
 
 	function panForward( dest ) {
@@ -61,6 +110,9 @@ var AnimatePage = (function() {
 	/* private */
 
 	function nextPage( options ) {
+
+		// pages can be dynamic, so you need to re-get this each time you call nextPage
+		$pages = $pan.children( 'div.pan-page' );
 
 		if( isAnimating ) {
 			return false;
@@ -130,7 +182,8 @@ var AnimatePage = (function() {
 	return { 
 		init : init,
 		panForward : panForward,
-		panBack : panBack
+		panBack : panBack,
+		addAnother : addAnother
 	};
 
 })();
