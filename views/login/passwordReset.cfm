@@ -1,20 +1,19 @@
-<!--- passwordReset.cfm --->
+<!-- views/login/passwordReset -->
+<div class="page-header">
+  <h1>Password Reset</h1>
+</div>
 
-	<div class="page-header">
-		<h2 shadow-text="Choose a New Password">Choose a New Password</h2>
-	</div>
+<div class="panel panel-default form-horizontal">
+<cfoutput>
 
-	<div class="panel panel-default form-horizontal">
+<cfform name="account" id="account" action="#buildURL('login.resetConfirm')#" method="post">
+  <div class="input-group">
+    <span class="input-group-addon"><i class="glyphicon glyphicon-envelope"></i></span>
+    <cfinput id="email" type="text" class="form-control" name="email" placeholder="Enter Your Email Address" required="yes" message="Please enter your email address" />
+  </div>
 
-	<cfoutput>
-	<cfform name="account" id="account" action="#buildURL('login.changeConfirm')#" method="post">
-		<input type="hidden" name="q" value="#rc.q#">
-		<div class="input-group">
-			<span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
-			<cfinput id="password" type="password" class="form-control" name="new_password" placeholder="Enter a New Password" required="yes" message="Please enter a new password." />
-		</div>
-		<button class="btn button btn-default" form="account"><span class="glyphicon glyphicon-check"></span> Save Changes</button>
-	</cfform>
-	</cfoutput>
+  <button class="btn button btn-default" form="account"><span class="glyphicon glyphicon-circle-arrow-right"></span> Request Reset</button>
+</cfform>
 
-	</div>
+</cfoutput>
+</div>

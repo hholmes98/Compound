@@ -1,166 +1,156 @@
+// model/services/preference
 component accessors=true  {
-		
-	public any function init( beanFactory ) {
 
-		variables.beanFactory = beanFactory;
+  public any function init( beanFactory ) {
 
-		variables.defaultOptions = {
-			datasource = 'dd'
-		};
-		
-		return this;
+    variables.beanFactory = beanFactory;
 
-	}
+    variables.defaultOptions = {
+      datasource = application.datasource
+    };
 
-	/*
-	public any function list( ) {
+    return this;
 
-		var ret = structCopy( variables.data.cards );
+  }
 
-		ret['keylist'] = structKeyArray( variables.data.cards );
-		arraySort( ret['keylist'], "numeric", "desc" );
-		
-		return variables.data.cards;
-	
-	}
-	*/
+  public any function get( id ) {
 
-	public any function get( id ) {
+    var sql = '
+      SELECT up.*
+      FROM "pUserPreferences" up
+      WHERE up.user_id = :uid
+    ';
 
-		sql = '
-			SELECT up.*
-			FROM "pUserPreferences" up
-			WHERE up.user_id = :uid
-		';
+    var params = {
+      uid = {
+        value = arguments.id, sqltype = 'integer'
+      }
+    };
 
-		params = {
-			uid = {
-				value = arguments.id, sqltype = 'integer'
-			}
-		};
+    var result = QueryExecute( sql, params, variables.defaultOptions );
 
-		result = queryExecute( sql, params, variables.defaultOptions );
+    var preference = variables.beanFactory.getBean('preferenceBean');
 
-		preference = variables.beanFactory.getBean('preferenceBean');
+    if ( result.recordcount ) {
 
-		if ( result.recordcount ) {
-		
-			preference.setUser_id( result.user_id[1] );
-			preference.setBudget( DecimalFormat(result.budget[1]) );
-			preference.setPay_Frequency( result.pay_frequency[1] );
-		
-		}
+      preference.setUser_id( result.user_id[1] );
+      preference.setBudget( DecimalFormat(result.budget[1]) );
+      preference.setPay_Frequency( result.pay_frequency[1] );
 
-		return preference;
+    }
 
-	}
+    return preference;
 
-	public any function setBudget( required string val, required string id ) {
-					
-		var sql = '
-			UPDATE "pUserPreferences"
-			SET 
-				budget = :bval
-			WHERE 
-				user_id = :uid
-			RETURNING 
-				budget AS budget_out;
-		';
+  }
 
-		var params = {
-			bval = {
-				value = arguments.val, sqltype = 'numeric'
-			},
-			uid = {
-				value = arguments.id, sqltype = 'integer'
-			}
-		};
+  public any function setBudget( required string val, required string id ) {
 
-		var result = queryExecute( sql, params, variables.defaultOptions );
+    var sql = '
+      UPDATE "pUserPreferences"
+      SET 
+        budget = :bval
+      WHERE 
+        user_id = :uid
+      RETURNING 
+        budget AS budget_out;
+    ';
 
-		return result.budget_out;
-	}
+    var params = {
+      bval = {
+        value = arguments.val, sqltype = 'numeric'
+      },
+      uid = {
+        value = arguments.id, sqltype = 'integer'
+      }
+    };
 
-	public any function setFrequency( required string val, required string id ) {
+    var result = QueryExecute( sql, params, variables.defaultOptions );
 
-		sql = '
-			UPDATE "pUserPreferences"
-			SET 
-				pay_frequency = :pfval
-			WHERE 
-				user_id = :uid
-			RETURNING
-				pay_frequency AS pay_frequency_out
-		';
+    return result.budget_out;
 
-		params = {
-			uid = {
-				value = arguments.id, sqltype = 'integer'
-			},
-			pfval = {
-				value = arguments.val, sqltype = 'integer'
-			}
-		};
+  }
 
-		result = queryExecute( sql, params, variables.defaultOptions );
+  public any function setFrequency( required string val, required string id ) {
 
-		return result.pay_frequency_out;	
-	}
+    var sql = '
+      UPDATE "pUserPreferences"
+      SET 
+        pay_frequency = :pfval
+      WHERE 
+        user_id = :uid
+      RETURNING
+        pay_frequency AS pay_frequency_out
+    ';
 
-	public string function getBudget( required string id ) {
+    var params = {
+      uid = {
+        value = arguments.id, sqltype = 'integer'
+      },
+      pfval = {
+        value = arguments.val, sqltype = 'integer'
+      }
+    };
 
-		sql = '
-			SELECT up.budget
-			FROM "pUserPreferences" up
-			WHERE up.user_id = :uid
-		';
+    var result = QueryExecute( sql, params, variables.defaultOptions );
 
-		params = {
-			uid = {
-				value = arguments.id, sqltype = 'integer'
-			}
-		};
+    return result.pay_frequency_out;
 
-		result = queryExecute( sql, params, variables.defaultOptions );
+  }
 
-		if (result.recordcount) {
-		
-			return result.budget[1];
-		
-		} else {
+  public string function getBudget( required string id ) {
 
-			-1;
+    var sql = '
+      SELECT up.budget
+      FROM "pUserPreferences" up
+      WHERE up.user_id = :uid
+    ';
 
-		}
-			
-	}
+    var params = {
+      uid = {
+        value = arguments.id, sqltype = 'integer'
+      }
+    };
 
-	public string function getFrequency( required string id ) {
+    var result = QueryExecute( sql, params, variables.defaultOptions );
 
-		sql = '
-			SELECT up.pay_frequency
-			FROM "pUserPreferences" up
-			WHERE up.user_id = :uid
-		';
+    if ( result.recordcount ) {
 
-		params = {
-			uid = {
-				value = arguments.id, sqltype = 'integer'
-			}
-		};
+      return result.budget[1];
 
-		result = queryExecute( sql, params, variables.defaultOptions );
+    } else {
 
-		if (result.recordcount) {
-		
-			return result.pay_frequency[1];
-		
-		} else {
+      -1; // error
 
-			-1;
+    }
 
-		}
+  }
 
-	}	
-		
+  public string function getFrequency( required string id ) {
+
+    var sql = '
+      SELECT up.pay_frequency
+      FROM "pUserPreferences" up
+      WHERE up.user_id = :uid
+    ';
+
+    var params = {
+      uid = {
+        value = arguments.id, sqltype = 'integer'
+      }
+    };
+
+    var result = QueryExecute( sql, params, variables.defaultOptions );
+
+    if ( result.recordcount ) {
+
+      return result.pay_frequency[1];
+
+    } else {
+
+      -1;
+
+    }
+
+  }
+
 }

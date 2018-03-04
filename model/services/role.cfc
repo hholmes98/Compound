@@ -1,71 +1,74 @@
-//role.cfc
+// model/services/role
 component accessors=true {
-	
-	function init( beanFactory ) {
 
-        variables.beanFactory = beanFactory;
+  function init( beanFactory ) {
 
-		variables.defaultOptions = {
-			datasource = 'dd'
-		};
-		
-		return this;
-	}
-	
-	function get( id ) {
-		
-		sql = '
-			SELECT r.*
-			FROM "pRoles" r
-			WHERE r.role_id = :rid
-		';
+    variables.beanFactory = beanFactory;
 
-		params = {
-			rid = {
-				value = arguments.id, sqltype = 'integer'
-			}
-		};
+    variables.defaultOptions = {
+      datasource = application.datasource
+    };
 
-		result = queryExecute( sql, params, variables.defaultOptions );
+    return this;
 
-		role = variables.beanFactory.getBean('roleBean');
+  }
 
-		if (result.recordcount) {
-		
-			role.setRole_id( result.role_id[1] );
-			role.setName( result.name[1] );
-		
-		}
+  function get( id ) {
 
-		return role;
-	}
-	
-	function list() {
-		
-		user = {};
+    var sql = '
+      SELECT r.*
+      FROM "pRoles" r
+      WHERE r.role_id = :rid
+    ';
 
-		sql = '
-			SELECT r.*
-			FROM "pRoles" r
-			ORDER BY r.role_id ASC
-		';
+    var params = {
+      rid = {
+        value = arguments.id, sqltype = 'integer'
+      }
+    };
 
-		params = {};
+    var result = QueryExecute( sql, params, variables.defaultOptions );
 
-		result = queryExecute( sql, params, variables.defaultOptions );
+    var role = variables.beanFactory.getBean('roleBean');
 
-		roles = {};
+    if ( result.recordcount ) {
 
-		for ( i = 1; i lte result.recordcount; i++ ) {
-			role = variables.beanFactory.getBean('roleBean');
-			
-			role.setRole_Id( result.role_id[i] );
-			role.setName( result.name[i] );
+      role.setRole_id( result.role_id[1] );
+      role.setName( result.name[1] );
 
-			roles[role.getRole_id()] = role;
-		}
-
-		return roles;
     }
-	
+
+    return role;
+
+  }
+
+  function list() {
+
+    var sql = '
+      SELECT r.*
+      FROM "pRoles" r
+      ORDER BY r.role_id ASC
+    ';
+
+    var params = {};
+
+    var result = QueryExecute( sql, params, variables.defaultOptions );
+
+    var roles = {};
+
+    for ( var i = 1; i <= result.recordcount; i++ ) {
+
+      var role = variables.beanFactory.getBean('roleBean');
+
+      role.setRole_Id( result.role_id[i] );
+      role.setName( result.name[i] );
+
+      roles[role.getRole_id()] = role;
+
+    }
+
+    return roles;
+
+  }
+
 }

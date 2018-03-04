@@ -33,157 +33,230 @@ Gold
 
 */
 .glyphicon-large {
-	font-size: 42px;
+  font-size: 42px;
+}
+
+.btn-tile .glyphicon {
+  font-size: 84px;
 }
 
 .glyphicon-money:before {
-	font-size: 16px;
-	font-weight: 700;
-	content: "$";
+  content: "$";
+  font-family: 'Days One', sans-serif;
+}
+
+.dollar-large {
+  font-size: 48px;
+  font-weight: 700;
 }
 
 html, body { 
-	height: 120%;	/* FIXME: scrolling now wacked out! Sometimes too much, other times too little! */
-	padding-top: 25px;	/* to consider for the fixed nav */
+  height: 120%; /* FIXME: scrolling now wacked out! Sometimes too much, other times too little! */
+  padding-top: 25px;  /* to consider for the fixed nav */
 
-	background-color: #fff;
-	color: #171717;	/* dd-black */
+  background-color: #fff;
+  color: #171717; /* dd-black */
+  font-family: 'Nunito', sans-serif;
+  font-size: 21px;
+  font-weight: 400;
 }
 
 hr {
-	border-top: 1px solid #171717;
+  border-top: 1px solid #171717;
 }
 
 p {
-	font-size: 16px;
+  font-size: 21px;
 }
 
-.nav-tabs a {
-	color: #000;
-	font-weight: 700;
+th > p,ol,ul {
+  font-weight: 400;
 }
-
-@media screen and (max-width: 480px) {
-	html, body {
-		height: 130%;
-		padding-top: 22px;
-	}
-
-	p {
-		font-size: 42px;
-	}
-}
-
-
-
 
 /* the money font */
 h1, h2, h3 {
-	font-family: 'Ultra', serif;
-	margin: 0.5em;
-	opacity: 0.9;
+  font-family: 'Ultra', serif;
+  margin: 0.5em;
+  opacity: 0.9;
 }
 
 /* H1: Look at the no. '20' in the upper left corner of a 20 dollar bill */
 h1 {
-	font-size: 62px;
+  font-size: 62px;
 
-   	-webkit-text-fill-color: #e0e9dd;
-	-webkit-text-stroke-width: 2px;
-	-webkit-text-stroke-color: #171717;
+  -webkit-text-fill-color: #e0e9dd;
+  -webkit-text-stroke-width: 2px;
+  -webkit-text-stroke-color: #171717;
 
-	text-shadow:
-		3px 3px 0 #000,
-		-1px -1px 0 #000,
-		1px -1px 0 #000,
-		-1px 1px 0 #000,
-		1px 1px 0 #000
+  text-shadow:
+    3px 3px 0 #000,
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000
 }
 
 /* H2: like H1, but with a horizontal line fill */
 /* Look at 'the united states of america' text in the upper right quadrant of a 20 dollar bill */
 h2 {
-	font-size: 46px;
+  font-size: 46px;
 
-	background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%,#ffffff), color-stop(100%, #171717));
-	background-image: repeating-linear-gradient(to bottom,
-    	#ffffff,
-    	#171717 1%,
-    	#ffffff 3%);
+  background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%,#ffffff), color-stop(100%, #171717));
+  background-image: repeating-linear-gradient(to bottom,
+      #ffffff,
+      #171717 1%,
+      #ffffff 3%);
 
-	-webkit-background-clip: text;
-	-webkit-text-fill-color: transparent;
-	
-	-webkit-text-stroke-width: 2px;
-	-webkit-text-stroke-color: #171717;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  
+  -webkit-text-stroke-width: 2px;
+  -webkit-text-stroke-color: #171717;
 
-	color: #171717;
-	position: relative;
+  color: #171717;
+  position: relative;
 }
 
 /* place a solid (screen) copy of the text behind the gradient text; use *that* text as the drop-shadow */
 h2:after {
-	mix-blend-mode: screen;
-	background: none;
-	display: inline-block;
-	content: attr(shadow-text);
-	position: absolute;	/* FIXME: this aligns to the parent element, not the *actual text*, so center alignments break! */;
-	text-shadow: 5px 5px 0 rgba(0,0,0,1);
-	top: 0;
-	left: 0;
-	z-index: -1;
+  mix-blend-mode: screen;
+  background: none;
+  display: inline-block;
+  content: attr(shadow-text);
+  position: absolute; /* FIXME: this aligns to the parent element, not the *actual text*, so center alignments break! */;
+  text-shadow: 5px 5px 0 rgba(0,0,0,1);
+  top: 0;
+  left: 0;  
+  z-index: -1;
 }
 
 /* H3: the smaller 'The' above 'the united states of america' in the upper right quadrant of the $20 */
 h3 {
-	font-size: 24px;
+  font-size: 24px;
+}
+
+label {
+  font-weight: normal;
 }
 
 /* restyling bootstrap */
 .page-header {
-	border-bottom: 1px solid #171717;
+  border-bottom: 1px solid #171717;
 }
 
 /* input */
 .input-group-addon {
-	background-color: #acc3a2;
-	border: 1px solid #839178;
+  background-color: #acc3a2;
+  border: 1px solid #839178;
+  font-size: 17px;
+}
+
+.input-group {
+  margin-top: 6px;
 }
 
 /* buttons */
+.btn {
+  padding: 12px 14px;
+}
+
 .btn-default {
   color: #1c6a3a;
   background-color: #e0e9dd;
-  border-color: #cccccc;
+  /*border-color: #cccccc;*/
+  border: 2px solid #19482c;
+  border-radius: 8px;
+  text-transform: uppercase;
+  font-weight: 900;
+}
+
+/* button-primary */
+.btn-primary {
+  color: #fff;
+  background-color: #1c6a3a;
+  /*border-color: #cccccc;*/
   border: 2px solid #171717;
   border-radius: 8px;
   text-transform: uppercase;
-  font-weight: 700;
+  font-weight: 900;
+  letter-spacing: 2px;
+}
+
+.btn.btn-sm {
+  padding: 5px 10px;
+}
+
+.btn-tile {
+  margin: 8px 8px 8px 8px;
+  font-size: 28px;
+  line-height: 1.03;
+  width: 300px;
+  height: 220px;
 }
 
 .btn-default[disabled] {
-	background-color: #ffffff; /* bootstrap default */
-	border-color: #cccccc; /* boostrap default */
-	color: #839178;
+  background-color: #ffffff; /* bootstrap default */
+  border-color: #cccccc; /* boostrap default */
+  color: #839178;
 }
 
 /* glyphs */
 .glyphicon {
-	color: #19482c;
+  color: #19482c;
+  top: 2px;
 }
 
 /* glyphs that specifically show up on buttons */
 .btn > .glyphicon {
-	color: #D2691E;
+  color: #D2691E;
 }
 
 /* glyphs in the fixed nav */
 .navbar-nav > li > a > .glyphicon {
-	color: #fff;
+  color: #fff;
+}
+
+/* nav */
+.navbar-inverse {
+  background-color: #1c6a3a;
+  border-color: #000;
+  /* border-top: 2px; */
+}
+
+.navbar-inverse a {
+  color: #fff;
+}
+
+.navbar-inverse .navbar-nav > .active > a {
+  color: #D2691E;
+  background-color: #e0e9dd;
+}
+
+.navbar-inverse .navbar-nav > .active > a > .glyphicon {
+  color: #D2691E;
+}
+
+.navbar-inverse .navbar-toggle {
+  border-color: #fff;
+}
+
+.navbar-inverse .navbar-toggle .icon-bar {
+  background-color: #e0e9dd;
+}
+
+/* nav tabs */
+.nav-tabs > li > a {
+  color: #000;
+  font-weight: 700;
+}
+
+.nav-tabs > li.active > a {
+  color: #19482c;
+  font-weight: 700;
 }
 
 .btn[disabled] > .glyphicon {
-	color: #dcc9b6;
+  color: #dcc9b6;
 }
 
 /* tables with alternating rows */
@@ -200,15 +273,44 @@ h3 {
     border: 2px solid #171717;
 }
 
+.panel table > thead > tr > th {
+  background: #fff;
+}
+
 .panel-default
 {
-	border-color: #171717;
+  border-color: #171717;
+}
+
+.panel > .nav-tabs > li > a {
+  background-color: #acc3a2;
+}
+
+.panel > .nav-tabs > li.active > a {
+  background-color: #e0e9dd;
+  color: #d2691e;
+}
+
+.panel > .nav-tabs > li > a:hover {
+  background-color: #fff;
 }
 
 /* form fields */
+.form-horizontal .control-label {
+  padding-top: 0px;
+}
+
 .form-control {
-	color: #1c6a3a;
-	font-weight: 600;
+  color: #1c6a3a;
+  font-weight: 700;
+  height: 38px;
+}
+
+.form-group-lg > .input-group > .input-group-addon {
+  font-size: 20px;
+}
+.form-group-lg > .input-group > input[type="text"] {
+  font-size: 20px;
 }
 
 /* strike */
@@ -231,7 +333,7 @@ h3 {
     top: 50%;
     width: 9999px;
     height: 1px;
-    background: #171717;	/* dd-black */
+    background: #171717;  /* dd-black */
 }
 
 .strike > span:before {
@@ -247,215 +349,364 @@ h3 {
 /* FIXME: I have 0 confidence in this ad destkop/mobile code */
 /* mobile ads */
 #top-banner {
-	position: fixed;
-	left:0;
-	bottom: 0;
-	text-align: center;
-	width: 320px;
-	height: 100px;
-	z-index: 999;
-	background-color: transparent;
+  position: fixed;
+  left:0;
+  bottom: 0;
+  text-align: center;
+  width: 320px;
+  height: 100px;
+  z-index: 999;
+  background-color: transparent;
 }
 
 /* default-mobile first: smallest screens (up to 800px); */
 .responsive_ad {
-	width: 320px;
-	height: 100px;
+  width: 320px;
+  height: 100px;
 }
 
-/* last, screen widths up 800px and wider (desktop) */
-@media (min-width: 800px) {
-	.responsive_ad {
-		width: 728px;
-		height: 90px;
-	}
+
+
+/* home styles */
+
+.section-inner {
+  display: block;
+  padding: 40px;
+  max-width: 980px;
+  margin: 0 auto;
 }
 
-@media (min-width: 800px) {
-	#top-banner {
-		position: relative;
-		border-bottom: 1px solid #fff;
-		bottom: inherit;
-		text-align: center;
-		width: 100%;
-		height: 98px;
-		padding-top: 4px;
-		padding-bottom: 4px;
-		background-color: #171717;
-		color: #fff;
-	}
+/*
+1. focus
+2. security
+3. fear
+4. privacy
+5. support
+
+*/
+
+/* all tiles */
+.splash-icon {
+  background-position: 0 -233px;
+  vertical-align: middle;
+  height: 185px;
+  background-size: 1750px;
+  width: 345px;
+}
+
+/* left-text */
+
+.text {
+  vertical-align: middle;
+  display: inline-block;
+  width: 520px;
+  padding: 0 30px 0 0;
+}
+
+/* right-tiles */
+.section-inner .focus-icon,
+.section-inner .fear-icon,
+.section-inner .support-icon {
+  width: 330px;
+  height: 220px;
+  border: 2px solid #fff;
+  border-radius: 6px;
+}
+
+/* left tiles */
+.section-inner .security-icon, 
+.section-inner .privacy-icon {
+  width: 330px;
+  height: 220px;
+  background-size: 674px;
+  background-position: 0 -270px;
+  border: 2px solid #e5e5e5;
+  border-radius: 6px;
+}
+
+/* right-text */
+
+.text-other {
+  vertical-align: middle;
+  display: inline-block;
+  width: 520px;
+  padding: 0 0 0 30px;
+}
+
+/* the first section is padded down below the welcome interface */
+.about {
+  padding-top: 700px;
+}
+
+/* the following section is relative */
+.focus, .fear, .support {
+  position: relative;
+  top: 0;
+  background-color: #e0e9dd;
+}
+
+/* the tiles themselves */
+.focus-icon {
+  top: 0;
+  display: inline-block;
+  background-image: url(/path/to/img);
+}
+
+.security-icon {
+  top: 0;
+  display: inline-block;
+  background-image: url(/path/to/img);
+}
+
+.fear-icon {
+  top: 0;
+  display: inline-block;
+  background-image: url(/path/to/img);
+}
+
+.privacy-icon {
+  top: 0;
+  display: inline-block;
+  background-image: url(/path/to/img);
+}
+
+.support-icon {
+  top: 0;
+  display: inline-block;
+  background-image: url(/path/to/img);
+}
+
+/* footer section */
+.footer {
+  top: 0;
+  bottom: 0;
+  color: #fff;
+  background-color: #1c6a3a;
 }
 
 /* the panning functionality */
 .pan-perspective {
-	margin-top: 11px;
-	position: relative;
-	width: 100%;
-	height: 100%;
-	-webkit-perspective: 1200px;
-	-moz-perspective: 1200px;
-	perspective: 1200px;
+  margin-top: 11px;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  -webkit-perspective: 1200px;
+  -moz-perspective: 1200px;
+  perspective: 1200px;
 }
 
 .pan-page {
-	width: 100%;
-	height: 100%;
-	position: absolute;
-	top: 0;
-	left: 0;
-	visibility: hidden;
-	overflow: hidden;
-	-webkit-backface-visibility: hidden;
-	-moz-backface-visibility: hidden;
-	backface-visibility: hidden;
-	-webkit-transform: translate3d(0, 0, 0);
-	-moz-transform: translate3d(0, 0, 0);
-	transform: translate3d(0, 0, 0);
-	-webkit-transform-style: preserve-3d;
-	-moz-transform-style: preserve-3d;
-	transform-style: preserve-3d;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  visibility: hidden;
+  overflow: hidden;
+  -webkit-backface-visibility: hidden;
+  -moz-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: translate3d(0, 0, 0);
+  -moz-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+  -webkit-transform-style: preserve-3d;
+  -moz-transform-style: preserve-3d;
+  transform-style: preserve-3d;
 }
 
 .pan-page-current,
 .no-js .pan-page {
-	visibility: visible;
-	z-index: 1;
+  visibility: visible;
+  z-index: 1;
 }
 
 .no-js body {
-	overflow: auto;
+  overflow: auto;
 }
 
 .pan-page-ontop {
-	z-index: 999;
+  z-index: 999;
 }
 
 /* Triggers (menu and button) */
 
 .pan-triggers {
-	position: absolute;
-	width: 300px;
-	z-index: 999999;
-	top: 12%;
-	left: 50%;
-	margin-top: 130px;
-	-webkit-transform: translateX(-50%);
-	-moz-transform: translateX(-50%);
-	-ms-transform: translateX(-50%); 
-	transform: translateX(-50%);
+  position: absolute;
+  width: 300px;
+  z-index: 999999;
+  top: 12%;
+  left: 50%;
+  margin-top: 130px;
+  -webkit-transform: translateX(-50%);
+  -moz-transform: translateX(-50%);
+  -ms-transform: translateX(-50%); 
+  transform: translateX(-50%);
 }
 
 .no-js .pan-triggers {
-	display: none;
+  display: none;
 }
 
 .pan-touch-button {
-	border: none;
-	font-size: 13px;
-	font-weight: 700;
-	text-transform: uppercase;
-	margin: 10px 0 20px;
-	padding: 0px 20px;
-	line-height: 50px;
-	height: 50px;
-	letter-spacing: 1px;
-	width: 100%;
-	cursor: pointer;
-	display: block;
-	font-family: 'Lato', Calibri, Arial, sans-serif;
-	box-shadow: 0 3px 0 rgba(0,0,0,0.1);
-	-webkit-touch-callout: none;
-	-webkit-user-select: none;
-	-khtml-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin: 10px 0 20px;
+  padding: 0px 20px;
+  line-height: 50px;
+  height: 50px;
+  letter-spacing: 1px;
+  width: 100%;
+  cursor: pointer;
+  display: block;
+  font-family: 'Lato', Calibri, Arial, sans-serif;
+  box-shadow: 0 3px 0 rgba(0,0,0,0.1);
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .pan-touch-button {
-	background: #fff;
-	color: #aaa;
+  background: #fff;
+  color: #aaa;
 }
 
 .pan-touch-button:active {
-	box-shadow: 0 1px 0 rgba(0,0,0,0.1);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.1);
 }
 
 .pan-message {
-	display: none;
-	position: absolute;
-	z-index: 99999;
-	bottom: 0;
-	left: 0;
-	width: 100%;
-	background: #da475c;
-	color: #fff;
-	text-align: center;
+  display: none;
+  position: absolute;
+  z-index: 99999;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #da475c;
+  color: #fff;
+  text-align: center;
 }
 
 .pan-message p {
-	margin: 0;
-	line-height: 60px;
-	font-size: 26px;
-}
-
-@media screen and (max-width: 47.4375em) {
-	.pan-page h1 {
-		font-size: 3em;
-	}
-
+  margin: 0;
+  line-height: 60px;
+  font-size: 26px;
 }
 
 /* animations */
 
 .pan-moveToLeft {
-	-webkit-animation: moveToLeft .6s ease both;
-	animation: moveToLeft .6s ease both;
+  -webkit-animation: moveToLeft .6s ease both;
+  animation: moveToLeft .6s ease both;
 }
 
 .pan-moveFromLeft {
-	-webkit-animation: moveFromLeft .6s ease both;
-	animation: moveFromLeft .6s ease both;
+  -webkit-animation: moveFromLeft .6s ease both;
+  animation: moveFromLeft .6s ease both;
 }
 
 .pan-moveToRight {
-	-webkit-animation: moveToRight .6s ease both;
-	animation: moveToRight .6s ease both;
+  -webkit-animation: moveToRight .6s ease both;
+  animation: moveToRight .6s ease both;
 }
 
 .pan-moveFromRight {
-	-webkit-animation: moveFromRight .6s ease both;
-	animation: moveFromRight .6s ease both;
+  -webkit-animation: moveFromRight .6s ease both;
+  animation: moveFromRight .6s ease both;
 }
 
 @-webkit-keyframes moveToLeft {
-	from { }
-	to { -webkit-transform: translateX(-100%); }
+  from { }
+  to { -webkit-transform: translateX(-100%); }
 }
 @keyframes moveToLeft {
-	from { }
-	to { -webkit-transform: translateX(-100%); transform: translateX(-100%); }
+  from { }
+  to { -webkit-transform: translateX(-100%); transform: translateX(-100%); }
 }
 
 @-webkit-keyframes moveFromLeft {
-	from { -webkit-transform: translateX(-100%); }
+  from { -webkit-transform: translateX(-100%); }
 }
 @keyframes moveFromLeft {
-	from { -webkit-transform: translateX(-100%); transform: translateX(-100%); }
+  from { -webkit-transform: translateX(-100%); transform: translateX(-100%); }
 }
 
 @-webkit-keyframes moveToRight { 
-	from { }
-	to { -webkit-transform: translateX(100%); }
+  from { }
+  to { -webkit-transform: translateX(100%); }
 }
 @keyframes moveToRight { 
-	from { }
-	to { -webkit-transform: translateX(100%); transform: translateX(100%); }
+  from { }
+  to { -webkit-transform: translateX(100%); transform: translateX(100%); }
 }
 
 @-webkit-keyframes moveFromRight {
-	from { -webkit-transform: translateX(100%); }
+  from { -webkit-transform: translateX(100%); }
 }
 @keyframes moveFromRight {
-	from { -webkit-transform: translateX(100%); transform: translateX(100%); }
+  from { -webkit-transform: translateX(100%); transform: translateX(100%); }
+}
+
+/* mobile */
+@media screen and (max-width: 480px) {
+  html, body {
+    height: 130%;
+    padding-top: 22px;
+    font-size: 18px;
+  }
+
+  p {
+    font-size: 18px;
+  }
+
+  h1 {
+    font-size: 40px;
+  }
+
+  h2 {
+    font-size: 36px;
+  }
+
+  h3 {
+    font-size: 19px;
+  }
+
+  .btn .glyphicon {
+    top: 0px;
+  }
+
+  .btn-label {
+    display: none;
+  }
+
+  .input-group {
+    margin-top: 2px;
+  }
+}
+
+/* last, screen widths up 800px and wider (desktop) */
+@media (min-width: 800px) {
+  .responsive_ad {
+    width: 728px;
+    height: 90px;
+  }
+}
+
+@media (min-width: 800px) {
+  #top-banner {
+    position: relative;
+    border-bottom: 1px solid #fff;
+    bottom: inherit;
+    text-align: center;
+    width: 100%;
+    height: 98px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    background-color: #1c6a3a;
+    color: #fff;
+  }
 }

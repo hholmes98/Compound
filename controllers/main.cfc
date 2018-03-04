@@ -1,108 +1,67 @@
-component accessors = true { 
+component accessors = true {
 
-	property framework;
-	property cardservice;
-	property userservice;
+  property cardservice;
 
-	function init( fw ) {
+  function init( fw ) {
 
-        variables.fw = fw;
+    variables.fw = fw;
 
-    }
+  }
 
-    function password( rc ) {
+  public void function get( struct rc ) {
 
-        rc.id = session.auth.user.getId();
-        
-    }
+    var cardbean = cardservice.get( arguments.rc.id );
 
-    function change( rc ) {
-        
-        rc.user = variables.userService.get( rc.id );
-        rc.message = variables.userService.checkPassword( argumentCollection = rc );
-        
-        if ( !arrayIsEmpty( rc.message ) ) {
-            variables.fw.redirect( "main.password", "message" );
-        }
-        
-        var newPasswordHash = variables.userService.hashPassword( rc.newPassword );
-        
-        rc.passwordHash = newPasswordHash.hash;
-        rc.passwordSalt = newPasswordHash.salt;
-        
-        // this will update any user fields from RC so it's a bit overkill here
-        variables.fw.populate( cfc = rc.user, trim = true );
+    /* consider:
 
-        variables.userService.save( rc.user );
-        
-        rc.message = ["Your password was changed"];
-        
-        variables.fw.redirect( "main", "message" );
-    }
+    https://docs.angularjs.org/api/ng/service/$http#jsonp
 
+    A JSON vulnerability allows third party website to turn your JSON resource URL into JSONP request under some conditions. To counter this your server can prefix all JSON requests with following string ")]}',\n". AngularJS will automatically strip the prefix before processing it as JSON.
 
-    /*
-	public void function default( struct rc ) {
-		
-		location(url:"index.html", addtoken:false);
-	
-	}
-	*/
+    For example if your server needs to return:
 
-	public void function get( struct rc ) {
+    ['one','two']
+    which is vulnerable to attack, your server can return:
 
-		var cardbean = cardservice.get( arguments.rc.id );
+    )]}',
+    ['one','two']
+    AngularJS will strip the prefix, before processing the JSON.
+    */
 
-		/* consider:
+    variables.fw.renderdata( 'JSON', cardbean );
 
-		https://docs.angularjs.org/api/ng/service/$http#jsonp
+  }
 
-		A JSON vulnerability allows third party website to turn your JSON resource URL into JSONP request under some conditions. To counter this your server can prefix all JSON requests with following string ")]}',\n". AngularJS will automatically strip the prefix before processing it as JSON.
+  public void function delete( struct rc ) {
 
-		For example if your server needs to return:
+    var ret = cardservice.delete( arguments.rc.card_id );
 
-		['one','two']
-		which is vulnerable to attack, your server can return:
+    variables.fw.renderdata( 'JSON', ret );
 
-		)]}',
-		['one','two']
-		AngularJS will strip the prefix, before processing the JSON.
-		*/
+  }
 
-		framework.renderdata("JSON", cardbean);
+  public void function list( struct rc ) {
 
-	}
+    var cards = cardservice.list( arguments.rc.id );
 
-	public void function delete( struct rc ) {
-		
-		var ret = cardservice.delete( arguments.rc.card_id );
-		
-		framework.renderdata("JSON", ret);
-	
-	}
+    variables.fw.renderdata( 'JSON', cards );
 
-	public void function list( struct rc ) {
-		
-		var cards = cardservice.list( arguments.rc.id );
+  }
 
-		framework.renderdata("JSON", cards);
-	
-	}
+  public void function save( struct rc ) {
 
-	public void function save( struct rc ) {
+    var ret = cardservice.save( arguments.rc );
 
-		var ret = cardservice.save( arguments.rc );
+    variables.fw.renderdata( 'JSON', ret );
 
-		framework.renderdata("JSON", ret);
-	
-	}
+  }
 
-	public void function setAsEmergency( struct rc ) {
+  public void function setAsEmergency( struct rc ) {
 
-		var ret = cardservice.setAsEmergency( arguments.rc.eid, arguments.rc.uid );
+    var ret = cardservice.setAsEmergency( arguments.rc.eid, arguments.rc.uid );
 
-		framework.renderdata("JSON", ret);
-	
-	}	
+    variables.fw.renderdata( 'JSON', ret );
+
+  }
 
 }

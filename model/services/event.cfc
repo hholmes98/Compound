@@ -1,99 +1,111 @@
-//event.cfc
-component accessors=true {
+// model/services/event
+component accessors = true {
 
-	public any function saveEvents( struct cards ) {
+  public any function init( beanFactory ) {
 
-		var i=0;
-		var sql=0;
-		var result=0;
-		var params={};
+    variables.beanFactory = beanFactory;
 
-		sql = '
-			INSERT INTO "pEvents" (
-				card_id,				
-				card_label,
-				balance,
-				min_payment,
-				interest_rate,
-				is_hot,
-				is_emergency,
-				calculated_payment,
-				pay_date,
-				user_id
-			) VALUES
-		';
+    variables.defaultOptions = {
+      datasource = application.datasource
+    };
 
-		for ( card in arguments.cards ) {
-			sql = sql & '(
-				#arguments.cards.getCard_id()#,
-				''#arguments.cards.getCard_label()#'',
-				#arguments.cards.getBalance()#,
-				#arguments.cards.getMin_payment()#,
-				#arguments.cards.getInterest_rate()#,
-				#arguments.cards.getIs_hot()#,
-				#arguments.cards.getIs_emergency()#,
-				#arguments.cards.getCalculated_payment()#,
-				#arguments.cards.getPay_date()#,
-				#arguments.cards.getUser_id()#
-			)';
+    return this;
 
-			sql = sql & ',';
-		}
+  }
 
-		sql = Left( sql, Len(sql)-1 ); // trim trailing comma off
-		sql = sql & ';'; 			// add a semi-colon to the end
+  public any function saveEvents( struct cards ) {
 
-		result = queryExecute( sql, params, variables.defaultOptions );
+    var i = 0;
+    var sql = 0;
+    var result = 0;
+    var params = {};
 
-		return 0;
-	}
+    var sql = '
+      INSERT INTO "pEvents" (
+        card_id,
+        card_label,
+        balance,
+        min_payment,
+        interest_rate,
+        is_hot,
+        is_emergency,
+        calculated_payment,
+        pay_date,
+        user_id
+    ) VALUES
+    ';
 
-	public any function dbSaveEvents( query plan ) {
+    for ( card in arguments.cards ) {
+      sql = sql & '(
+        #arguments.cards.getCard_id()#,
+        ''#arguments.cards.getCard_label()#'',
+        #arguments.cards.getBalance()#,
+        #arguments.cards.getMin_payment()#,
+        #arguments.cards.getInterest_rate()#,
+        #arguments.cards.getIs_hot()#,
+        #arguments.cards.getIs_emergency()#,
+        #arguments.cards.getCalculated_payment()#,
+        #arguments.cards.getPay_date()#,
+        #arguments.cards.getUser_id()#
+      )';
+      sql = sql & ',';
+    }
 
-		var i=0;
-		var sql=0;
-		var result=0;
-		var params={};
+    sql = Left( sql, Len(sql)-1 ); // trim trailing comma off
+    sql = sql & ';';      // add a semi-colon to the end
 
-		sql = '
-			INSERT INTO "pEvents" (
-				card_id,				
-				card_label,
-				balance,
-				min_payment,
-				interest_rate,
-				is_hot,
-				is_emergency,
-				calculated_payment,
-				pay_date,
-				user_id
-			) VALUES
-		';
+    var result = queryExecute( sql, params, variables.defaultOptions );
 
-		for (i=1; i <= arguments.plan.recordcount; i++) {
-			sql = sql & '(
-				#arguments.plan.card_id[i]#,
-				''#arguments.plan.card_label[i]#'',
-				#arguments.plan.balance[i]#,
-				#arguments.plan.min_payment[i]#,
-				#arguments.plan.interest_rate[i]#,
-				#arguments.plan.is_hot[i]#,
-				#arguments.plan.is_emergency[i]#,
-				#arguments.plan.calculated_payment[i]#,
-				#arguments.plan.pay_date[i]#,
-				#arguments.plan.user_id[i]#
-			)';
+    return 0;
+  }
 
-			if (i < arguments.plan.recordcount) {
-				sql = sql & ',';
-			} 
-		}
+  public any function dbSaveEvents( query plan ) {
 
-		sql = sql & ';';
+    var i=0;
+    var sql=0;
+    var result=0;
+    var params={};
 
-		result = queryExecute( sql, params, variables.defaultOptions );
+    sql = '
+      INSERT INTO "pEvents" (
+        card_id,
+        card_label,
+        balance,
+        min_payment,
+        interest_rate,
+        is_hot,
+        is_emergency,
+        calculated_payment,
+        pay_date,
+        user_id
+      ) VALUES
+    ';
 
-		return 0;
-	}
+    for ( i=1; i <= arguments.plan.recordcount; i++ ) {
+      sql = sql & '(
+        #arguments.plan.card_id[i]#,
+        ''#arguments.plan.card_label[i]#'',
+        #arguments.plan.balance[i]#,
+        #arguments.plan.min_payment[i]#,
+        #arguments.plan.interest_rate[i]#,
+        #arguments.plan.is_hot[i]#,
+        #arguments.plan.is_emergency[i]#,
+        #arguments.plan.calculated_payment[i]#,
+        #arguments.plan.pay_date[i]#,
+        #arguments.plan.user_id[i]#
+      )';
+
+      if ( i < arguments.plan.recordcount ) {
+        sql = sql & ',';
+      }
+    }
+
+    sql = sql & ';';
+
+    var result = QueryExecute( sql, params, variables.defaultOptions );
+
+    return 0;
+
+  }
 
 }

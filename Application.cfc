@@ -1,94 +1,148 @@
-component extends="framework.one" {
-	
-	this.name = "ddApp";
-	this.sessionManagement = true;
-	this.sessionTimeout = createTimeSpan(0, 0, 20, 0);
-	this.applicationTimeout = createTimeSpan(1, 0, 0, 0);
+component extends = "framework.one" {
 
-	variables.framework = {
-        
-        unhandledExtensions = "cfc,map,css,js,html",
-        
-        unhandledPaths = "/fonts",
-		
-		generateSES = 'true',
+  this.name = "ddApp";
+  this.sessionManagement = true;
+  this.sessionTimeout = CreateTimeSpan(0, 0, 20, 0);
+  this.applicationTimeout = CreateTimeSpan(1, 0, 0, 0);
 
-		home = 'debt',
-		
-		routes = [ //Just for fun.....
-		  { "$GET/card/user_id/:user_id" = "/main/list/id/:user_id" },
-		  { "$GET/card/:id" = "/main/get/id/:id" },
-		  { "$DELETE/card/:card_id" = "/main/delete/card_id/:card_id" },
-		  { "$POST/card/eid/:eid/uid/:uid" = "/main/setAsEmergency/eid/:eid/uid/:uid" },
-		  { "$POST/card/" = "/main/save" },
-		  { "$GET/prefs/uid/:uid" = "/prefs/get/uid/:uid" },
-		  { "$POST/prefs/freq/:freq/uid/:uid" = "/prefs/save/freq/:freq/uid/:uid" },
-		  { "$POST/prefs/budget/:budget/uid/:uid" = "/prefs/save/budget/:budget/uid/:uid" },
-		  { "$GET/plan/sched/:user_id" = "/plan/journey/user_id/:user_id" },
-		  { "$GET/plan/events/:user_id" = "/plan/schedule/user_id/:user_id" },
-		  { "$GET/plan/:user_id" = "/plan/list/user_id/:user_id" },
-		  { "$DELETE/plan/:user_id" = "/plan/delete/user_id/:user_id" },
-		  { "$GET/debt/sched/" = "/debt/journey/" },
-		],
-		
-		reloadApplicationOnEveryRequest = true // set this to false when in PROD!
+  variables.framework = {
 
-	};
-	
-	function setupApplication() {
-		application.admin_email = 'support@some-website.com';
-		application.site_domain = 'some-website.com';
+    unhandledExtensions = "cfc,map,css,js,html",
+    unhandledPaths = "/fonts",
 
-		application.app_name = 'Compound (Alpha v0.9)';
+    generateSES = 'true',
 
-		// locale
-		application.default_locale = 'EN_us';
+    home = 'debt',
 
-		application.locale['EN_us'] =  StructNew();
-		application.locale['EN_us']['name'] = 'Compound';
+    environments = {
 
- 		// a single hot card and/or an emergency card *must* stay over this percentage of the budget.
-		application.emergency_balance_threshold = 0.33;
+        // development vars
+        development = {
+          reloadApplicationOnEveryRequest = true,
+          error = "main.detailederror"
+        },
 
- 		// in a given month, never allow a payment to drop the balance of a card below this number
- 		// (to prevent things like carrying an .11 cent balance)
-		application.min_card_threshold = 10; // hey, 10 bucks is 10 bucks.
+        // production vars
+        production = {
+          reloadApplicationOnEveryRequest = false,
+          error = "main.oops",
+          password = "foobar" // default, overridden by config
+        }
+    },
 
- 		// when this is true, I consistently add on several more months to the payout plan, as hot card
- 		// payments are spread more thinly, month-to-month.
-		application.consider_interest_when_calculating_payments = false;
+    routes = [
+      { "$GET/card/user_id/:user_id" = "/main/list/id/:user_id" },
+      { "$GET/card/:id" = "/main/get/id/:id" },
+      { "$DELETE/card/:card_id" = "/main/delete/card_id/:card_id" },
+      { "$POST/card/eid/:eid/uid/:uid" = "/main/setAsEmergency/eid/:eid/uid/:uid" },
+      { "$POST/card/" = "/main/save" },
+      { "$GET/prefs/uid/:uid" = "/prefs/get/uid/:uid" },
+      { "$POST/prefs/freq/:freq/uid/:uid" = "/prefs/save/freq/:freq/uid/:uid" },
+      { "$POST/prefs/budget/:budget/uid/:uid" = "/prefs/save/budget/:budget/uid/:uid" },
+      { "$GET/plan/miles/:user_id" = "/plan/journey/user_id/:user_id" },
+      { "$GET/plan/events/:user_id" = "/plan/schedule/user_id/:user_id" },
+      { "$GET/plan/:user_id" = "/plan/list/user_id/:user_id" },
+      { "$DELETE/plan/:user_id" = "/plan/delete/user_id/:user_id" },
+      { "$GET/debt/miles/" = "/debt/journey/" },
+    ],
 
-		application.start_page = variables.framework.home;	// if you're anonymous/non-authorized, this is where you start
-		application.auth_start_page = 'pay';				// if you're logged-in/authorized, this is where you start
+  };
 
-		application.base_url = CGI.SERVER_NAME;
-		if ( CGI.SERVER_PORT_SECURE ) {
-			application.base_url = "https://" & application.base_url;
-		} else {
-			application.base_url = "http://" & application.base_url;
-		}
-		if ( CGI.SERVER_PORT <> 80 ) {
-			application.base_url = application.base_url & ":" & CGI.SERVER_PORT;
-		}
+  function setupApplication() {
 
-	}
+    var file = FileRead( ExpandPath( '/config/config.cfm') );
+    var conf = XmlParse( file );
 
-	function setupSession() {
-		controller( 'security.session' );
+    application.admin_email = XmlSearch( conf, '//admin/email' )[1].XmlText;
+    application.site_domain = XmlSearch( conf, '//app/domain' )[1].XmlText;
 
-		/* consider
+    application.app_name = XmlSearch( conf, '//app/name' )[1].XmlText & ' (' & XmlSearch( conf, '//app/version' )[1].XmlText & ')';
+    application.show_app_name = XmlSearch( conf, '//app/show' )[1].XmlText;
 
-		https://docs.angularjs.org/api/ng/service/$http#jsonp
+    // locales
+    application.locale = StructNew();
 
-		XSRF is an attack technique by which the attacker can trick an authenticated user into unknowingly executing actions on your website. AngularJS provides a mechanism to counter XSRF. When performing XHR requests, the $http service reads a token from a cookie (by default, XSRF-TOKEN) and sets it as an HTTP header (X-XSRF-TOKEN). Since only JavaScript that runs on your domain could read the cookie, your server can be assured that the XHR came from JavaScript running on your domain. The header will not be set for cross-domain requests.
-		To take advantage of this, your server needs to set a token in a JavaScript readable session cookie called XSRF-TOKEN on the first HTTP GET request. On subsequent XHR requests the server can verify that the cookie matches X-XSRF-TOKEN HTTP header, and therefore be sure that only JavaScript running on your domain could have sent the request. The token must be unique for each user and must be verifiable by the server (to prevent the JavaScript from making up its own tokens). We recommend that the token is a digest of your site's authentication cookie with a salt for added security.
-		The name of the headers can be specified using the xsrfHeaderName and xsrfCookieName properties of either $httpProvider.defaults at config-time, $http.defaults at run-time, or the per-request config object.
-		In order to prevent collisions in environments where multiple AngularJS apps share the same domain or subdomain, we recommend that each application uses unique cookie name.
-		*/
-	}
+    var locales = XmlSearch( conf, '//locales' );
 
-	function setupRequest() {
-		controller( 'security.authorize' );
-	}	
+    for ( var i=1; i <= ArrayLen( locales ); i++ ) {
+
+      var locale = StructNew();
+
+      locale.country = locales[1].XmlChildren[i].XmlAttributes.country;
+      locale.language = locales[1].XmlChildren[i].XmlAttributes.language;
+      locale.code = locales[1].XmlChildren[i].XmlAttributes.language & '-' & locales[1].XmlChildren[i].XmlAttributes.country;
+      locale.name = locales[1].XmlChildren[i].name.XmlText;
+
+      StructInsert( application.locale, locale.code, locale, true );
+
+    }
+
+    // locale
+    application.default_locale = XmlSearch( conf, '//app/locale' )[1].XmlText;
+
+    // datasource
+    application.datasource = XmlSearch( conf, '//app/datasource' )[1].XmlText;
+
+    // a single hot card and/or an emergency card *must* stay over this percentage of the budget.
+    application.emergency_balance_threshold = 0.33;
+
+    // in a given month, never allow a payment to drop the balance of a card below this number 
+    // (to prevent things like carrying an .11 cent balance)
+    application.min_card_threshold = 10; // hey, 10 bucks is 10 bucks.
+
+    // when this is true, I consistently add on several more months to the payout plan, as hot card 
+    // payments are spread more thinly, month-to-month.
+    application.consider_interest_when_calculating_payments = false;
+
+    application.start_page = variables.framework.home;  // if you're anonymous/non-authorized, this is where you start
+    application.auth_start_page = 'pay';        // if you're logged-in/authorized, this is where you start
+
+    application.base_url = CGI.SERVER_NAME;
+
+    if ( CGI.SERVER_PORT_SECURE ) {
+      application.base_url = "https://" & application.base_url;
+    } else {
+      application.base_url = "http://" & application.base_url;
+    }
+
+    if ( CGI.SERVER_PORT <> 80 ) {
+      application.base_url = application.base_url & ":" & CGI.SERVER_PORT;
+    }
+
+    // overrides
+    variables.framework['environments']['production']['password'] = XmlSearch( conf, '//fw1/password' )[1].XmlText;
+
+  }
+
+  function setupSession() {
+
+    controller( 'security.session' );
+
+    /* consider
+
+    https://docs.angularjs.org/api/ng/service/$http#jsonp
+
+    XSRF is an attack technique by which the attacker can trick an authenticated user into unknowingly executing actions on your website. AngularJS provides a mechanism to counter XSRF. When performing XHR requests, the $http service reads a token from a cookie (by default, XSRF-TOKEN) and sets it as an HTTP header (X-XSRF-TOKEN). Since only JavaScript that runs on your domain could read the cookie, your server can be assured that the XHR came from JavaScript running on your domain. The header will not be set for cross-domain requests.
+    To take advantage of this, your server needs to set a token in a JavaScript readable session cookie called XSRF-TOKEN on the first HTTP GET request. On subsequent XHR requests the server can verify that the cookie matches X-XSRF-TOKEN HTTP header, and therefore be sure that only JavaScript running on your domain could have sent the request. The token must be unique for each user and must be verifiable by the server (to prevent the JavaScript from making up its own tokens). We recommend that the token is a digest of your site's authentication cookie with a salt for added security.
+    The name of the headers can be specified using the xsrfHeaderName and xsrfCookieName properties of either $httpProvider.defaults at config-time, $http.defaults at run-time, or the per-request config object.
+    In order to prevent collisions in environments where multiple AngularJS apps share the same domain or subdomain, we recommend that each application uses unique cookie name.
+    */
+  }
+
+  function setupRequest() {
+
+    controller( 'security.authorize' );
+
+  }
+
+  function getEnvironment() {
+
+    if ( FindNoCase( "dev", CGI.SERVER_NAME ) || FindNoCase( "lc", CGI.SERVER_NAME ) ) {
+      return "development";
+    }
+    else 
+      return "production";
+
+  }
 
 }
