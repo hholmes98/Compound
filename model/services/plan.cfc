@@ -3,6 +3,8 @@ component accessors="true" {
 
   property cardservice;
   property preferenceservice;
+  property knapsackservice;
+  property eventservice;
 
   public any function init( beanFactory ) {
 
@@ -168,7 +170,6 @@ component accessors="true" {
     var balance_array = arrayNew(1);
     var top_interest_rate = 0;
 
-
     // new logic to determine hot card:
     // IF
     //   the is_emergency card set (and have a non-zero balance?) THEN SET 
@@ -251,7 +252,7 @@ component accessors="true" {
 
   }
 
-  /* 
+  /*
 
   *********************
   calculatePayments()
@@ -536,10 +537,10 @@ component accessors="true" {
 
   public any function dbCalculatePlan( string user_id, no_cache=false ) {
 
-    var payment_plan  = 0;    
-    var budget      = 0;
-    var deck      = 0;
-    var e_card      = 0;
+    var payment_plan = 0;
+    var budget = 0;
+    var deck = 0;
+    var e_card = 0;
 
     // if cached and cache not expired
     payment_plan = get( arguments.user_id );
@@ -586,37 +587,46 @@ component accessors="true" {
 
   public any function dbCalculatePayments( struct cards, numeric available_budget, boolean use_interest=true, emergency_priority=false ) {
 
-    var i               = 0;
-    var calc_payment        = 0;
-    var total_payments        = 0;
-    var user_id           = 0;
+    var i = 0;
+    var calc_payment = 0;
+    var total_payments = 0;
+    var user_id = 0;
     var hot_card_calculated_payment = 0;
-    var smaller_budget        = 0;
-    var _tmpCard          = 0;
-    var this_interest_rate      = 0;
-    var each_card         = 0;
+    var smaller_budget = 0;
+    var _tmpCard = 0;
+    var this_interest_rate = 0;
+    var each_card = 0;
+    var thirty_day_rule = false;
+    var id_list = '';
 
     // you sent me an empty list of cards
     if ( StructIsEmpty( arguments.cards ) )
       return arguments.cards;
 
-    var user_id     = arguments.cards[ListFirst( StructKeyList( arguments.cards ) )].getUser_Id();
+    var user_id = arguments.cards[ListFirst( StructKeyList( arguments.cards ) )].getUser_Id();
 
     // make a copy of the incoming cards...work with this var locally.
-    var this_deck     = duplicate( arguments.cards );
+    var this_deck = Duplicate( arguments.cards );
 
-    // reset all the calculated payments
     for ( each_card in this_deck ) {
+
+      if ( this_deck[each_card].getBalance() > 0 && this_deck[each_card].getMin_Payment() == 0 )
+        thirty_day_rule = true;
+
+      // reset all the calculated payments
       this_deck[each_card].setCalculated_Payment( 0 );
       this_deck[each_card].setIs_Hot( 0 );
     }
 
     // Get the list of card IDs in this deck (with a balance)
-    var id_list     = cardservice.dbGetNonZeroCardIDs( this_deck );
+    if ( thirty_day_rule )
+      id_list = cardservice.dbGetNonZeroCardIDsWithMinPayment( this_deck );
+    else
+      id_list = cardservice.dbGetNonZeroCardIDs( this_deck );
 
     // WARNING: UNKNOWN REASON
     // if the balance is zero across the user's deck
-    if (id_list == '') {
+    if ( id_list == '' ) {
       return this_deck;
     }
 
@@ -626,8 +636,8 @@ component accessors="true" {
       return this_deck;
 
     // Build a query that sorts these cards so that the hot card is row 1
-    var cardsQry    = cardservice.qryGetNonZeroCardsByUser( user_id, id_list, arguments.emergency_priority );
-    var hot_card_id   = cardsQry.card_id[1];
+    var cardsQry = cardservice.qryGetNonZeroCardsByUser( user_id, id_list, arguments.emergency_priority );
+    var hot_card_id = cardsQry.card_id[1];
 
     // firm up the hot card
     this_deck[hot_card_id].setIs_Hot(1);
@@ -635,7 +645,7 @@ component accessors="true" {
     // 2. Loop over the cards (starting after the hot card), calculating the payment for each card that is not the hot card.
     for ( i=2; i lte cardsQry.recordcount; i++ ) {
 
-      if ( application.consider_interest_when_calculating_payments ) {
+      if ( application.AllowAvalanche ) {
 
         if ( cardsQry.interest_rate[i] > 0 && arguments.use_interest ) {
 
@@ -703,8 +713,6 @@ component accessors="true" {
         this_deck = dbCalculatePayments( this_deck, smaller_budget, true, arguments.emergency_priority );
       } catch (any e) {
         if ( e.errorCode == "ERR_BUDGET_OVERRUN" ) {
-          //writeDump( qSmallerDeck );
-          //writeOutput('SUBCAUGHT/FIXED');         
           this_deck = dbCalculatePayments( this_deck, smaller_budget, false, arguments.emergency_priority );
         } else {
           rethrow;
@@ -772,7 +780,7 @@ component accessors="true" {
     if ( payment < 0 ) {
       Throw( type="Custom", errorCode="ERR_NEGATIVE_CALCULATE_PAYMENT", message="dbCalculatePayment negative value.", detail="dbCalculatePayment produced a negative value.", var={balance:arguments.balance,interest_rate:arguments.interest_rate,target_date:arguments.target_date});
     }
-    
+
     return payment;
 
   }
@@ -793,13 +801,13 @@ component accessors="true" {
 
   public any function dbEvaluateEmergencyCard( struct plan, numeric eid ) {
 
-    var e_card        = cardservice.get( arguments.eid );
-    var uid         = e_card.getUser_Id();
-    var budget        = preferenceservice.getBudget( uid );
-    var card        = 0;
-    var calc_e_payment    = 0;
-    var this_plan     = duplicate( arguments.plan );
-    var new_payment_plan  = 0;
+    var e_card = cardservice.get( arguments.eid );
+    var uid = e_card.getUser_Id();
+    var budget = preferenceservice.getBudget( uid );
+    var card = 0;
+    var calc_e_payment = 0;
+    var this_plan = Duplicate( arguments.plan );
+    var new_payment_plan = 0;
 
     // 1. Does the emergency card have a zero balance? Exit if so.
     if ( e_card.getBalance() == 0 ) {
@@ -851,20 +859,133 @@ component accessors="true" {
   public any function dbCalculateEvent( struct plan, date calculated_for, no_cache=false ) {
 
     // TODO: later, look at the date and get a *portion* of the cached schedule from the db (if it exists)
-    var card    = 0;
-    var this_plan   = duplicate( arguments.plan );
-    
-    //var the_first = CreateDate( Year( arguments.calculated_for ), Month( arguments.calculated_for ), 1 );
+    var card = 0;
+    var this_plan = Duplicate( arguments.plan );
+    var user_id = this_plan[ListFirst(StructKeyList(this_plan))].getUser_Id();
+    var num_columns = 1; // default, for preference = 0|1
+    var the_date = ArrayNew(1); // this will always be populated in reverse order, so the_date[1] should *always* be the *last* pay period of the month.
+
+    //var the_date[1] = CreateDate( Year( arguments.calculated_for ), Month( arguments.calculated_for ), 1 );
+    //var the_date[2] = CreateDate( Year( arguments.calculated_for ), Month( arguments.calculated_for ), 15 );
+    //var the_date[3] = CreateDate( Year( arguments.calculated_for ), Month( arguments.calculated_for ), DaysInMonth( arguments.calculated_for ) );
+
+    //var the_start = the_date[1];
+    //var the_fifteenth = the_date[2];
+    //var the_end = the_date[3];
 
     // by default (which applies to preference=1 and preference=4 {monthly,its complicated}) is to set the pay date
     // to the *last* day of the specified month
-    
-    // TODO: examine the user's preferences, and calculate each card's pay_date.
-    var the_last = CreateDate( Year( arguments.calculated_for ), Month( arguments.calculated_for ), DaysInMonth( arguments.calculated_for ) );
+
+    // 1 or 4
+    the_date[1] = CreateDate( Year( arguments.calculated_for ), Month( arguments.calculated_for ), DaysInMonth( arguments.calculated_for ) );
+    // now the_date.length = 2;
+
+    if ( preferenceservice.getFrequency( user_id ) == 2) { // twice a month
+
+      num_columns = 2;
+
+      the_date[2] = CreateDate( Year( arguments.calculated_for ), Month( arguments.calculated_for ), 15 );
+
+      // now the_date.length = 2;
+
+    } else if ( preferenceservice.getFrequency( user_id ) == 3 ) { // every two weeks
+
+      // TODO: Allow users that specify "every two weeks" to set the "first pay period of the year" -- otherwise, the following calculation is just a guess.
+
+      var result = eventservice.qGetPayPeriodsInMonthOfDate( arguments.calculated_for );
+
+      num_columns = result.recordCount; // might be 2 or 3.
+
+      // updates the_date[] array to be the actual pay period dates, irrespective of # of pay dates in a month.
+      for ( var m=num_columns; m > 0; m-- ) { // walk backwards.
+
+        the_date[m] = result.pay_date[m];
+
+        // the_date.length 2 or 3, depending on month/year.
+
+      }
+
+    }
+
+    /* BEGIN */
+    // adapted from: https://stackoverflow.com/questions/3009146/splitting-values-into-groups-evenly
+    var cpStruct = StructNew();
 
     for ( card in this_plan ) {
 
-      this_plan[card].setPay_Date( the_last );
+      if ( this_plan[card].getCalculated_Payment() > 0 )
+
+        StructInsert( cpStruct, card, this_plan[card].getCalculated_Payment() );
+
+    }
+
+    var totalcp = cardservice.dbCalculateTotalCalculatedPayments( this_plan );
+    var pay_frequency_capacity = totalcp / num_columns;
+    var pay_days = ArrayNew(1);
+
+    for (var a=1; a <= num_columns; a++) {
+
+      if ( a < num_columns && !StructIsEmpty(cpStruct) ) {
+
+        splits = knapsackservice.knapsack( cpStruct, pay_frequency_capacity );
+
+        // if it can't split anything
+        if ( ArrayLen(splits) == 0 ) {
+
+          // put everything into the first index of the array
+          ArrayAppend( pay_days, StructNew() );
+
+          // and clear it out
+          cpStruct = StructNew();
+
+        } else {
+
+          // TODO: Any list should suffice, but will we ever want to prefer one? The longest? The shortest?
+          var chosen = splits[1];
+
+          var thisPay = StructNew();
+          var remains = StructNew();
+
+          for ( key in cpStruct ) {
+            if ( ListFind(chosen, key, ',') ) {
+              StructInsert( thisPay, key, cpStruct[key] );
+            } else {
+              StructInsert( remains, key, cpStruct[key] );
+            }
+          }
+
+          // store what you kept
+          ArrayAppend( pay_days, thisPay );
+
+          // the remains are what's left, so pare cpStruct down
+          cpStruct = remains;
+
+        }
+
+      } else {
+
+        // we don't knapsack the the final entry in the list - we just accept it and carry on.
+        ArrayAppend( pay_days, cpStruct );
+
+      }
+
+    }
+
+    var pay_dates = ArrayReverse(the_date);
+
+    // looping over the pay_days array assures us we'll only use what we *need* from the_dates[], so if we erroneously
+    // assigned a 3rd pay date -- we won't even iterate that far.
+    for ( var p=1; p <= ArrayLen(pay_days); p++ ) {
+
+      for ( var p_card in pay_days[p] ) {
+
+        if ( pay_days[p][p_card] > 0 ) {
+
+          this_plan[p_card].setPay_Date( pay_dates[p] );
+
+        }
+
+      }
 
     }
 
@@ -872,30 +993,29 @@ component accessors="true" {
 
   }
 
-
   /* takes a user and returns a series of events, based on their computed plan, to determine the month-by-month
   details of a payoff */
   public array function dbCalculateSchedule( string user_id ) {
 
     // 0. init
-    var recalculate_plan    = false;
-    var new_payment_plan    = 0;
-    var each_card       = 0;
+    var recalculate_plan = false;
+    var new_payment_plan = 0;
+    var each_card = 0;
     var this_card_next_interest = 0;
-    var this_card_next_balance  = 0;
-    var budget          = preferenceservice.getBudget( arguments.user_id );
+    var this_card_next_balance = 0;
+    var budget = preferenceservice.getBudget( arguments.user_id );
 
     // 1. init an events array
-    var events          = ArrayNew(1);    
+    var events = ArrayNew(1);
 
     // 2. start with today's date
-    var next_date         = Now();
+    var next_date = Now();
 
     // 3. get the user's plan
-    var next_plan         = list( arguments.user_id );
+    var next_plan = list( arguments.user_id );
 
     // 4. convert the plan to an event with calculateEvent()
-    var next_event        = dbCalculateEvent( next_plan, next_date );
+    var next_event = dbCalculateEvent( next_plan, next_date );
 
     // 5. add the event to the events array
     ArrayAppend( events, next_event );
@@ -912,7 +1032,13 @@ component accessors="true" {
       // 8b. loop over every card in next_plan
       for ( each_card in next_plan ) {
 
-        if ( next_plan[each_card].getRemaining_Balance() > 0 ) {
+        // account for the 30 day rule immediately
+        if ( next_plan[each_card].getBalance() > 0 && next_plan[each_card].getMin_Payment() == 0 ) {
+
+          // just calculate a min. payment, leave the balance alone
+          next_plan[each_card].calculateMin_Payment();
+
+        } else if ( next_plan[each_card].getRemaining_Balance() > 0 ) {
 
           // 8bi. calculate the interest for next month
           this_card_next_interest = dbCalculateMonthInterest( next_plan[each_card].getRemaining_Balance(), next_plan[each_card].getInterest_Rate(), next_date );
@@ -929,12 +1055,6 @@ component accessors="true" {
 
           // 8biv. set the new balance on the card in the plan
           next_plan[each_card].setBalance( this_card_next_balance );
-
-          // 8bv. if the card has a balance but no minimum payment (eg. credit that was added to the card *this month*), calc one and set it.
-          if ( next_plan[each_card].getBalance() > 0 && next_plan[each_card].getMin_Payment() == 0 ) {
-              // FIXME: This isn't working
-              next_plan[each_card].setMin_Payment(''); // this is a trick in the card bean that forces a calculated minpayment.
-          }
 
         } else {
 
@@ -976,7 +1096,7 @@ component accessors="true" {
       total_remaining_balance = cardservice.dbCalculateTotalRemainingBalance( next_event );
 
     }
-    
+
     // 9. return the entire events array.
     return events;
 

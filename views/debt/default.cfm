@@ -5,52 +5,51 @@
 
   <div class="container">
 
-    <div class="page-header">
-      <span align="center"><h1><cfoutput>#application.locale[application.default_locale]['name']#</cfoutput></h1></span>
-    </div>
-
     <cfoutput>
 
-    <div align="center">
+    <div class="col-xs-12" align="center">
 
-      <p>
-        <h3>Tell us your debt. We'll tell you the rest.<br/>
-        <br/>
-        Every payment.<br/>
-        <br/>
-        Every date.<br/>
-        <br/>
-        Until you're free.</h3>
-      </p>
+      <font style="font-size: 30px; font-weight: 700;">
+        <div class="header">
+          <span>Tell us your debt.</span> <span>We'll tell you the rest.</span>
+        </div>
+        <div>
+          Every payment.
+        </div>
+        <div>
+          Every date.
+        </div>
+        <div>
+          Until you're free.
+        </div>
+      </font>
 
-      <br/>
+      <div class="col-xs-2"></div>
+      <div class="col-xs-8">
 
-      <table class="table table-bordered table-responsive table-valign-middle">
-        <tbody>
-        <tr>
-          <td><strong>First:</strong> How much can you <b>afford</b>, each month, to apply towards <em>all</em> of your outstanding debt?</td>
-        </tr>
-        <tr>
-          <td>
-            <div class="input-group">
-              <div class="input-group-addon">I'll commit</div>
-              <div class="input-group-addon">$</div>
-              <input class="form-control" type="text" placeholder="(eg. 250.00)" name="budget" />
-              <div class="input-group-addon">a month to decimating my debt.</div>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td align="center"><button type="button" class="btn button btn-primary btn-more"><span class="glyphicon glyphicon-circle-arrow-right"></span> Next: Enter Some Debt</button><br/></td>
-        </tr>
-        <tr>
-          <td colspan="2">&nbsp;</td>
-        </tr>
-        <tr>
-          <td align="center"><button type="button" class="btn button btn-default btn-sm btn-login" ng-click="navigateTo('#buildUrl('login.default')#')"><span class="glyphicon glyphicon-exclamation-sign"></span> I already have an account</button></td>
-        </tr>
-        </tbody>
-      </table>
+        <hr>
+
+        <span class="help-block" id="budget-help-block"><strong>First:</strong> How much can you <b>afford</b>, each month, to apply towards <em>all</em> of your outstanding debt?</span>
+        <div class="form-group form-group-lg">
+          <label class="sr-only" for="budget">Monthly budget allocated to debt payoff (in dollars)</label>
+          <div class="input-group">
+            <div class="input-group-addon">$</div>
+            <input class="form-control" type="text" id="budget" placeholder="(eg. 250.00)" name="budget" />
+            <div class="input-group-addon"> per month.</div>
+          </div>
+        </div>
+        <span>
+          <button type="button" class="btn button btn-primary btn-more"><span class="glyphicon glyphicon-circle-arrow-right"></span> Next: Enter Some Debt</button>
+        </span>
+        <span>
+          <br/>
+          <br/>
+          <br/>
+          <button type="button" class="btn button btn-default btn-sm btn-login" ng-click="navigateTo('#buildUrl('login.default')#')"><span class="glyphicon glyphicon-exclamation-sign"></span> I already have an account</button>
+        </span>
+
+      </div>
+      <div class="col-xs-2"></div>
 
     </div>
 
@@ -67,46 +66,49 @@
 
     <cfoutput>
 
-    <div class="card-content">
+    <div class="card-content col-sm-12" align="center">
 
-      <div align="center">
-        <h3>
-          Debt.<br/><br/>
-          A loan you owe the bank. A balance lingering on a credit card.<br/>
-          We call them <font style="color:gold;">cards</font>, but it's all the same.<br/>
-          Just tell us how much you owe. We'll take it from here.
-        </h3>
-      </div>
+      <h3>Debt.</h3>
 
-      <br/>
+      <p>
+        A loan you owe the bank. A balance lingering on a credit card.<br/>
+        We call them <font style="color:##D2691E;"><strong>cards</strong></font>, but it's all the same to the calculator.<br/>
+        Just tell us how much you owe. We'll take it from here.
+      </p>
 
-      <div class="form-group">
-        <label for="credit-card-balance1" class="col-md-8 control-label"><b>Next:</b> Enter the remaining balance on one of your credit cards/debts:</label>
-        <div class="col-md-4">
-          <div class="input-group">
-            <span class="input-group-addon">$</span>
-            <input class="form-control credit-card-balance" type="text" placeholder="(eg. 3,275.22)" name="credit-card-balance1">
+      <div class="col-sm-2"></div>
+      <div class="col-sm-8">
+
+        <hr>
+
+        <span class="help-block" id="credit-card-balance-help1"><b>Next:</b> Enter the remaining balance on one of your <font style="color:##D2691E;"><strong>cards</strong></font>.<br/><br/></span>
+        <div class="form-group" align="left">
+          <label for="credit-card-balance1" class="col-sm-3 control-label">Balance:</label>
+          <div class="col-sm-7">
+            <div class="input-group">
+              <span class="input-group-addon">$</span>
+              <input class="form-control credit-card-balance" type="text" placeholder="(eg. 3,275.22)" name="credit-card-balance1">
+            </div>
           </div>
         </div>
-      </div>
-      <div class="form-group">
-        <label for="credit-card-label1" class="col-md-8 control-label">Give it a name:</label>
-        <div class="col-md-4">
-            <input class="form-control credit-card-label" type="text" placeholder="(eg. WF checking atm card)" name="credit-card-label1">
+        <div class="form-group" align="left">
+          <label for="credit-card-label1" class="col-sm-3 control-label">Give it a name:</label>
+          <div class="col-sm-7">
+              <input class="form-control credit-card-label" type="text" placeholder="(eg. WF checking atm card)" name="credit-card-label1">
+          </div>
         </div>
-      </div>
-      <div class="form-group">
-        <div class="col-md-offset-8 col-sm-4">
-          <button type="button" class="btn button btn-default btn-sm btn-more"><span class="glyphicon glyphicon-plus"></span> Enter More Debt</button>
+        <div class="form-group" align="left">
+          <div class="col-sm-offset-3 col-sm-7">
+            <button type="button" class="btn button btn-default btn-sm btn-more"><span class="glyphicon glyphicon-plus"></span> Enter More Debt</button>
+          </div>
         </div>
-      </div>
+        <br/>
+        <div align="center">
+          <button type="button" class="btn button btn-primary btn-submit" form="entry"><i class="fas fa-calculator"></i> Show Me The Plan</button>
+        </div>
 
-      <br/>
-      <br/>
-
-      <div align="center">
-        <button type="button" class="btn button btn-primary btn-submit" form="entry"><span class="glyphicon glyphicon-stats"></span> Show Me The Plan</button>
       </div>
+      <div class="col-sm-2"></div>
 
     </div>
 
@@ -182,7 +184,10 @@
   </section>
   <section dir="ltr" class="footer">
     <div class="section-inner">
-      <h3>Decimate your debt.</h3>
+      <cfoutput>
+      <h3>#application.locale[session.auth.locale]['name']#</h3>
+      <h3>#application.locale[session.auth.locale]['motto']#</h3>
+      </cfoutput>
       <button class="btn btn-default" id="returnTop"> Get Started</button>
       <footer id="footer-sitemap">
         <div class="footer-container">

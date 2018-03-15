@@ -14,7 +14,7 @@ component accessors = true {
   public void function default( struct rc ) {
 
     // detect if the user is logged in, and if so, just take them directly to auth_start_page
-    if ( session.auth.isLoggedIn ) {
+    if ( StructKeyExists(session, 'auth') && session.auth.isLoggedIn ) {
       variables.fw.redirect( application.auth_start_page );
     }
 

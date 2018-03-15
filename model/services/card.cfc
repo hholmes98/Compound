@@ -311,7 +311,7 @@ component accessors = true {
 
   }
 
-  public string function dbGetCardIDs( struct cards, require_nonzero_balance=false ) {
+  public string function dbGetCardIDs( struct cards, require_nonzero_balance=false, require_nonzero_min_payment=false ) {
 
     var res = '';
     var card = 0;
@@ -322,7 +322,12 @@ component accessors = true {
         res = ListAppend( res, arguments.cards[card].getCard_Id() );
       } else {
         if ( arguments.cards[card].getBalance() > 0 ) {
-          res = ListAppend( res, arguments.cards[card].getCard_Id() );
+          if ( !arguments.require_nonzero_min_payment ) {
+            res = ListAppend( res, arguments.cards[card].getCard_Id() );
+          } else {
+            if ( arguments.cards[card].getMin_Payment() > 0 )
+              res = ListAppend( res, arguments.cards[card].getCard_Id() );
+          }
         }
       }
 
@@ -335,6 +340,14 @@ component accessors = true {
   public string function dbGetNonZeroCardIDs( struct cards ) {
 
     var res = dbGetCardIDs( arguments.cards, true );
+
+    return res;
+
+  }
+
+  public string function dbGetNonZeroCardIDsWithMinPayment( struct cards ) {
+
+    var res = dbGetCardIDs( arguments.cards, true, true );
 
     return res;
 
@@ -363,6 +376,19 @@ component accessors = true {
     }
 
     return rtot;
+
+  }
+
+  public numeric function dbCalculateTotalCalculatedPayments( struct cards ) {
+
+    var tot = 0;
+    var card = 0;
+
+    for ( card in arguments.cards ) {
+      tot += arguments.cards[card].getCalculated_Payment();
+    }
+
+    return tot;
 
   }
 

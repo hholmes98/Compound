@@ -1,6 +1,8 @@
 // model/services/mail
 component accessors = true {
 
+  variables.nl = chr(13) & chr(10);
+
   function sendPasswordResetEmail( dest_email, key, dest_url ) {
 
     var mailBody = 'Greetings!
@@ -47,6 +49,56 @@ Your friends at ' & application.locale[session.auth.locale]['name'];
         from = application.admin_email,
         subject = "[" & application.locale[session.auth.locale]['name'] & "] New Account" ) {
       WriteOutput(mailBody);
+    }
+
+  }
+
+  function sendError( dest_email, e ) {
+
+    var errorBody = '';
+    var tagBody = '';
+    var msg = "Unknown";
+    var tagCount = 1;
+    var offender = StructNew();
+
+    if ( StructKeyExists(e,'message') ) {
+      msg = e.message;
+      errorBody &= 'Message: ' & msg & nl & nl;
+    }
+
+    if ( StructKeyExists(e, 'stacktrace') ) {
+      errorBody &= 'Stack Trace: ' & nl & e.stacktrace & nl & nl;
+    }
+
+    if ( StructKeyExists(e, 'tagcontext') ) {
+
+      for (tag in e.tagcontext) {
+
+        savecontent variable="tagBody" append=true {
+          WriteDump( var=tag, format="text" );
+        }
+
+        if (tagCount == 1) {
+          offender = tag;
+        }
+
+        tagCount++;
+      }
+
+      errorBody &= 'Start at:' & nl;
+      errorBody &= '- Line: ' & offender.line & nl;
+      errorBody &= '- Template: ' & offender.template & nl;
+      errorBody &= '- Code: ' & nl & offender.codePrintPlain & nl & nl;
+
+      errorBody &= 'Tag Context: ' & tagBody & nl & nl;
+
+    }
+
+    cfmail(
+        to = dest_email,
+        from = application.admin_email,
+        subject = "[" & application.locale[session.auth.locale]['name'] & "] ERROR: " & msg ) {
+      WriteOutput(errorBody);
     }
 
   }

@@ -9,13 +9,13 @@
     <cfoutput>
     <div align="center">
       <span align="left">
-        <button class="btn button btn-default btn-tile" ng-click="panTo(2)"><span class="glyphicon glyphicon-money"></span><br/><br/> PAY bills</button>
+        <button class="btn button btn-default btn-tile" ng-click="panTo(2)"><i class="fas fas-large fa-dollar-sign"></i></span><br/><br/> PAY my<br/>bills</button>
       </span>
       <span align="center">
-        <button class="btn button btn-default btn-tile" ng-click="navigateTo('#buildUrl('main')#')"><span class="glyphicon glyphicon-cog"></span><br/><br/> UPDATE budget</button>
+        <button class="btn button btn-default btn-tile" ng-click="navigateTo('#buildUrl('main')#')"><i class="fas fas-large fa-chart-pie"></i><br/><br/> UPDATE my<br/>budget</button>
       </span>
       <span align="right">
-        <button class="btn button btn-default btn-tile" ng-click="navigateTo('#buildUrl('plan')#')"><span class="glyphicon glyphicon-stats"></span><br/><br/> SEE my future</button>
+        <button class="btn button btn-default btn-tile" ng-click="navigateTo('#buildUrl('plan')#')"><i class="fas fas-large fa-calculator"></i><br/><br/> CALCULATE my<br/>future</button>
       </span>
     </div>
     </cfoutput>

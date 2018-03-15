@@ -1,4 +1,6 @@
 <!--- scripts.cfm --->
+
+  <!-- CDNs -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
 
@@ -8,6 +10,10 @@
   <!--- http://www.bootstraptoggle.com/ --->
   <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>  
 
+  <!-- font awesome -->
+  <script defer src="//use.fontawesome.com/releases/v5.0.8/js/all.js"></script>
+
+  <!-- Locals -->
   <script src="/node_modules/angular-route/angular-route.js"></script>
   <script src="/node_modules/angular-tooltips/lib/angular-tooltips.js"></script>
 

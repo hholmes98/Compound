@@ -101,7 +101,7 @@ component accessors = true {
     // 2. Loop over the cards (starting after the hot card), calculating the payment for each card that is not the hot card.
     for ( i=2; i <= cardsQry.recordcount; i++ ) {
 
-      if ( application.consider_interest_when_calculating_payments ) {
+      if ( application.AllowAvalanche ) {
 
         if ( cardsQry.interest_rate[i] > 0 && arguments.use_interest ) {
 

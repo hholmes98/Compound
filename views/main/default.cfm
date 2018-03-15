@@ -1,7 +1,7 @@
 <!-- views/main/default -->
 
 <div class="page-header">
-  <h1>Update Budget</h1>
+  <h1>Update Your Budget</h1>
   <h3>This is where you decimate your debt.</h3>
 </div>
 
@@ -40,15 +40,15 @@
           <th colspan="5"><button tooltip="Cards can also be loans!" type="button" class="btn button btn-default" ng-click="newCard(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>)"><span class="glyphicon glyphicon-plus"></span> Add a new card</button></th>
         </tr>
         <tr>
-          <th class="col-md-4">Card</th>
-          <th class="col-md-2">Balance</th>
-          <th class="col-md-2">Interest Rate</th>
-          <th class="col-md-2">Min. Payment</th>
+          <th class="col-md-4"><a href="javascript:void(0)" ng-click="orderByField='label';reverseSort = !reverseSort">Card <span ng-show="orderByField=='label'"><span ng-show="!reverseSort"><i class="fas fa-angle-up"></i></span><span ng-show="reverseSort"><i class="fas fa-angle-down"></i></span></span></a></th>
+          <th class="col-md-2"><a href="javascript:void(0)" ng-click="orderByField='balance';reverseSort = !reverseSort">Balance <span ng-show="orderByField=='balance'"><span ng-show="!reverseSort"><i class="fas fa-angle-up"></i></span><span ng-show="reverseSort"><i class="fas fa-angle-down"></i></span></span></a></th>
+          <th class="col-md-2"><a href="javascript:void(0)" ng-click="orderByField='interest_rate';reverseSort = !reverseSort">Interest Rate <span ng-show="orderByField=='interest_rate'"><span ng-show="!reverseSort"><i class="fas fa-angle-up"></i></span><span ng-show="reverseSort"><i class="fas fa-angle-down"></i></span></span></a></th>
+          <th class="col-md-2"><a href="javascript:void(0)" ng-click="orderByField='min_payment';reverseSort = !reverseSort">Min. Payment <span ng-show="orderByField=='min_payment'"><span ng-show="!reverseSort"><i class="fas fa-angle-up"></i></span><span ng-show="reverseSort"><i class="fas fa-angle-down"></i></span></span></a></th>
           <th></th>
         </tr>
         </thead>
         <tbody>
-        <tr class="align-top" ng-form name="myForm" ng-repeat="key in keylist | orderBy:'null':false:cardLabelCompare">
+        <tr class="align-top" ng-form name="myForm" ng-repeat="key in keylist | orderBy:'null':reverseSort:cardLabelCompare">
           <input type="hidden" ng-model="cards[key].id">
           <input type="hidden" ng-model="cards[key].is_emergency">
           <td>

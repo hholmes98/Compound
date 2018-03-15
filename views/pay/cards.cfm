@@ -4,8 +4,12 @@
 <div class="pan-page pan-page-<cfoutput>#pageStart#</cfoutput>">
   <div class="container">
     <div class="page-header">
-      <h1>Pay Bills</h1>
+      <h1>Pay Your Bills</h1>
       <h3>Pick a card. Any card.</h3>
+      <p>
+        Get your recommended payment for any card. If the balance and/or minimumn payment have changed, you can update them
+        on-the-fly and your recommended payment will be re-calculated instantly.
+      </p>
     </div>
     <div class="panel panel-default form-horizontal">
       <div class="panel-body tab-pane" id="card-list">

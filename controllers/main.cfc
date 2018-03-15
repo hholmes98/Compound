@@ -1,6 +1,7 @@
 component accessors = true {
 
   property cardservice;
+  property mailservice;
 
   function init( fw ) {
 
@@ -61,6 +62,13 @@ component accessors = true {
     var ret = cardservice.setAsEmergency( arguments.rc.eid, arguments.rc.uid );
 
     variables.fw.renderdata( 'JSON', ret );
+
+  }
+
+  public void function oops( struct rc ) {
+
+    // email the admins before displaying anything nice to the user.
+    mailservice.sendError( application.admin_email, request.exception );
 
   }
 

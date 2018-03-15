@@ -6,7 +6,7 @@
   <!-- app info -->
   <app>
     <name>Compound</name>
-    <version>Alpha v0.91</version>
+    <version>Alpha v0.92</version>
     <locale>EN-us</locale>
     <show>true</show><!-- set to false to hide from top nav -->
     <domain>some-website.com</domain>
@@ -17,6 +17,11 @@
   <locales>
     <locale language="EN" country="us">
       <name>Compound</name>
+      <motto>The only credit card calculator you'll ever need.</motto>
+    </locale>
+    <locale language="ES" country="us">
+      <name>Compound</name>
+      <motto>La única calculadora de tarjeta de crédito que necesitarás.</motto>
     </locale>
   </locales>
 

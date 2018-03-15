@@ -21,7 +21,8 @@ var AnimatePage = (function() {
   endCurr   = false,
   endNext   = false,
   animcursor  = 1,
-  current   = 0,  
+  current   = 0,
+  tRnd = 0
 
   $pages    = $pan.children( 'div.pan-page' );
 
@@ -40,8 +41,21 @@ var AnimatePage = (function() {
 
   function addAnother() {
 
-    var newMsg = ['Keep \'em coming!', 'Need more debt!', 'You\'re killing it! (and by "it" we mean "debt")', 'Give us your debt!', 'Somebody set up us the debt!'];
-    var tMsg = Math.floor(Math.random() * newMsg.length);
+    var newHed = [
+      'Keep \'em coming!', 
+      'Need more debt!', 
+      'You\'re killing it! (and by "it" we mean "debt")', 
+      'Give us your cards!', 
+      'Somebody set you up the debt!'
+    ];
+    
+    var newMsg = [
+      'The average balance a person carries on a credit card is: $5,047. Let\'s get that down to $0.',
+      'Families with debt carry an average balance of: $15,654. It\'s time to chip that away.',
+      'People born between \'80-\'84 carry approx. $5,689 more credit card debt than their parents, and $8,156 more than their grandparents.',
+      'Credit card debt increased by nearly 8% in 2017. Let\'s reverse that trend. Now.',
+      'But starting today, you\'re paying it off. For great justice.'
+    ];
 
     var $last_div = $('div[id^="page"]:last');
     var num = parseInt( $last_div.prop('id').match(/\d+/g), 10 ) + 1;
@@ -74,7 +88,9 @@ var AnimatePage = (function() {
 
     });
 
-    $div.find('.card-content h3').text(newMsg[tMsg]);
+    $div.find('.card-content h3').text(newHed[tRnd % newHed.length]);
+    $div.find('.card-content p').text(newMsg[tRnd % newHed.length]);
+    tRnd++;
 
     $pan.append( $div );
 

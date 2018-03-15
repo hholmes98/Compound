@@ -15,6 +15,10 @@ var d = date.getDate();
 var m = date.getMonth();
 var y = date.getFullYear();
 
+function daysInMonth( month, year ) {
+  return new Date(year, month, 0).getDate();
+}
+
 /***************
 
 common functions
@@ -309,6 +313,9 @@ controller/main
 ***************/
 .controller( 'ddMain' , function ( $scope, $http, $q, DDService ) {
 
+  $scope.orderByField = 'label';
+  $scope.reverseSort = false;
+
   // init-start
   $http({
     method: 'GET',
@@ -526,10 +533,42 @@ controller/main
 
   // FIXME: duplicate!!
   $scope.cardLabelCompare = function( v1, v2 ) {
-    if ( $scope.cards[$scope.keylist[v1.index]].label > $scope.cards[$scope.keylist[v2.index]].label )
-      return 1;
-    if ( $scope.cards[$scope.keylist[v1.index]].label < $scope.cards[$scope.keylist[v2.index]].label )
-      return -1;
+
+    switch($scope.orderByField) {
+      case 'label':
+        if ( $scope.cards[$scope.keylist[v1.index]].label > $scope.cards[$scope.keylist[v2.index]].label )
+          return 1;
+        if ( $scope.cards[$scope.keylist[v1.index]].label < $scope.cards[$scope.keylist[v2.index]].label )
+          return -1;
+
+        break;
+
+      case 'balance':
+        if ( $scope.cards[$scope.keylist[v1.index]].balance > $scope.cards[$scope.keylist[v2.index]].balance )
+          return 1;
+        if ( $scope.cards[$scope.keylist[v1.index]].balance < $scope.cards[$scope.keylist[v2.index]].balance )
+          return -1;
+
+        break;
+
+      case 'interest_rate':
+
+        if ( $scope.cards[$scope.keylist[v1.index]].interest_rate > $scope.cards[$scope.keylist[v2.index]].interest_rate )
+          return 1;
+        if ( $scope.cards[$scope.keylist[v1.index]].interest_rate < $scope.cards[$scope.keylist[v2.index]].interest_rate )
+          return -1;
+
+        break;
+
+      case 'min_payment':
+
+        if ( $scope.cards[$scope.keylist[v1.index]].min_payment > $scope.cards[$scope.keylist[v2.index]].min_payment )
+          return 1;
+        if ( $scope.cards[$scope.keylist[v1.index]].min_payment < $scope.cards[$scope.keylist[v2.index]].min_payment )
+          return -1;
+
+        break;
+    }
 
     return 0;
   }
@@ -541,23 +580,39 @@ controller/main
 controller/plan
 
 ***************/
-.controller( 'ddPlan' , function ( $scope , $http  ) {
+.controller( 'ddPlan' , function ( $scope , $http, $timeout ) {
+
+  $scope.orderByField = 'label';
+  $scope.reverseSort = false;
 
   // Calendar: for the calendar init
   $scope.schedule = [];
   $scope.events   = [];
 
   // Calendar: alert on eventClick
-  $scope.alertOnEventClick = function( date, jsEvent, view ){
-      $scope.alertMessage = date.title;
+  $scope.alertOnEventClick = function( date, jsEvent, view ) {
+      $scope.alertMessage = date.title + ' on ' + moment(date.start._d).format('dddd, MMMM Do');
   };
   
   // Calendar: config object
   $scope.uiConfig = {
     calendar:{
       eventClick: $scope.alertOnEventClick,
+      timezone: 'UTC'
     }
-  };  
+  };
+
+  $scope.renderCalendar = function(calendar) {
+    $timeout(function(){
+      // such a fuckin' hack, thx to calendar not rendering if hidden by default!
+      if (!$scope.schedule.length)
+        $scope.schedule.push($scope.events);
+
+      calendarTag = $('#' + calendar);
+      calendarTag.fullCalendar('render');
+
+    }, 0);
+  };
 
   // FIXME : Plan, Calendar, and Chart init() should all be promise-chained
   // Intended Step 2
@@ -576,7 +631,9 @@ controller/plan
       });
     };
 
-    $scope.schedule.push($scope.events);
+    //$scope.schedule.push($scope.events); 
+    // NOTE: we no longer populate at this stage, because if calendar is hidden by default,
+    // errors get thrown!! (see #601)
 
   }).catch( function onError( response ) {
 
@@ -659,19 +716,18 @@ controller/plan
               return this.text;
             }
           },
+          lineWidth: 2,
           data: []
         };
 
-        // payOffDate = Today + ( ( 1 month ) * ( Num of Months Until Payoff, Minus 1 ) )
-        // FIXME: This is still not calculated correctly.
-        payOffDate = Date.UTC(y,m,1) + ( (30 * 24 * 3600 * 1000) * (result[i].data.length-1) ); // fixme: couldn't i use the actual plan's payoff date, and convert this, since it is going to change for certain folks, based on their pay periods?
-        dateReadable = new Date(payOffDate);
+        var startMoment = moment(new Date(y,m,1));
+        var endMoment = startMoment.add( result[i].data.length-1, 'months');
 
         win.data.push({
           color: getColor(i),
-          x: payOffDate,
+          x: endMoment.toDate(),
           title: 'CHECKPOINT!!',
-          text: (result[i].name + ' paid off in: <b>' + monthNames[dateReadable.getMonth()] + ' of ' + dateReadable.getFullYear() + '</b>' )
+          text: (result[i].name + ' paid off in: <b>' + endMoment.format('MMMM') + ' of ' + endMoment.format('YYYY') + '</b>' ),
         });
 
         wins.push(win);
@@ -683,10 +739,33 @@ controller/plan
     // cat the two arrays together
     result = result.concat(wins);
 
+    Highcharts.SVGRenderer.prototype.symbols.doublearrow = function(x, y, w, h) {
+      return [
+        // right arrow
+        'M', x + w / 2 + 1, y,
+        'L', x + w / 2 + 1, y + h,
+        x + w + w / 2 + 1, y + h / 2,
+        'Z',
+        // left arrow
+        'M', x + w / 2 - 1, y,
+        'L', x + w / 2 - 1, y + h,
+        x - w / 2 - 1, y + h / 2,
+        'Z'
+      ];
+    };
+
+    if (Highcharts.VMLRenderer) {
+      Highcharts.VMLRenderer.prototype.symbols.doublearrow = Highcharts.SVGRenderer.prototype.symbols.doublearrow;
+    }
+
     Highcharts.stockChart('milestones', {
 
-      title: {
-        text: 'Payoff Milestones'
+      //title: {
+      //  text: 'Payoff Milestones'
+      //},
+
+      credits: {
+        enabled: false
       },
 
       chart: {
@@ -708,38 +787,50 @@ controller/plan
 
       // this start and end should be equal-to-or-longer than the visual display of the spline (set above in xAxis)
       navigator: {
+        height: 80,
+        maskFill: 'rgba(131,145,120,0.6)', //'#839178',
+        maskInside: false,
+        outlineColor: '#000',
+        outlineWidth: 1,
         xAxis: {
           type: 'datetime',
           ordinal: false,
           min: Date.UTC(y,m,1), // full range start (today)
           tickInterval: 2 * 30 * 24 * 3600 * 1000 // a tick every 2 month
+        },
+        handles: {
+          symbols: ['doublearrow','doublearrow'],
+          height: 20,
+          width: 12,
+          lineWidth: 1,
+          backgroundColor: '#d2691e',
+          borderColor: '#000'
         }
       },
 
       yAxis: {
         type: 'linear',
-        min: 0
+        min: 0,
       },
 
       tooltip: {
         split: true,
         distance: 70, // undocumented, distance in pixels away from the point (calculated either + or -, based on best positioning of cursor)
-        padding: 5
+        padding: 5,
+        pointFormatter: function() {
+          return '<span style="color:' + this.color + '">\u25CF</span> ' + this.series.name + '\'s Balance: <b>' + currencyFormatter.format(this.y) + '</b><br/>';
+        }
       },
 
       plotOptions: {
         series: {
           pointStart: Date.UTC(y,m,1), // we begin plotting on the 1st of the current month
           pointIntervalUnit: 'month',  // every point along the x axis represents 1 month
-          tooltip: {
-            pointFormatter: function() {
-              return '<span style="color:' + this.color + '">\u25CF</span> ' + this.series.name + '\'s Balance: <b>' + currencyFormatter.format(this.y) + '</b><br/>';
-            }
-          },
           animation: {
             duration: 6200,
             //easing: 'easeOutBounce'
-          }
+          },
+          lineWidth: 4
         }
       },
 
@@ -783,12 +874,56 @@ controller/plan
       }
     }
 
+    $scope.cards = $scope.plan; // FIXME: you're duping this var, just to make the ordering work? Don't.
+
   }).catch ( function onError( response ) {
     
     //failure
     window.location.href = 'index.cfm/login';
 
   });
+
+  // FIXME: duplicate!!
+  $scope.cardLabelCompare = function( v1, v2 ) {
+
+    switch($scope.orderByField) {
+      case 'label':
+        if ( $scope.cards[$scope.keylist[v1.index]].label > $scope.cards[$scope.keylist[v2.index]].label )
+          return 1;
+        if ( $scope.cards[$scope.keylist[v1.index]].label < $scope.cards[$scope.keylist[v2.index]].label )
+          return -1;
+
+        break;
+
+      case 'balance':
+        if ( $scope.cards[$scope.keylist[v1.index]].balance > $scope.cards[$scope.keylist[v2.index]].balance )
+          return 1;
+        if ( $scope.cards[$scope.keylist[v1.index]].balance < $scope.cards[$scope.keylist[v2.index]].balance )
+          return -1;
+
+        break;
+
+      case 'interest_rate':
+
+        if ( $scope.cards[$scope.keylist[v1.index]].interest_rate > $scope.cards[$scope.keylist[v2.index]].interest_rate )
+          return 1;
+        if ( $scope.cards[$scope.keylist[v1.index]].interest_rate < $scope.cards[$scope.keylist[v2.index]].interest_rate )
+          return -1;
+
+        break;
+
+      case 'min_payment':
+
+        if ( $scope.cards[$scope.keylist[v1.index]].min_payment > $scope.cards[$scope.keylist[v2.index]].min_payment )
+          return 1;
+        if ( $scope.cards[$scope.keylist[v1.index]].min_payment < $scope.cards[$scope.keylist[v2.index]].min_payment )
+          return -1;
+
+        break;
+    }
+
+    return 0;
+  }
 
 }) // controller/plan
 
@@ -800,6 +935,8 @@ controller/pay
 .controller( 'ddPay' , function ( $scope, $http, $q, $location, DDService ) {
 
   $scope.fail = false;
+  $scope.orderByField = 'label';
+  $scope.reverseSort = false;
 
   $http({
     method: 'GET',
@@ -906,10 +1043,39 @@ controller/pay
 
   // FIXME: this shouldn't be duplicated!
   $scope.cardLabelCompare = function( v1, v2 ) {
-    if ( $scope.cards[$scope.keylist[v1.index]].label > $scope.cards[$scope.keylist[v2.index]].label )
-      return 1;
-    if ( $scope.cards[$scope.keylist[v1.index]].label < $scope.cards[$scope.keylist[v2.index]].label )
-      return -1;
+
+    switch($scope.orderByField) {
+      case 'label':
+        if ( $scope.cards[$scope.keylist[v1.index]].label > $scope.cards[$scope.keylist[v2.index]].label )
+          return 1;
+        if ( $scope.cards[$scope.keylist[v1.index]].label < $scope.cards[$scope.keylist[v2.index]].label )
+          return -1;
+
+        break;
+      case 'balance':
+        if ( $scope.cards[$scope.keylist[v1.index]].balance > $scope.cards[$scope.keylist[v2.index]].balance )
+          return 1;
+        if ( $scope.cards[$scope.keylist[v1.index]].balance < $scope.cards[$scope.keylist[v2.index]].balance )
+          return -1;
+
+        break;
+      case 'interest_rate':
+
+        if ( $scope.cards[$scope.keylist[v1.index]].interest_rate > $scope.cards[$scope.keylist[v2.index]].interest_rate )
+          return 1;
+        if ( $scope.cards[$scope.keylist[v1.index]].interest_rate < $scope.cards[$scope.keylist[v2.index]].interest_rate )
+          return -1;
+
+        break;
+      case 'min_payment':
+
+        if ( $scope.cards[$scope.keylist[v1.index]].min_payment > $scope.cards[$scope.keylist[v2.index]].min_payment )
+          return 1;
+        if ( $scope.cards[$scope.keylist[v1.index]].min_payment < $scope.cards[$scope.keylist[v2.index]].min_payment )
+          return -1;
+
+        break;
+    }
 
     return 0;
   }
@@ -1038,14 +1204,14 @@ controller/debt
           };
 
           payOffDate = Date.UTC(y,m,1) + ( (30 * 24 * 3600 * 1000) * (result[i].data.length-1) ); // fixme: couldn't i use the actual plan's payoff date, and convert this, since it is going to change for certain folks, based on their pay periods?
-          
+
           dateReadable = new Date(payOffDate);
 
           win.data.push({
             color: getColor(i),
             x: payOffDate,
             title: 'CHECKPOINT!!',
-            text: (result[i].name + ' paid off in: <b>' + monthNames[dateReadable.getMonth()] + ' of ' + dateReadable.getFullYear() + '</b>' )
+            text: (result[i].name + ' paid off on: <b>' + monthNames[dateReadable.getMonth()] + ' ' + dateReadable.getDate() + ', ' + dateReadable.getFullYear() + '</b>' )
           });
 
           wins.push(win);

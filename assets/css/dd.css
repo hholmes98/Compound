@@ -36,6 +36,10 @@ Gold
   font-size: 42px;
 }
 
+.fas-large {
+  font-size: 84px;
+}
+
 .btn-tile .glyphicon {
   font-size: 84px;
 }
@@ -48,6 +52,26 @@ Gold
 .dollar-large {
   font-size: 48px;
   font-weight: 700;
+}
+
+/* glyphs */
+.glyphicon, .fas {
+  color: #19482c;
+  top: 2px;
+}
+
+/* glyphs that specifically show up on buttons */
+.btn > .glyphicon, .btn > .fas-large {
+  color: #D2691E;
+}
+
+.btn.btn-primary > .glyphicon, .btn.btn-primary > .fas {
+  color: #fff;
+}
+
+/* glyphs in the fixed nav */
+.navbar-nav > li > a > .glyphicon, .navbar-nav > li > a > .fas {
+  color: #fff;
 }
 
 html, body { 
@@ -76,7 +100,7 @@ th > p,ol,ul {
 /* the money font */
 h1, h2, h3 {
   font-family: 'Ultra', serif;
-  margin: 0.5em;
+  /* margin: 0.5em; */
   opacity: 0.9;
 }
 
@@ -144,6 +168,11 @@ label {
   border-bottom: 1px solid #171717;
 }
 
+/* help-block */
+.help-block {
+  color: #19482c;
+}
+
 /* input */
 .input-group-addon {
   background-color: #acc3a2;
@@ -155,13 +184,17 @@ label {
   margin-top: 6px;
 }
 
+.container .header span {
+  display: inline-block;
+}
+
 /* buttons */
 .btn {
   padding: 12px 14px;
 }
 
 .btn-default {
-  color: #1c6a3a;
+  color: #19842c;
   background-color: #e0e9dd;
   /*border-color: #cccccc;*/
   border: 2px solid #19482c;
@@ -192,6 +225,7 @@ label {
   line-height: 1.03;
   width: 300px;
   height: 220px;
+  white-space: normal;
 }
 
 .btn-default[disabled] {
@@ -200,20 +234,10 @@ label {
   color: #839178;
 }
 
-/* glyphs */
-.glyphicon {
-  color: #19482c;
-  top: 2px;
-}
-
-/* glyphs that specifically show up on buttons */
-.btn > .glyphicon {
-  color: #D2691E;
-}
-
-/* glyphs in the fixed nav */
-.navbar-nav > li > a > .glyphicon {
-  color: #fff;
+.navbar-fixed-top {
+  top: 0;
+  z-index: 1030;
+  box-shadow: 0 4px 7px 2px rgba(0,0,0,0.4);
 }
 
 /* nav */
@@ -230,6 +254,14 @@ label {
 .navbar-inverse .navbar-nav > .active > a {
   color: #D2691E;
   background-color: #e0e9dd;
+}
+
+.navbar-inverse .navbar-nav > li > a {
+  color: #fff;
+}
+
+.navbar-inverse .navbar-nav > li > a:hover {
+  text-decoration: underline;
 }
 
 .navbar-inverse .navbar-nav > .active > a > .glyphicon {
@@ -296,14 +328,20 @@ label {
 }
 
 /* form fields */
+/*
 .form-horizontal .control-label {
   padding-top: 0px;
 }
+*/
 
 .form-control {
   color: #1c6a3a;
   font-weight: 700;
   height: 38px;
+}
+
+.form-control input[type="text"] {
+  width: 400px;
 }
 
 .form-group-lg > .input-group > .input-group-addon {
@@ -422,6 +460,7 @@ label {
   background-position: 0 -270px;
   border: 2px solid #e5e5e5;
   border-radius: 6px;
+  /* padding: 0 30px 0 0; */
 }
 
 /* right-text */
@@ -430,12 +469,12 @@ label {
   vertical-align: middle;
   display: inline-block;
   width: 520px;
-  padding: 0 0 0 30px;
+  /* padding: 0 0 0 30px; */
 }
 
 /* the first section is padded down below the welcome interface */
 .about {
-  padding-top: 700px;
+  padding-top: 540px;
 }
 
 /* the following section is relative */
@@ -456,6 +495,7 @@ label {
   top: 0;
   display: inline-block;
   background-image: url(/path/to/img);
+  margin: 0 30px 0 0;
 }
 
 .fear-icon {
@@ -468,6 +508,7 @@ label {
   top: 0;
   display: inline-block;
   background-image: url(/path/to/img);
+  margin: 0 30px 0 0;
 }
 
 .support-icon {
@@ -483,6 +524,23 @@ label {
   color: #fff;
   background-color: #1c6a3a;
 }
+
+@media screen and (max-width: 980px) {
+
+  .section-inner {
+    padding: 40px 40px 40px 40px;
+  }
+
+  .section-inner .text, .section-inner .text-other {
+    width: 100%;
+  }
+
+  .focus-icon, .security-icon, .fear-icon, .privacy-icon, .support-icon {
+    display: none;
+  }
+
+}
+
 
 /* the panning functionality */
 .pan-perspective {
@@ -653,6 +711,7 @@ label {
 
 /* mobile */
 @media screen and (max-width: 480px) {
+
   html, body {
     height: 130%;
     padding-top: 22px;
@@ -686,6 +745,15 @@ label {
   .input-group {
     margin-top: 2px;
   }
+
+  .about {
+    padding-top: 625px;
+  }
+
+  .pan-perspective {
+    margin-top: 20px;
+  }
+
 }
 
 /* last, screen widths up 800px and wider (desktop) */
@@ -699,14 +767,15 @@ label {
 @media (min-width: 800px) {
   #top-banner {
     position: relative;
-    border-bottom: 1px solid #fff;
+    border-bottom: 1px solid #000;
     bottom: inherit;
     text-align: center;
     width: 100%;
     height: 98px;
     padding-top: 4px;
     padding-bottom: 4px;
-    background-color: #1c6a3a;
+    /* background-color: #1c6a3a; */
     color: #fff;
+    margin-top: 5px;
   }
 }

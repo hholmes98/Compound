@@ -72,6 +72,7 @@ component extends = "framework.one" {
       locale.language = locales[1].XmlChildren[i].XmlAttributes.language;
       locale.code = locales[1].XmlChildren[i].XmlAttributes.language & '-' & locales[1].XmlChildren[i].XmlAttributes.country;
       locale.name = locales[1].XmlChildren[i].name.XmlText;
+      locale.motto = locales[1].XmlChildren[i].motto.XmlText;
 
       StructInsert( application.locale, locale.code, locale, true );
 
@@ -90,9 +91,9 @@ component extends = "framework.one" {
     // (to prevent things like carrying an .11 cent balance)
     application.min_card_threshold = 10; // hey, 10 bucks is 10 bucks.
 
-    // when this is true, I consistently add on several more months to the payout plan, as hot card 
-    // payments are spread more thinly, month-to-month.
-    application.consider_interest_when_calculating_payments = false;
+    // when false, only Snowball is ever used.
+    // when true, Avalanche is used unless interest rates aren't specified / are 0.
+    application.AllowAvalanche = false;
 
     application.start_page = variables.framework.home;  // if you're anonymous/non-authorized, this is where you start
     application.auth_start_page = 'pay';        // if you're logged-in/authorized, this is where you start
@@ -130,6 +131,12 @@ component extends = "framework.one" {
   }
 
   function setupRequest() {
+
+    if ( NOT StructKeyExists( SESSION, 'auth') ) {
+      lock scope="session" type="exclusive" timeout="30" {
+        setupSession();
+      }
+    }
 
     controller( 'security.authorize' );
 
