@@ -45,8 +45,7 @@ function getColor(index) {
 
 // https://stackoverflow.com/questions/149055/how-can-i-format-numbers-as-dollars-currency-string-in-javascript
 var currencyFormatter = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
+  style: 'decimal',
   minimumFractionDigits: 2, /* this might not be necessary */
 });
 
@@ -133,10 +132,10 @@ directives
     require: 'ngModel',
     link: function(scope, element, attrs, ngModel) {
       ngModel.$parsers.push(function(val) {
-        return val != null ? parseFloat(val) : null;
+        return val != null ? parseFloat(val.replace(/,/g,"")) : null;
       });      
       ngModel.$formatters.push(function(val) {
-        return val != null ? val.toFixed(2) : null; // always display 2 decimals, include .00
+        return val != null ? currencyFormatter.format(val.toString().replace(/,/g,"")) : null; // always display 2 decimals, include .00
       });
     }
   }
@@ -818,7 +817,7 @@ controller/plan
         distance: 70, // undocumented, distance in pixels away from the point (calculated either + or -, based on best positioning of cursor)
         padding: 5,
         pointFormatter: function() {
-          return '<span style="color:' + this.color + '">\u25CF</span> ' + this.series.name + '\'s Balance: <b>' + currencyFormatter.format(this.y) + '</b><br/>';
+          return '<span style="color:' + this.color + '">\u25CF</span> ' + this.series.name + '\'s Balance: <b>$' + currencyFormatter.format(this.y) + '</b><br/>';
         }
       },
 
@@ -1274,7 +1273,7 @@ controller/debt
             pointIntervalUnit: 'month',  // every point along the x axis represents 1 month
             tooltip: {
               pointFormatter: function() {
-                return '<span style="color:' + this.color + '">\u25CF</span> ' + this.series.name + '\'s Balance: <b>' + currencyFormatter.format(this.y) + '</b><br/>';
+                return '<span style="color:' + this.color + '">\u25CF</span> ' + this.series.name + '\'s Balance: <b>$' + currencyFormatter.format(this.y) + '</b><br/>';
               }
             },
             animation: {

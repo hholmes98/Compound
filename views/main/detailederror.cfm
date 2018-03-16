@@ -47,4 +47,4 @@
 
 <hr>
 
-<cfdump var=#request.exception#>
+<cfdump var=#request#>

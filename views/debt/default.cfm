@@ -125,9 +125,8 @@
   <section dir="ltr" class="focus">
     <div class="section-inner">
       <div class="text">
-        <h3>Focus</h3>
-        <p>Financial applications love throwing the kitchen sink at you. We do one thing and one thing well: make
-  it <b>easy to track your debts</b>, and figure out <b>the fastest possible way to pay them off</b>. That's
+        <h3>Keepin' it real (simple).</h3>
+        <p>Financial applications love throwing the kitchen sink at you. You have one problem, we have one solution: <b>take your debt and calculate the fastest payoff</b>. That's
   all you need! Why complicate things?</p>
       </div>
       <span class="splash-icon focus-icon"></span>
@@ -137,10 +136,9 @@
     <div class="section-inner">
       <span class="splash-icon security-icon"></span>
       <div class="text-other">
-        <h3>Security</h3>
-        <p>Other systems often require a connection to all of your banking institutions. In some cases, those banks
-  ask for additional fees, <em>just to connect!</em> This is about paying off debt, not accruing more.
-  With us, <b>no bank connections are required,</b> and <b>no credit card numbers stored</b>.
+        <h3>We're on a need-to-know basis.</h3>
+        <p>Other systems often require a connection to all of your banking institutions (and in some cases, those banks
+  ask for additional fees...<em>just to connect!</em> ) With us, <b>no bank connections are required,</b> and <b>no credit card numbers stored</b>.
   Under the hood, it's just a list of balances...we don't ask for your personal financial information, and we don't believe
   you should have to fork it over.</p>
       </div>
@@ -149,11 +147,10 @@
   <section dir="ltr" class="fear">
     <div class="section-inner">
       <div class="text">
-        <h3>No scary stuff</h3>
+        <h3>Doing what's <strike>good for business</strike> right for you.</h3>
         <p>No machine learning. No AI. No blockchain. No bitcoin. No hooking up to your bank and charging you hidden fees.
-  No secret surveillance listening in over your phone. Just a simple app doing basic math for you -- <b>math based entirely
-  on the world's respected minds in economics and money management.</b> <a href="http://6dollarshirts.com/rocket-surgery" target="_blank">This isn't rocket surgery</a>, so there won't be any rise of the
-  machines on our watch! To those buzzwords we say...no thanks!</p>
+  No smartphone GPS tracking your location. <b>We're a calculator that does the math for you...<em>and that's it.</em></b> There won't be any rise of the
+  machines on our watch! We believe in ethical technology, so to those buzzwords we say...no thanks!</p>
       </div>
       <span class="splash-icon fear-icon"></span>
     </div>
@@ -162,7 +159,7 @@
     <div class="section-inner">
       <span class="splash-icon privacy-icon"></span>
       <div class="text-other">
-        <h3>Your data is yours and nobody else's</h3>
+        <h3>Your data is yours and nobody else's.</h3>
         <p>We value your freedom to choose a competitor. If you don't like us or find something better, we give you a
   single button to access all your data. That's it! It's yours!...<em>as it should be</em>. We'd be sorry to lose
   you, but <b>we care more about <em>your</em> success than our own.</b></p>
@@ -172,11 +169,9 @@
   <section dir="ltr" class="support">
     <div class="section-inner">
       <div class="text">
-        <h3>Support</h3>
-        <p>Paying off debt <em>is hard</em>. It requires discipline over a long period of time.
-  Everyone's financial situation is different and it is tough to talk about. We understand that. Ours is a 
-  community of shared ideals. No one should be excluded from help or support because of a lack of funds. This
-  is why <b>our base functionality is 100% free</b>, <b>support is one click away</b>, and we provide the means for
+        <h3>We're built by people like you.</h3>
+        <p>Paying off debt <em>is hard</em>. It requires discipline over a long period of time. It's tough to ask for help.<br/><br/>We know.<br/><br/>
+        No one should be excluded because of shame or a lack of funds. This is why <b>our base functionality is 100% free</b>, <b>support is one click away</b>, and we provide the means for
   <b>others to donate/gift subscriptions to our users</b>.</p>
       </div>
       <span class="splash-icon support-icon"></span>

@@ -6,7 +6,7 @@
   <!-- app info -->
   <app>
     <name>Compound</name>
-    <version>Alpha v0.92</version>
+    <version>Alpha v0.93</version>
     <locale>EN-us</locale>
     <show>true</show><!-- set to false to hide from top nav -->
     <domain>some-website.com</domain>

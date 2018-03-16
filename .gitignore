@@ -1,2 +1,3 @@
 # everything in WEB-INF
 WEB-INF/**
+config/config.cfm

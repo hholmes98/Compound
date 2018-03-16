@@ -53,13 +53,15 @@ Your friends at ' & application.locale[session.auth.locale]['name'];
 
   }
 
-  function sendError( dest_email, e ) {
+  function sendError( dest_email, e, requested_url ) {
 
     var errorBody = '';
     var tagBody = '';
     var msg = "Unknown";
     var tagCount = 1;
     var offender = StructNew();
+
+    errorBody &= 'URL: ' & requested_url & nl & nl;
 
     if ( StructKeyExists(e,'message') ) {
       msg = e.message;

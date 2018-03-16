@@ -132,7 +132,7 @@
             <div class="input-group">
               <div class="input-group-addon">I'll commit</div>
               <div class="input-group-addon">$</div>
-              <input type="text" class="form-control" id="budget" ng-model="preferences.budget" />
+              <input type="text" class="form-control" id="budget" ng-model="preferences.budget" dollar-input />
               <div class="input-group-addon">a month to decimating my debt.</div>
             </div>
           </td>

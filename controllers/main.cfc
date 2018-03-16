@@ -67,8 +67,20 @@ component accessors = true {
 
   public void function oops( struct rc ) {
 
+    var the_url = 'Unknown';
+
+    if (StructKeyExists(request,'_fw1') && 
+        StructKeyExists(request._fw1, 'CGIPATHINFO') &&
+        StructKeyExists(request._fw1, 'CGISCRIPTNAME') &&
+        StructKeyExists(request._fw1, 'HEADERS') &&
+        StructKeyExists(request._fw1.HEADERS, 'origin') ) {
+
+      the_url = request._fw1.HEADERS.origin & request._fw1.CGISCRIPTNAME & request._fw1.CGIPATHINFO;
+
+    }
+
     // email the admins before displaying anything nice to the user.
-    mailservice.sendError( application.admin_email, request.exception );
+    mailservice.sendError( application.admin_email, request.exception, the_url );
 
   }
 

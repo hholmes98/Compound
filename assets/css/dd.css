@@ -15,7 +15,8 @@
 
 Greens
 #171717 - near black - default font color, horizontal rules, button borders, some icons
-#19482c - forest - default icons color - some font - all upper case (button labels?) - ID numbers, could be good for anything fixed width (dollar values)
+#42493C - dark forest - starting to approach black - only used in the bg of the master .panel class
+#19482c - forest - default HYPERLINK color - default icons color - some font - all upper case (button labels?) - ID numbers, could be good for anything fixed width (dollar values)
 #1c6a3a - go signal - few icons
 #839178 - dulled gray-green
 #acc3a2 - washed out green (gray)
@@ -27,8 +28,8 @@ Peach
 Ultra Light Blue 
 #bbd1ea - perhaps some bg icongraphy?
 
-Gold
-#D2691E - chocolate (goldenrod is too bright)
+Chocolate
+#D2691E - link hover/focus states, button hover/focus states, icons that accompany links.
 
 
 */
@@ -55,14 +56,9 @@ Gold
 }
 
 /* glyphs */
-.glyphicon, .fas {
+.glyphicon, .fas, {
   color: #19482c;
   top: 2px;
-}
-
-/* glyphs that specifically show up on buttons */
-.btn > .glyphicon, .btn > .fas-large {
-  color: #D2691E;
 }
 
 .btn.btn-primary > .glyphicon, .btn.btn-primary > .fas {
@@ -70,19 +66,44 @@ Gold
 }
 
 /* glyphs in the fixed nav */
-.navbar-nav > li > a > .glyphicon, .navbar-nav > li > a > .fas {
+.navbar-nav > li > a > .glyphicon, .navbar-nav > li > a > .svg-inline--fa {
   color: #fff;
+}
+
+.navbar-nav > .active > a > .glyphicon, .navbar-nav > .active > a > .svg-inline--fa {
+  color: #D2691E;;
 }
 
 html, body { 
   height: 120%; /* FIXME: scrolling now wacked out! Sometimes too much, other times too little! */
   padding-top: 25px;  /* to consider for the fixed nav */
-
   background-color: #fff;
   color: #171717; /* dd-black */
   font-family: 'Nunito', sans-serif;
   font-size: 21px;
   font-weight: 400;
+}
+
+a {
+  color: #19842c; /* bright green */
+}
+
+/* glyphs that accompany links are chocolate */
+a .svg-inline--fa {
+  color: #D2691E;
+}
+
+a:focus, a:hover {
+  color: #D2691E; /* chocolate */
+}
+
+.nav-tabs > .active > a > .svg-inline--fa {
+  color: #fff;
+}
+
+/* glyphs in links that are being hovered over (chocolate) will themselves flip black */
+a:focus .svg-inline--fa, a:hover .svg-inline--fa {
+  color: #171717;
 }
 
 hr {
@@ -194,13 +215,33 @@ label {
 }
 
 .btn-default {
-  color: #19842c;
-  background-color: #e0e9dd;
-  /*border-color: #cccccc;*/
-  border: 2px solid #19482c;
+  color: #19842c; /* bright green */
+  background-color: #e0e9dd; /* pale green */
+  border: 2px solid #19482c; /* deep forest green */
   border-radius: 8px;
   text-transform: uppercase;
   font-weight: 900;
+}
+
+.btn-default:hover, .btn-default:focus, .btn-primary:hover, .btn-primary:focus {
+  color: #D2691E;
+  background-color: #F9Ece3;
+  border-color: #4F270B;
+}
+
+/* glyphs that specifically show up on buttons */
+.btn > .glyphicon, .btn > .fas-large {
+  color: #D2691E;
+  top: 2px;
+}
+
+/* glyphs on buttons that are being hovered or focused (orange) will flip to black */
+.btn:hover .glyphicon, .btn:focus .glyphicon {
+  color: #171717;
+}
+
+.btn:hover .fas, .btn:focus .fas {
+  color: #171717;
 }
 
 /* button-primary */
@@ -261,11 +302,20 @@ label {
 }
 
 .navbar-inverse .navbar-nav > li > a:hover {
+  background-color: #fff;
   text-decoration: underline;
 }
 
+.navbar-inverse .navbar-nav > li > a:hover > .svg-inline--fa {
+  color: #171717;
+}
+
+.navbar-inverse .navbar-nav > .active > a:hover {
+  background-color: #fff;
+}
+
 .navbar-inverse .navbar-nav > .active > a > .glyphicon {
-  color: #D2691E;
+  color: #171717;
 }
 
 .navbar-inverse .navbar-toggle {
@@ -277,13 +327,12 @@ label {
 }
 
 /* nav tabs */
-.nav-tabs > li > a {
-  color: #000;
-  font-weight: 700;
+.nav-tabs > li {
+  /* margin-bottom: 0px; */
 }
 
-.nav-tabs > li.active > a {
-  color: #19482c;
+.nav-tabs > li > a {
+  color: #000;
   font-weight: 700;
 }
 
@@ -300,9 +349,14 @@ label {
 /* panels */
 .panel
 {
-    background: #839178;
-    border-radius: 8px;
-    border: 2px solid #171717;
+  background: #42493C;
+  border-radius: 8px;
+  border: 2px solid #171717;
+}
+
+.panel .tab-content {
+  background: #839178;
+  border-radius: 8px;
 }
 
 .panel table > thead > tr > th {
@@ -314,17 +368,42 @@ label {
   border-color: #171717;
 }
 
+.nav-tabs {
+  border-bottom: 1px solid #171717;
+}
+
+/* all tabs (front or back) */
 .panel > .nav-tabs > li > a {
   background-color: #acc3a2;
+  margin-top: 3px;
+  margin-right: 5px;
+  margin-left: 5px;
+  border-top-color: #19482c;
+  border-right-color: #19482c;
+  border-bottom-color: #171717; /* same as the nav-tabs bottom border. also a cheat */
+  border-left-color: #19482c;
 }
 
+/* tabs in the front */
 .panel > .nav-tabs > li.active > a {
-  background-color: #e0e9dd;
-  color: #d2691e;
+  background-color: #839178;
+  color: #fff;
+  border-top-color: #171717;
+  border-right-color: #171717;
+  border-bottom-color: #839178; /* same as the bg color. i get it. we're cheating */
+  border-left-color: #171717;
+  
 }
 
+/* tabs being hovered over */
 .panel > .nav-tabs > li > a:hover {
-  background-color: #fff;
+  background-color: #e0e9dd;
+  color: #D2691E;
+}
+
+/* active tab panels that are hovered over get a black glyph */
+.panel > .nav-tabs > .active > a:hover > .svg-inline--fa {
+  color: #171717;
 }
 
 /* form fields */
