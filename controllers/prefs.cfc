@@ -1,52 +1,53 @@
+//controllers/prefs
 component accessors = true { 
 
-	property framework;
-	property preferenceservice;
+  property framework;
+  property preferenceservice;
 
-	public void function get( struct rc ) {
-		
-		var prefbean = preferenceservice.get( rc.uid );
-		
-		framework.renderdata( "JSON" , prefbean );
-	
-	}
+  public void function get( struct rc ) {
 
-	public void function save( struct rc ) {
+    var prefbean = preferenceservice.get( rc.uid );
 
-		var ret = {};
+    framework.renderdata( "JSON" , prefbean );
 
-		if ( structKeyExists( arguments.rc, 'freq' ) ) {
-		
-			ret = freq( arguments.rc.uid, arguments.rc.freq );
-		
-		} else if ( structKeyExists( arguments.rc, 'budget' ) ) {
-		
-			ret = budget( arguments.rc.uid, arguments.rc.budget );
-		
-		}
+  }
 
-		framework.renderdata( "JSON", ret );
-	
-	}
+  public void function save( struct rc ) {
 
-	/******
-	private (refactor these out completely later, thanks)
-	******/
-	
-	private string function budget( string budget, string uid ) {
+    var ret = {};
 
-		var ret = preferenceservice.setbudget( arguments.uid, arguments.budget );
+    if ( StructKeyExists( arguments.rc, 'freq' ) ) {
 
-		return ret;
-	
-	}
+      ret = freq( arguments.rc.user_id, arguments.rc.freq );
 
-	private string function freq( string freq, string uid ) {
+    } else if ( structKeyExists( arguments.rc, 'budget' ) ) {
 
-		var ret = preferenceservice.setfrequency( arguments.uid, arguments.freq );
+      ret = budget( arguments.rc.user_id, arguments.rc.budget );
 
-		return ret;
-	
-	}
+    }
+
+    framework.renderdata( "JSON", ret );
+
+  }
+
+/******
+private (refactor these out completely later, thanks)
+******/
+
+  private string function budget( string budget, string uid ) {
+
+    var ret = preferenceservice.setbudget( arguments.uid, arguments.budget );
+
+    return ret;
+
+  }
+
+  private string function freq( string freq, string uid ) {
+
+    var ret = preferenceservice.setfrequency( arguments.uid, arguments.freq );
+
+    return ret;
+
+  }
 
 }

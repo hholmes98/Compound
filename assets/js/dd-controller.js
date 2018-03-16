@@ -278,21 +278,20 @@ services
 
   }
 
-  service.pSetBudget = function( data ) {
+  service.pSetPreferences = function( data ) {
 
-    var bud = data.budget;
-    var uid = data.user_id;
     var deferred = $q.defer();
 
     $http({
       method: 'POST',
-      url: 'index.cfm/prefs/budget/' + bud + '/uid/' + uid,
+      url: '/index.cfm/prefs/',
+      data: $.param( data ),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       } // set the headers so angular passing info as form data (not request payload)
-    }).then( function onSuccess( response ) {
+    })
+    .then( function( response ) {
 
-      // resolve the inc. data, since this REST method doesn't return enough data to chain
       deferred.resolve( data );
 
     });
@@ -423,7 +422,7 @@ controller/main
       budget: val
     };
 
-    DDService.pSetBudget( data )
+    DDService.pSetPreferences( data )
     .then( DDService.pDeletePlan )
     .then( function onSuccess( response ) {
 
@@ -433,6 +432,30 @@ controller/main
     });
 
   };
+
+  /*****************
+
+  setPayFrequency
+
+  *****************/
+  $scope.setPayFrequency = function( id, freq ) { 
+
+    var data = {
+      user_id: id,
+      freq: freq
+    };
+
+    DDService.pSetPreferences( data )
+    .then( DDService.pDeletePlan )
+    .then( function onSuccess( response ) {
+
+      // actually set the pay frequency
+      $scope.preferences.pay_frequency = freq;
+
+    });
+
+  };
+
 
   /**************
 
@@ -501,28 +524,6 @@ controller/main
     });
 
   }
-
-  /*****************
-
-  setPayFrequency
-
-  *****************/
-  $scope.setPayFrequency = function( id, freq ) { 
-
-    $http({
-      method: 'POST',
-      url: 'index.cfm/prefs/freq/' + freq + '/uid/' + id,
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      } // set the headers so angular passing info as form data (not request payload)
-    }).then( function onSuccess( data ) {
-
-      // actually set the pay frequency
-      $scope.preferences.pay_frequency = freq;
-
-    });
-
-  };
 
   /******************
 
