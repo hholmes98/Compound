@@ -33,9 +33,11 @@ component accessors=true  {
 
     if ( result.recordcount ) {
 
-      preference.setUser_id( result.user_id[1] );
-      preference.setBudget( DecimalFormat(result.budget[1]) );
+      preference.setUser_Id( result.user_id[1] );
+      preference.setBudget( Replace( DecimalFormat( result.budget[1] ),",","","ALL" ) );
       preference.setPay_Frequency( result.pay_frequency[1] );
+      preference.setEmail_Reminders( result.email_reminders[1] );
+      preference.setEmail_Frequency( result.email_frequency[1] );
 
     }
 
@@ -43,113 +45,56 @@ component accessors=true  {
 
   }
 
-  public any function setBudget( required string val, required string id ) {
+  public struct function flatten( any pref ) {
+
+    var p_data = StructNew();
+
+    p_data.user_id = pref.getUser_Id();
+    p_data.budget = pref.getBudget();
+    p_data.pay_frequency = pref.getPay_Frequency();
+    p_data.email_reminders = pref.getEmail_Reminders();
+    p_data.email_frequency = pref.getEmail_Frequency();
+
+    return p_data;
+
+  }
+
+  public any function save( struct preference ) {
+
+    var f_bud = Replace( preference.budget, ",","","ALL" );
 
     var sql = '
       UPDATE "pUserPreferences"
-      SET 
-        budget = :bval
-      WHERE 
+      SET
+        budget = :bud,
+        pay_frequency = :pay_freq,
+        email_reminders = :email_rem,
+        email_frequency = :email_freq
+      WHERE
         user_id = :uid
-      RETURNING 
-        budget AS budget_out;
     ';
 
     var params = {
-      bval = {
-        value = arguments.val, sqltype = 'numeric'
+      uid = {
+        value = preference.user_id, sqltype = 'integer'
       },
-      uid = {
-        value = arguments.id, sqltype = 'integer'
-      }
-    };
-
-    var result = QueryExecute( sql, params, variables.defaultOptions );
-
-    return result.budget_out;
-
-  }
-
-  public any function setFrequency( required string val, required string id ) {
-
-    var sql = '
-      UPDATE "pUserPreferences"
-      SET 
-        pay_frequency = :pfval
-      WHERE 
-        user_id = :uid
-      RETURNING
-        pay_frequency AS pay_frequency_out
-    ';
-
-    var params = {
-      uid = {
-        value = arguments.id, sqltype = 'integer'
+      bud = {
+        value = f_bud, sqltype = 'decimal'
       },
-      pfval = {
-        value = arguments.val, sqltype = 'integer'
+      pay_freq = {
+        value = preference.pay_frequency, sqltype = 'integer'
+      },
+      email_rem = {
+        value = preference.email_reminders, sqltype = 'integer'
+      },
+      email_freq = {
+        value = preference.email_frequency, sqltype = 'integer'
       }
     };
 
     var result = QueryExecute( sql, params, variables.defaultOptions );
 
-    return result.pay_frequency_out;
-
-  }
-
-  public string function getBudget( required string id ) {
-
-    var sql = '
-      SELECT up.budget
-      FROM "pUserPreferences" up
-      WHERE up.user_id = :uid
-    ';
-
-    var params = {
-      uid = {
-        value = arguments.id, sqltype = 'integer'
-      }
-    };
-
-    var result = QueryExecute( sql, params, variables.defaultOptions );
-
-    if ( result.recordcount ) {
-
-      return result.budget[1];
-
-    } else {
-
-      -1; // error
-
-    }
-
-  }
-
-  public string function getFrequency( required string id ) {
-
-    var sql = '
-      SELECT up.pay_frequency
-      FROM "pUserPreferences" up
-      WHERE up.user_id = :uid
-    ';
-
-    var params = {
-      uid = {
-        value = arguments.id, sqltype = 'integer'
-      }
-    };
-
-    var result = QueryExecute( sql, params, variables.defaultOptions );
-
-    if ( result.recordcount ) {
-
-      return result.pay_frequency[1];
-
-    } else {
-
-      -1;
-
-    }
+    return 0; // -1 if you throw an error
 
   }
 

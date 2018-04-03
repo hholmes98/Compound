@@ -1,4 +1,4 @@
-// controllers/login
+    // controllers/login
 component accessors = true {
 
   property userService;
@@ -56,10 +56,12 @@ component accessors = true {
     if ( !StructIsEmpty(session.tmp.cards) ) {
 
       // 1. capture the tmp.preferences.budget
-      variables.preferenceService.setBudget( session.tmp.preferences.budget, user.getUser_Id() );
+      var prefs = preferenceService.get( user.getUser_Id() );
+      prefs.setBudget( session.tmp.preferences.budget );
+      preferenceService.save( prefs );
 
       // 2. convert to legit (new) cards and save
-      for ( tmpCard in session.tmp.cards ) {
+      for ( var tmpCard in session.tmp.cards ) {
 
         // card_id to 0
         session.tmp.cards[tmpCard].setCard_Id(0);

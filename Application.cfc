@@ -4,6 +4,7 @@ component extends = "framework.one" {
   this.sessionManagement = true;
   this.sessionTimeout = CreateTimeSpan(0, 0, 20, 0);
   this.applicationTimeout = CreateTimeSpan(1, 0, 0, 0);
+  this.triggerDataMember = true;
 
   variables.framework = {
 
@@ -39,8 +40,6 @@ component extends = "framework.one" {
       { "$GET/prefs/uid/:uid" = "/prefs/get/uid/:uid" },
       { "$POST/prefs/" = "/prefs/save" },
       { "$GET/plan/miles/:user_id" = "/plan/journey/user_id/:user_id" },
-      { "$GET/plan/events/:user_id" = "/plan/schedule/user_id/:user_id" },
-      { "$GET/plan/:user_id" = "/plan/list/user_id/:user_id" },
       { "$DELETE/plan/:user_id" = "/plan/delete/user_id/:user_id" },
       { "$GET/debt/miles/" = "/debt/journey/" },
     ],

@@ -73,97 +73,163 @@ component accessors = true {
 
   }
 
-  public any function saveEvents( struct cards ) {
 
-    var i = 0;
-    var params = {};
+
+
+
+
+  public any function get( string id ) {
+
+    // an event doesn't have a single key - events only come by way of a user_id
+    return getByUser( arguments.id );
+
+  }
+
+  public any function delete( string id ) {
+
+    // an event doesn't have a single key - events only come by way of a user_id
+    return deleteByUser( arguments.id )
+
+  }
+
+  public array function getByUser( string user_id ) {
 
     var sql = '
-      INSERT INTO "pEvents" (
-        card_id,
-        card_label,
-        balance,
-        min_payment,
-        interest_rate,
-        is_hot,
-        is_emergency,
-        calculated_payment,
-        pay_date,
-        user_id
-        ) 
-      VALUES
+      SELECT c.card_id, c.user_id, c.card_label, c.min_payment, c.is_emergency, c.interest_rate, p.is_hot, p.calculated_payment, e.calculated_for_month, e.calculated_for_year, e.pay_date, e.balance
+      FROM "pCards" c
+      INNER JOIN "pPlans" p ON
+        c.card_id = p.card_id
+      INNER JOIN (
+        SELECT last_updated
+        FROM "pPlans"
+        WHERE user_id = :uid
+        GROUP BY last_updated
+        ORDER BY last_updated DESC
+        LIMIT 1
+      ) AS PP ON 
+        pp.last_updated = p.last_updated
+      INNER JOIN "pEvents" e ON
+        c.card_id = e.card_id
+      INNER JOIN (
+        SELECT last_updated
+          FROM "pEvents"
+          WHERE user_id = :uid
+          GROUP BY last_updated
+          ORDER BY last_updated DESC
+        LIMIT 1
+      ) AS EE ON
+        ee.last_updated = e.last_updated
+      WHERE c.user_id = :uid
+      ORDER BY e.calculated_for_year, e.calculated_for_month, e.pay_date, c.card_id
     ';
 
-    for ( card in arguments.cards ) {
+    var params = {
+      uid = {
+        value = arguments.user_id, sqltype = 'integer'
+      }
+    };
 
-      sql = sql & '(
-        #arguments.cards.getCard_id()#,
-        ''#arguments.cards.getCard_label()#'',
-        #arguments.cards.getBalance()#,
-        #arguments.cards.getMin_payment()#,
-        #arguments.cards.getInterest_rate()#,
-        #arguments.cards.getIs_hot()#,
-        #arguments.cards.getIs_emergency()#,
-        #arguments.cards.getCalculated_payment()#,
-        #arguments.cards.getPay_date()#,
-        #arguments.cards.getUser_id()#
-      )';
+    var result = QueryExecute( sql, params, variables.defaultOptions );
+    var schedule = ArrayNew(1);
+    var plan = StructNew();
 
-      sql = sql & ',';
+    cfloop( query = result, group="calculated_for_month" ) {
+
+      var plan = StructNew();
+
+      cfloop() {
+
+        var card = variables.beanFactory.getBean('cardBean');
+
+        card.setCard_Id(result.card_id);
+        card.setUser_Id(result.user_id);
+        card.setLabel(result.card_label);
+        card.setMin_Payment(result.min_payment);
+        card.setIs_Emergency(result.is_emergency);
+        card.setBalance(result.balance);
+        card.setInterest_Rate(result.interest_rate);
+        card.setIs_Hot(result.is_hot);
+        card.setCalculated_Payment(result.calculated_payment);
+        card.setPay_Date(result.pay_date);
+        card.setCalculated_For_Month(result.calculated_for_month);
+        card.setCalculated_For_Year(result.calculated_for_year);
+
+        plan[card.getCard_Id()] = card;
+
+      }
+
+      ArrayAppend( schedule, plan );
+
+    }
+
+    return schedule;
+
+  }
+
+  public any function save( array events ) {
+
+    var i=0;
+    var sql=0;
+    var result=0;
+    var params={};
+
+    sql = '
+      INSERT INTO "pEvents" (
+        calculated_for_month,
+        calculated_for_year,
+        card_id,
+        pay_date,
+        balance,
+        user_id
+      ) VALUES
+    ';
+
+    for ( var event in arguments.events ) {
+
+      for ( var card in event ) {
+
+        if ( event[card].getPay_Date() != '1900-1-1' && event[card].getBalance() > 0 ) {
+
+          sql = sql & '(
+            #event[card].getCalculated_For_Month()#,
+            #event[card].getCalculated_For_Year()#,
+            #event[card].getCard_Id()#,
+            #CreateODBCDateTime(event[card].getPay_Date())#,
+            #event[card].getBalance()#,
+            #event[card].getUser_Id()#
+          )';
+
+          sql = sql & ',';
+
+        }
+
+      }
 
     }
 
     sql = Left( sql, Len(sql)-1 ); // trim trailing comma off
     sql = sql & ';';      // add a semi-colon to the end
 
-    var result = QueryExecute( sql, params, variables.defaultOptions );
+    //trace( category="SQL", type="Information", text=sql );  
+
+    result = QueryExecute( sql, params, variables.defaultOptions );
 
     return 0;
 
   }
 
-  public any function dbSaveEvents( query plan ) {
-
-    var params={};
+  public any function deleteByUser( string user_id ) {
 
     var sql = '
-      INSERT INTO "pEvents" (
-        card_id,
-        card_label,
-        balance,
-        min_payment,
-        interest_rate,
-        is_hot,
-        is_emergency,
-        calculated_payment,
-        pay_date,
-        user_id
-      )
-      VALUES
+      DELETE FROM "pEvents"
+      WHERE user_id = :uid
     ';
 
-    for ( var i=1; i <= arguments.plan.recordcount; i++ ) {
-
-      sql = sql & '(
-        #arguments.plan.card_id[i]#,
-        ''#arguments.plan.card_label[i]#'',
-        #arguments.plan.balance[i]#,
-        #arguments.plan.min_payment[i]#,
-        #arguments.plan.interest_rate[i]#,
-        #arguments.plan.is_hot[i]#,
-        #arguments.plan.is_emergency[i]#,
-        #arguments.plan.calculated_payment[i]#,
-        #arguments.plan.pay_date[i]#,
-        #arguments.plan.user_id[i]#
-      )';
-
-      if ( i < arguments.plan.recordcount ) {
-        sql = sql & ',';
+    var params = {
+      uid = {
+        value = arguments.user_id, sqltype = 'integer'
       }
-
-    }
-
-    sql = sql & ';';
+    };
 
     var result = QueryExecute( sql, params, variables.defaultOptions );
 

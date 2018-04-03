@@ -33,7 +33,7 @@ component accessors = true {
     var card = {};
     var cards = {}; // do not change to an array! json populates gaps in the ids, which dumps a bunch of routines!!
 
-    var result = queryExecute(sql, params, variables.defaultOptions);
+    var result = QueryExecute(sql, params, variables.defaultOptions);
 
     for ( var i = 1; i <= result.recordcount; i++ ) {
       var card = variables.beanFactory.getBean('cardBean');
@@ -94,7 +94,7 @@ component accessors = true {
 
   }
 
-  /* convenience: bean->struct */
+  /* convenience: bean->struct, there's something wrong with invokeImplicitAccessor */
   public struct function flatten( any card ) {
 
     var c_data = StructNew();

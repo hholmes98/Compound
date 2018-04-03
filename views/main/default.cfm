@@ -40,10 +40,10 @@
           <th colspan="5"><button tooltip="Cards can also be loans!" type="button" class="btn button btn-default" ng-click="newCard(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>)"><span class="glyphicon glyphicon-plus"></span> Add a new card</button></th>
         </tr>
         <tr>
-          <th class="col-md-4"><a href="javascript:void(0)" ng-click="orderByField='label';reverseSort = !reverseSort">Card <span ng-show="orderByField=='label'"><span ng-show="!reverseSort"><i class="fas fa-angle-up"></i></span><span ng-show="reverseSort"><i class="fas fa-angle-down"></i></span></span></a></th>
-          <th class="col-md-2"><a href="javascript:void(0)" ng-click="orderByField='balance';reverseSort = !reverseSort">Balance <span ng-show="orderByField=='balance'"><span ng-show="!reverseSort"><i class="fas fa-angle-up"></i></span><span ng-show="reverseSort"><i class="fas fa-angle-down"></i></span></span></a></th>
-          <th class="col-md-2"><a href="javascript:void(0)" ng-click="orderByField='interest_rate';reverseSort = !reverseSort">Interest Rate <span ng-show="orderByField=='interest_rate'"><span ng-show="!reverseSort"><i class="fas fa-angle-up"></i></span><span ng-show="reverseSort"><i class="fas fa-angle-down"></i></span></span></a></th>
-          <th class="col-md-2"><a href="javascript:void(0)" ng-click="orderByField='min_payment';reverseSort = !reverseSort">Min. Payment <span ng-show="orderByField=='min_payment'"><span ng-show="!reverseSort"><i class="fas fa-angle-up"></i></span><span ng-show="reverseSort"><i class="fas fa-angle-down"></i></span></span></a></th>
+          <th class="col-md-4"><a href="javascript:void(0)" ng-click="reorder('label')">Card <span ng-show="orderByField=='label'"><span ng-show="!reverseSort"><i class="fas fa-angle-up"></i></span><span ng-show="reverseSort"><i class="fas fa-angle-down"></i></span></span></a></th>
+          <th class="col-md-2"><a href="javascript:void(0)" ng-click="reorder('balance')">Balance <span ng-show="orderByField=='balance'"><span ng-show="!reverseSort"><i class="fas fa-angle-up"></i></span><span ng-show="reverseSort"><i class="fas fa-angle-down"></i></span></span></a></th>
+          <th class="col-md-2"><a href="javascript:void(0)" ng-click="reorder('interest_rate')">Interest Rate <span ng-show="orderByField=='interest_rate'"><span ng-show="!reverseSort"><i class="fas fa-angle-up"></i></span><span ng-show="reverseSort"><i class="fas fa-angle-down"></i></span></span></a></th>
+          <th class="col-md-2"><a href="javascript:void(0)" ng-click="reorder('min_payment')">Min. Payment <span ng-show="orderByField=='min_payment'"><span ng-show="!reverseSort"><i class="fas fa-angle-up"></i></span><span ng-show="reverseSort"><i class="fas fa-angle-down"></i></span></span></a></th>
           <th></th>
         </tr>
         </thead>

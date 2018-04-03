@@ -51,7 +51,7 @@
 <div>
   <p>Email Alerts are:</p>
 
-  <input type="checkbox" checked data-toggle="toggle">
+  <toggle id="email_reminders" name="email_reminders" ng-model="preferences.email_reminders" ng-change="savePreferences(preferences)">
 </div>
 
 <!-- Security Settings -->
@@ -88,11 +88,11 @@
 </div>
 
 <p>
-Remind me to pay my bills: <select class="form-control" name="email_reminder">
-  <option>Never! (No Notifications)</option>
-  <option>Once a month (Light Notification)</option><!-- this is the default -->
-  <option>Matching my payment schedule (Medium Notification)</option><!-- don't show this option if "its complicated" -->
-  <option>On each card's due date (Heavy Notification)</option><!-- gray this option until the user fills out due dates -->
+Remind me to pay my bills: <select class="form-control" name="email_frequency" ng-model="preferences.email_frequency" ng-change="savePreferences(preferences);" convert-to-number>
+  <option value="0">Never! (No Notifications)</option>
+  <option value="1">Once a month (Light Notification)</option><!-- this is the default -->
+  <option value="2">Matching my payment schedule (Medium Notification)</option><!-- don't show this option if "its complicated" -->
+  <option value="3">On each card's due date (Heavy Notification)</option><!-- gray this option until the user fills out due dates -->
 </select>
 </p>
 

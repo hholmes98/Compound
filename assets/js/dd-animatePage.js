@@ -1,11 +1,11 @@
 var AnimatePage = (function() {
 
-  var $pan = $( '#pan-main form' );
+  var $pan = $( '#pan-main > form' );
 
   if (!$pan.length) {
     $pan = $('#pan-main');
   }
-  
+
   var animEndEventNames = {
     'WebkitAnimation' : 'webkitAnimationEnd',
     'OAnimation' : 'oAnimationEnd',

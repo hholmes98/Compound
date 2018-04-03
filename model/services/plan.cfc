@@ -1,4 +1,4 @@
-//plan.cfc
+// model/services/plan
 component accessors="true" {
 
   property cardservice;
@@ -20,8 +20,6 @@ component accessors="true" {
 
   public any function list( string user_id ) {
 
-    //var deck = get( arguments.user_id );
-
     var plan = dbCalculatePlan( arguments.user_id );
 
     return plan;
@@ -36,49 +34,9 @@ component accessors="true" {
 
   public any function events( string user_id ) {
 
-    // return an array of event dates reflecting when each card is paid and by how much
-
-    /* match this format: 
-
-      data = [
-       
-        //month1
-        {id: 1, title: 'Pay $28.72 to card1', start: Wed Nov 30 2017 00:00:00 GMT-0600, balance_remaining: 4.22},
-        {id: 2, title: 'Pay $33.90 to card2', start: Wed Nov 30 2017 00:00:00 GMT-0600, balance_remaining: 1428.4},
-        
-        //month2    
-        {id: 1, title: 'Pay $28.72 to card1', start: Mon Dec 31 2018 00:00:00 GMT-0600, balance_remaining: 0},
-        {id: 2, title: 'Pay $33.90 to card2', start: Mon Dec 31 2018 00:00:00 GMT-0600, balance_remaining: 1389.2},
-
-        etc...
-
-      ];
-
-    */
-
-    var events = ArrayNew(1);
     var schedule = dbCalculateSchedule( arguments.user_id );
 
-    for ( event in schedule ) {
-      
-      for ( item in event ) {
-
-        var sItem = StructNew();
-
-        if ( event[item].getCalculated_Payment() > 0 ) {
-
-          StructInsert( sItem, 'id', event[item].getCard_Id() );
-          StructInsert( sItem, 'title', 'Pay $' & DecimalFormat( event[item].getCalculated_Payment() ) & ' to ' & JSStringFormat( event[item].getLabel() ) );
-          StructInsert( sItem, 'start', DateFormat( event[item].getPay_Date(), "ddd mmm dd yyyy" ) & ' 00:00:00 GMT-0600' );
-
-          ArrayAppend( events, sItem );
-
-        }
-
-      }
-    }
-
-    return events;
+    return schedule;
 
   }
 
@@ -113,42 +71,45 @@ component accessors="true" {
     ]
       */
 
-      var events = dbCalculateSchedule( arguments.user_id );
-      var cards = list( arguments.user_id );
-      var milestones = ArrayNew(1);
-      var thisEvent = 0;
-      var thisCardId = 0;
+    var schedule = dbCalculateSchedule( arguments.user_id );
+    var cards = list( arguments.user_id );
+    var milestones = ArrayNew(1);
+    var thisEvent = 0;
+    var thisCardId = 0;
 
-      // cards is an object(struct)!
-      for ( card in cards ) {
+    // cards is an object(struct)!
+    for ( var card in cards ) {
 
-        var milestone = StructNew();
+      var milestone = StructNew();
 
-        milestone["name"] = JSStringFormat( cards[card].getLabel() );
-        milestone["data"] = ArrayNew(1);
+      milestone["name"] = cards[card].getLabel();
+      milestone["data"] = ArrayNew(1);
 
-        thisCardId = cards[card].getCard_Id();
+      thisCardId = cards[card].getCard_Id();
 
-        // events is an array of structs!
-        for ( var event in events ) {
+      // events is an array of structs!
+      for ( var event in schedule ) {
 
-          thisEvent = event[thisCardId];
+        for (var item in event ) {
 
-          if ( thisEvent.getCard_Id() == cards[card].getCard_Id() && thisEvent.getRemaining_Balance() > 0 ) {
+          if ( event[item].getCard_Id() == thisCardID && event[item].getRemaining_Balance() > 0 ) {
 
             // append the remainig balance as a plottable point along the 
-            ArrayAppend( milestone["data"], thisEvent.getRemaining_Balance() );
+            ArrayAppend( milestone["data"], event[item].getRemaining_Balance() );
 
           }
 
         }
 
-        // add new milestones for this card
-        ArrayAppend( milestones, milestone );
-
       }
 
-      return milestones;
+      // add new milestones for this card
+      ArrayAppend( milestones, milestone );
+
+    }
+
+    return milestones;
+
   }
 
 
@@ -428,6 +389,12 @@ component accessors="true" {
 
   }
 
+  public any function delete( string id ) {
+
+    return deleteByUser( arguments.id );
+
+  }
+
   public any function getByUser( string user_id ) {
 
     var i=0;
@@ -459,7 +426,7 @@ component accessors="true" {
 
     for ( i=1; i lte result.recordcount; i++ ) {
       card = variables.beanFactory.getBean('cardBean');
-      
+
       card.setCard_Id(result.card_id[i]);
       card.setUser_Id(result.user_id[i]);
       card.setLabel(result.card_label[i]);
@@ -471,7 +438,7 @@ component accessors="true" {
       card.setCalculated_Payment(result.calculated_payment[i]);
 
       deck[card.getCard_id()] = card;
-    }   
+    }
 
     return deck;
   }
@@ -485,8 +452,8 @@ component accessors="true" {
 
     sql = '
       INSERT INTO "pPlans" (
-        card_id,        
-        is_hot,     
+        card_id,
+        is_hot,
         calculated_payment,
         user_id
       ) VALUES
@@ -508,12 +475,12 @@ component accessors="true" {
 
     //trace( category="SQL", type="Information", text=sql );  
 
-    result = queryExecute( sql, params, variables.defaultOptions );
+    result = QueryExecute( sql, params, variables.defaultOptions );
 
     return 0;
   }
 
-  public any function delete( string user_id ) {
+  public any function deleteByUser( string user_id ) {
 
     var sql = '
       DELETE FROM "pPlans"
@@ -549,7 +516,7 @@ component accessors="true" {
     if ( StructIsEmpty( payment_plan ) OR arguments.no_cache ) {
 
       // 1. get the user's budget
-      budget = preferenceservice.getBudget( arguments.user_id );
+      budget = preferenceservice.get( arguments.user_id ).getBudget();
 
       // 2. Get the user's list of cards
       deck = cardservice.list( arguments.user_id );
@@ -583,6 +550,7 @@ component accessors="true" {
 
     // 6. Return the plan
     return payment_plan;
+
   }
 
   public any function dbCalculatePayments( struct cards, numeric available_budget, boolean use_interest=true, emergency_priority=false ) {
@@ -803,7 +771,7 @@ component accessors="true" {
 
     var e_card = cardservice.get( arguments.eid );
     var uid = e_card.getUser_Id();
-    var budget = preferenceservice.getBudget( uid );
+    var budget = preferenceservice.get( uid ).getBudget();
     var card = 0;
     var calc_e_payment = 0;
     var this_plan = Duplicate( arguments.plan );
@@ -880,7 +848,7 @@ component accessors="true" {
     the_date[1] = CreateDate( Year( arguments.calculated_for ), Month( arguments.calculated_for ), DaysInMonth( arguments.calculated_for ) );
     // now the_date.length = 2;
 
-    if ( preferenceservice.getFrequency( user_id ) == 2) { // twice a month
+    if ( preferenceservice.get( user_id ).getPay_Frequency() == 2) { // twice a month
 
       num_columns = 2;
 
@@ -888,7 +856,7 @@ component accessors="true" {
 
       // now the_date.length = 2;
 
-    } else if ( preferenceservice.getFrequency( user_id ) == 3 ) { // every two weeks
+    } else if ( preferenceservice.get( user_id ).getPay_Frequency() == 3 ) { // every two weeks
 
       // TODO: Allow users that specify "every two weeks" to set the "first pay period of the year" -- otherwise, the following calculation is just a guess.
 
@@ -911,8 +879,13 @@ component accessors="true" {
     // adapted from: https://stackoverflow.com/questions/3009146/splitting-values-into-groups-evenly
     var cpStruct = StructNew();
 
-    for ( card in this_plan ) {
+    for ( var card in this_plan ) {
 
+      // set the calculated_for_* setters
+      this_plan[card].setCalculated_For_Month( Month(arguments.calculated_for) );
+      this_plan[card].setCalculated_For_Year( Year(arguments.calculated_for) );
+
+      // set aside a copy of all the cards that have a calculated payment.
       if ( this_plan[card].getCalculated_Payment() > 0 )
 
         StructInsert( cpStruct, card, this_plan[card].getCalculated_Payment() );
@@ -927,7 +900,7 @@ component accessors="true" {
 
       if ( a < num_columns && !StructIsEmpty(cpStruct) ) {
 
-        splits = knapsackservice.knapsack( cpStruct, pay_frequency_capacity );
+        var splits = knapsackservice.knapsack( cpStruct, pay_frequency_capacity );
 
         // if it can't split anything
         if ( ArrayLen(splits) == 0 ) {
@@ -946,7 +919,7 @@ component accessors="true" {
           var thisPay = StructNew();
           var remains = StructNew();
 
-          for ( key in cpStruct ) {
+          for ( var key in cpStruct ) {
             if ( ListFind(chosen, key, ',') ) {
               StructInsert( thisPay, key, cpStruct[key] );
             } else {
@@ -995,7 +968,7 @@ component accessors="true" {
 
   /* takes a user and returns a series of events, based on their computed plan, to determine the month-by-month
   details of a payoff */
-  public array function dbCalculateSchedule( string user_id ) {
+  public array function dbCalculateSchedule( string user_id, no_cache=false ) {
 
     // 0. init
     var recalculate_plan = false;
@@ -1003,97 +976,110 @@ component accessors="true" {
     var each_card = 0;
     var this_card_next_interest = 0;
     var this_card_next_balance = 0;
-    var budget = preferenceservice.getBudget( arguments.user_id );
 
-    // 1. init an events array
-    var events = ArrayNew(1);
+    // if cached and cache not expired
+    var events = eventservice.get( arguments.user_id );
 
-    // 2. start with today's date
-    var next_date = Now();
+    if ( ArrayIsEmpty(events) || arguments.no_cache ) {
 
-    // 3. get the user's plan
-    var next_plan = list( arguments.user_id );
+      // 0. get the user's budget
+      var budget = preferenceservice.get( arguments.user_id ).getBudget();
 
-    // 4. convert the plan to an event with calculateEvent()
-    var next_event = dbCalculateEvent( next_plan, next_date );
+      // 1. init an events array
+      events = ArrayNew(1);
 
-    // 5. add the event to the events array
-    ArrayAppend( events, next_event );
+      // 2. start with today's date
+      var next_date = Now();
 
-    // 6. calculate the total_remaining_balance by summing the remaining_balance of each card in the current_event.
-    var total_remaining_balance = cardservice.dbCalculateTotalRemainingBalance( next_event );
+      // 3. get the user's plan
+      var next_plan = list( arguments.user_id );
 
-    // 8. while total_remaining_balance is > 0, loop
-    while ( total_remaining_balance > 0 ) {
+      // 4. convert the plan to an event with calculateEvent()
+      var next_event = dbCalculateEvent( next_plan, next_date );
 
-      // 8a. Add a month to the working date.
-      next_date = DateAdd( 'm', 1, next_date );
+      // 5. add the event to the events array
+      ArrayAppend( events, next_event );
 
-      // 8b. loop over every card in next_plan
-      for ( each_card in next_plan ) {
+      // 6. calculate the total_remaining_balance by summing the remaining_balance of each card in the current_event.
+      var total_remaining_balance = cardservice.dbCalculateTotalRemainingBalance( next_event );
 
-        // account for the 30 day rule immediately
-        if ( next_plan[each_card].getBalance() > 0 && next_plan[each_card].getMin_Payment() == 0 ) {
+      // 8. while total_remaining_balance is > 0, loop
+      while ( total_remaining_balance > 0 ) {
 
-          // just calculate a min. payment, leave the balance alone
-          next_plan[each_card].calculateMin_Payment();
+        // 8a. Add a month to the working date.
+        next_date = DateAdd( 'm', 1, next_date );
 
-        } else if ( next_plan[each_card].getRemaining_Balance() > 0 ) {
+        // 8b. loop over every card in next_plan
+        for ( each_card in next_plan ) {
 
-          // 8bi. calculate the interest for next month
-          this_card_next_interest = dbCalculateMonthInterest( next_plan[each_card].getRemaining_Balance(), next_plan[each_card].getInterest_Rate(), next_date );
+          // account for the 30 day rule immediately
+          if ( next_plan[each_card].getBalance() > 0 && next_plan[each_card].getMin_Payment() == 0 ) {
 
-          // 8bii. add it to the card's reamining_balance.
-          this_card_next_balance = next_plan[each_card].getRemaining_Balance() + this_card_next_interest;
+            // just calculate a min. payment, leave the balance alone
+            next_plan[each_card].calculateMin_Payment();
 
-          // 8biii. if any card's balance is set to 0 as a result of this, set a recalculate flag.
-          if ( this_card_next_balance <= 0 ) {
-            this_card_next_balance = 0;
-            recalculate_plan = true;
-            abort; // FIXME: Uhhh, this is *never* firing. IT MUST!!
+          } else if ( next_plan[each_card].getRemaining_Balance() > 0 ) {
+
+            // 8bi. calculate the interest for next month
+            this_card_next_interest = dbCalculateMonthInterest( next_plan[each_card].getRemaining_Balance(), next_plan[each_card].getInterest_Rate(), next_date );
+
+            // 8bii. add it to the card's reamining_balance.
+            this_card_next_balance = next_plan[each_card].getRemaining_Balance() + this_card_next_interest;
+
+            // 8biii. if any card's balance is set to 0 as a result of this, set a recalculate flag.
+            if ( this_card_next_balance <= 0 ) {
+              this_card_next_balance = 0;
+              recalculate_plan = true;
+              abort; // FIXME: Uhhh, this is *never* firing. IT MUST!!
+            }
+
+            // 8biv. set the new balance on the card in the plan
+            next_plan[each_card].setBalance( this_card_next_balance );
+
+          } else {
+
+            next_plan[each_card].setBalance( 0 );
+
           }
 
-          // 8biv. set the new balance on the card in the plan
-          next_plan[each_card].setBalance( this_card_next_balance );
+        }
 
-        } else {
+        // 8e. If the recreate flag was set, 
+        // FIXME: You should only have to recalculate the plan *if* this iterate sets any balances to 0.
+        if ( 1 ) {
 
-          next_plan[each_card].setBalance( 0 );
+          // 8ei. Reset the flag
+          recalculate_plan = false;
+
+          // TODO: this *really* needs to call dbCalculatePlan() or at the very least handle emergency cards as well.
+          try {
+            new_payment_plan = dbCalculatePayments( next_plan, budget );
+          } catch (any e) {
+            if ( e.errorCode == "ERR_BUDGET_OVERRUN" ) {
+              new_payment_plan = dbCalculatePayments( next_plan, budget, false );
+            } else {
+              rethrow;
+            }
+          }
+
+          next_plan = new_payment_plan;
 
         }
+
+        // 8c. Convert next_plan into a next_event, using the new date.
+        next_event = dbCalculateEvent( next_plan, next_date );
+
+        // 8d. Add the new event to the events array
+        ArrayAppend( events, next_event );
+
+        // 8f. re-assign total_remaining_balance
+        total_remaining_balance = cardservice.dbCalculateTotalRemainingBalance( next_event );
 
       }
 
-      // 8e. If the recreate flag was set, 
-      // FIXME: You should only have to recalculate the plan *if* this iterate sets any balances to 0.
-      if ( 1 ) {
-
-        // 8ei. Reset the flag
-        recalculate_plan = false;
-
-        // TODO: this *really* needs to call dbCalculatedPlan() or at the very least handle emergency cards as well.
-        try {
-          new_payment_plan = dbCalculatePayments( next_plan, budget );
-        } catch (any e) {
-          if ( e.errorCode == "ERR_BUDGET_OVERRUN" ) {
-            new_payment_plan = dbCalculatePayments( next_plan, budget, false );
-          } else {
-            rethrow;
-          }
-        }
-
-        next_plan = new_payment_plan;
-
-      }     
-
-      // 8c. Convert next_plan into a next_event, using the new date.
-      next_event = dbCalculateEvent( next_plan, next_date );
-
-      // 8d. Add the new event to the events array
-      ArrayAppend( events, next_event );      
-
-      // 8f. re-assign total_remaining_balance
-      total_remaining_balance = cardservice.dbCalculateTotalRemainingBalance( next_event );
+      // save the plan
+      if (!arguments.no_cache)
+        eventservice.save( events );
 
     }
 

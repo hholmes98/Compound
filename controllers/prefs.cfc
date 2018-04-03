@@ -1,52 +1,33 @@
 //controllers/prefs
 component accessors = true { 
 
-  property framework;
   property preferenceservice;
+
+  function init( fw ) {
+
+    variables.fw = fw;
+
+  }
 
   public void function get( struct rc ) {
 
     var prefbean = preferenceservice.get( rc.uid );
 
-    framework.renderdata( "JSON" , prefbean );
+    variables.fw.renderdata( "JSON" , prefbean );
 
   }
 
   public void function save( struct rc ) {
+    param name="rc.user_id" default=0;
 
-    var ret = {};
+    rc.preference = preferenceservice.get( rc.user_id );
 
-    if ( StructKeyExists( arguments.rc, 'freq' ) ) {
+    variables.fw.populate( cfc = rc.preference, trim = true );
 
-      ret = freq( arguments.rc.user_id, arguments.rc.freq );
+    // flatten bean to struct, pass to save service
+    ret = preferenceservice.save( variables.preferenceservice.flatten( rc.preference ) );
 
-    } else if ( structKeyExists( arguments.rc, 'budget' ) ) {
-
-      ret = budget( arguments.rc.user_id, arguments.rc.budget );
-
-    }
-
-    framework.renderdata( "JSON", ret );
-
-  }
-
-/******
-private (refactor these out completely later, thanks)
-******/
-
-  private string function budget( string budget, string uid ) {
-
-    var ret = preferenceservice.setbudget( arguments.uid, arguments.budget );
-
-    return ret;
-
-  }
-
-  private string function freq( string freq, string uid ) {
-
-    var ret = preferenceservice.setfrequency( arguments.uid, arguments.freq );
-
-    return ret;
+    variables.fw.renderdata( "JSON", ret );
 
   }
 

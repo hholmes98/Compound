@@ -220,7 +220,7 @@ services
     var key = data.user_id;
     var deferred = $q.defer();
 
-    $http.get( '/index.cfm/plan/' + key )
+    $http.get( '/index.cfm/plan/list/user_id/' + key )
     .then( function( response ) {
 
       deferred.resolve( response.data );
@@ -278,6 +278,30 @@ services
 
   }
 
+  service.pGetPreferences = function( data ) {
+
+    var user_id = data.user_id;
+    var deferred = $q.defer();
+
+    $http({
+        method: 'GET',
+        url: '/index.cfm/prefs/uid/' + user_id
+    })
+    .then( function onSuccess( response ) {
+
+      deferred.resolve( response.data )
+
+    })
+    .catch( function onError( e ) {
+
+      deferred.reject( e );
+
+    });
+
+    return deferred.promise;
+
+  }
+
   service.pSetPreferences = function( data ) {
 
     var deferred = $q.defer();
@@ -292,7 +316,16 @@ services
     })
     .then( function( response ) {
 
+      if ( response.data == -1 ) {
+        throw new Error( 'REST Error' );
+      }
+
       deferred.resolve( data );
+
+    })
+    .catch( function( e ) {
+
+      deferred.reject( 'REST Error' );
 
     });
 
@@ -442,7 +475,7 @@ controller/main
 
     var data = {
       user_id: id,
-      freq: freq
+      pay_frequency: freq
     };
 
     DDService.pSetPreferences( data )
@@ -525,6 +558,17 @@ controller/main
 
   }
 
+  $scope.reorder = function( by_field ) {
+
+    if ( by_field == $scope.orderByField ) {
+      $scope.reverseSort = !$scope.reverseSort;
+    } else {
+      $scope.orderByField = by_field;
+      $scope.reverseSort = false;
+    }
+
+  }
+
   /******************
 
   cardLabelCompare
@@ -591,9 +635,9 @@ controller/plan
 
   // Calendar: alert on eventClick
   $scope.alertOnEventClick = function( date, jsEvent, view ) {
-      $scope.alertMessage = date.title + ' on ' + moment(date.start._d).format('dddd, MMMM Do');
+    $scope.alertMessage = date.title + ' on ' + moment(date.start._d).format('dddd, MMMM Do');
   };
-  
+
   // Calendar: config object
   $scope.uiConfig = {
     calendar:{
@@ -619,7 +663,7 @@ controller/plan
   // Calendar: main()
   $http({ 
     method: 'GET',
-    url: 'index.cfm/plan/events/' + CF_getUserID()
+    url: 'index.cfm/plan/schedule/user_id/' + CF_getUserID()
   }).then( function onSuccess( response ) {
 
     var result = response.data;
@@ -856,7 +900,7 @@ controller/plan
   // FIXME: separate global handler that verifies person is logged in / redirects them if fails, from plan/events/milestones init.
   $http({
       method: 'GET',
-      url: 'index.cfm/plan/' + CF_getUserID()
+      url: 'index.cfm/plan/list/user_id/' + CF_getUserID()
   }).then( function onSuccess( response ) {
   
     if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
@@ -935,12 +979,12 @@ controller/pay
 .controller( 'ddPay' , function ( $scope, $http, $q, $location, DDService ) {
 
   $scope.fail = false;
-  $scope.orderByField = 'label';
+  $scope.orderByField = 'pay_date';
   $scope.reverseSort = false;
 
   $http({
     method: 'GET',
-    url: '/index.cfm/card/user_id/' + CF_getUserID()
+    url: '/index.cfm/plan/events/user_id/' + CF_getUserID()
   }).then( function onSuccess( response ) {
     
     if ( response.data.toString().indexOf('DOCTYPE') != -1) {
@@ -948,7 +992,7 @@ controller/pay
     }
 
     //success
-    $scope.cards = response.data;
+    $scope.cards = response.data[0];
 
     // make an array 'keylist' of the keys in the order received (eg. 0:"10",1:"9",2:"8",3:"6",4:"2")
     $scope.keylist = Object.keys($scope.cards).sort( function(a, b) {
@@ -1041,6 +1085,18 @@ controller/pay
 
   }
 
+  // FIXME: don't duplicate!
+  $scope.reorder = function( by_field ) {
+
+    if ( by_field == $scope.orderByField ) {
+      $scope.reverseSort = !$scope.reverseSort;
+    } else {
+      $scope.orderByField = by_field;
+      $scope.reverseSort = false;
+    }
+
+  }
+
   // FIXME: this shouldn't be duplicated!
   $scope.cardLabelCompare = function( v1, v2 ) {
 
@@ -1074,10 +1130,21 @@ controller/pay
         if ( $scope.cards[$scope.keylist[v1.index]].min_payment < $scope.cards[$scope.keylist[v2.index]].min_payment )
           return -1;
 
+      case 'pay_date':
+
+        if ( $scope.cards[$scope.keylist[v1.index]].pay_date > $scope.cards[$scope.keylist[v2.index]].pay_date )
+          return 1;
+        if ( $scope.cards[$scope.keylist[v1.index]].pay_date < $scope.cards[$scope.keylist[v2.index]].pay_date )
+          return -1;
+
         break;
     }
 
     return 0;
+  }
+
+  $scope.fixDate = function(date) {
+    return new Date(date);
   }
 
 }) // controller/pay
@@ -1322,4 +1389,58 @@ controller/debt
 
   };
   
-}); // controller/debt
+}) // controller/debt
+
+/*****************
+
+controller/profile
+
+*****************/
+.controller( 'ddProfile' , function ( $scope, $http, $q, DDService ) {
+
+  var load_data = {
+    user_id: CF_getUserID()
+  };
+
+  DDService.pGetPreferences( load_data )
+  .then( function onSuccess( result ) {
+
+    $scope.preferences = result;
+
+  })
+  .catch( function onError( e ) {
+
+    //failure
+    window.location.href = '/index.cfm/login';
+
+  });
+
+  $scope.savePreferences = function( data ) {
+
+    DDService.pSetPreferences( data )
+    .then( function onSuccess( response ) {
+
+      var a=1;
+      //$scope.preferences = result.data;
+      if ( response.data == -1 ) {
+        throw new Error('REST failure');
+      }
+
+      a=2;
+
+    })
+    .catch( function onError( e ) {
+
+      // load old values back into the model
+      DDService.pGetPreferences( data )
+      .then( function onSuccess( result ) {
+        $scope.preferences = result;
+      });
+
+    });
+
+    console.log( $scope.preferences );
+
+  };
+
+}); // controller/profile

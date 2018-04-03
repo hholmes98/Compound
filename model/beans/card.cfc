@@ -8,11 +8,13 @@ component accessors = true {
   property interest_rate;
   property is_emergency;
   property min_payment;
-  property is_hot;
-  property calculated_payment;
-  property pay_date;
+  property is_hot; // plan
+  property calculated_payment; // plan
+  property pay_date; // event
+  property calculated_for_month; // event
+  property calculated_for_year; // event
 
-  function init( string card_id = 0, string user_id = 0, string label = "", string balance = 0, string interest_rate = 0.29, string is_emergency = 0, string min_payment = "", string is_hot = 0, string calculated_payment = "", date pay_date='1900-1-1' ) {
+  function init( string card_id = 0, string user_id = 0, string label = "", string balance = 0, string interest_rate = 0.29, string is_emergency = 0, string min_payment = "", string is_hot = 0, string calculated_payment = "", date pay_date='1900-1-1', string calculated_for_month = "", string calculated_for_year = "" ) {
 
     variables.card_id = card_id;
     variables.user_id = user_id;
@@ -24,6 +26,8 @@ component accessors = true {
     variables.is_hot = is_hot;
     variables.calculated_payment = calculated_payment; // "" = init, 0 or positive = calculated payment, -1 = do not/can not pay
     variables.pay_date = pay_date;
+    variables.calculated_for_month = calculated_for_month;
+    variables.calculated_for_year = calculated_for_year;
 
     return this;
 
@@ -89,6 +93,18 @@ component accessors = true {
 
     // ...set a default to 3% of balance
     variables.min_payment = (variables.balance * 0.03);
+
+  }
+
+  function calculated_for() {
+
+    if ( IsNumeric(variables.calculated_for_year) && IsNumeric(variables.calculated_for_month) )
+
+      return CreateDate( variables.calculated_for_year, variables.calculated_for_month, 1 );
+
+    else
+
+      return '1900-01-01';
 
   }
 
