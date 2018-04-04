@@ -15,6 +15,17 @@
   })(window,document,'script','dataLayer','GTM-W3L6CM2');</script>
   <!-- End Google Tag Manager -->
 
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-112744491-1"></script>
+  <script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'UA-112744491-1');
+  <cfif StructKeyExists( SESSION, 'auth' ) && SESSION.auth.isLoggedIn>
+  gtag('set', {'user_id': '<cfoutput>#SESSION.auth.user.getUser_Id()#</cfoutput>'}); // Set the user ID using signed-in user_id.
+  </cfif>  
+  </script>
   <!-- styles -->
   <cfinclude template="/includes/styles/styles.cfm">
 

@@ -58,7 +58,7 @@ component accessors = true {
       // 1. capture the tmp.preferences.budget
       var prefs = preferenceService.get( user.getUser_Id() );
       prefs.setBudget( session.tmp.preferences.budget );
-      preferenceService.save( prefs );
+      preferenceService.save( variables.preferenceService.flatten( prefs ) );
 
       // 2. convert to legit (new) cards and save
       for ( var tmpCard in session.tmp.cards ) {
