@@ -1,7 +1,8 @@
-//plan.cfc
+// controllers/plan
 component accessors = true { 
 
   property planservice;
+  property eventservice;
 
   function init( fw ) {
 
@@ -23,6 +24,14 @@ component accessors = true {
     var events = planservice.events( arguments.rc.user_id );
 
     variables.fw.renderdata( 'JSON', events );
+
+  }
+
+  public void function deleteEvents( struct rc ) {
+
+    var result = eventservice.delete( arguments.rc.user_id );
+
+    variables.fw.renderdata( 'JSON', result );
 
   }
 
@@ -75,7 +84,64 @@ component accessors = true {
 
   public void function journey( struct rc ) {
 
-    var milestones = planservice.milestones( arguments.rc.user_id );
+    // return an array of elements (each element is technically a month/year) that declare the remaining balance on each card
+    // (with the implication that the schedule conveyed in events() is committed to by the user)
+
+    // format is:
+    
+    /*
+    data = [
+
+      // milestone1
+      {
+        name: 'card1',
+        data: [100, 88, 72, 69, 51, 48, 27, 12, 4, 0]   // each value in the array the balance_remaining for that month.
+      },
+
+      // milestone2
+      {
+        name: 'card2',
+        data: [100, 72, 59, 34, 18, 9, 0]       // each value in the array the balance_remaining for that month.
+      }
+
+    ]
+      */
+
+    var s = planservice.events( arguments.rc.user_id );
+    var cards = planservice.list( arguments.rc.user_id );
+    var milestones = ArrayNew(1);
+    var thisCardId = 0;
+
+    // cards is an object(struct)!
+    for ( var card in cards ) {
+
+      var milestone = StructNew();
+
+      milestone["name"] = cards[card].getLabel();
+      milestone["data"] = ArrayNew(1);
+
+      thisCardId = cards[card].getCard_Id();
+
+      // events is an array of structs!
+      for ( var event in s ) {
+
+        for ( var item in event ) {
+
+          if ( event[item].getCard_Id() == thisCardID && event[item].getRemaining_Balance() > 0 ) {
+
+            // append the remainig balance as a plottable point along the 
+            ArrayAppend( milestone["data"], event[item].getRemaining_Balance() );
+
+          }
+
+        }
+
+      }
+
+      // add new milestones for this card
+      ArrayAppend( milestones, milestone );
+
+    }
 
     variables.fw.renderdata( 'JSON', milestones );
 

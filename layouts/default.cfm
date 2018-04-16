@@ -18,14 +18,15 @@
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-112744491-1"></script>
   <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'UA-112744491-1');
-  <cfif StructKeyExists( SESSION, 'auth' ) && SESSION.auth.isLoggedIn>
-  gtag('set', {'user_id': '<cfoutput>#SESSION.auth.user.getUser_Id()#</cfoutput>'}); // Set the user ID using signed-in user_id.
-  </cfif>  
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-112744491-1');
+    <cfif StructKeyExists( SESSION, 'auth' ) && SESSION.auth.isLoggedIn>
+    gtag('set', {'user_id': '<cfoutput>#SESSION.auth.user.getUser_Id()#</cfoutput>'}); // Set the user ID using signed-in user_id.
+    </cfif>
   </script>
+
   <!-- styles -->
   <cfinclude template="/includes/styles/styles.cfm">
 
@@ -33,7 +34,7 @@
   <cfinclude template="/includes/scripts/scripts.cfm">
 
   <script>
-  var ddApp = angular.module('ddApp', ['ui.calendar', 'ui.bootstrap', '720kb.tooltips', 'ui.toggle']);
+  var ddApp = angular.module('ddApp', ['ngSanitize', 'ui.calendar', 'ui.bootstrap', '720kb.tooltips', 'ui.toggle']);
   </script>
 
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0" />
@@ -48,6 +49,15 @@
       }
     }, 1000);
   };
+
+  function CF_restErrorHandler( e ) {
+    <cfif getEnvironment() == "development">
+    alert(e);
+    <cfelse>
+    // by default, we throw the user back to the login page.
+    window.location.href = '/index.cfm/login';
+    </cfif>
+  }
   </script>
 
 </head>

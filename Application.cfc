@@ -4,7 +4,6 @@ component extends = "framework.one" {
   this.sessionManagement = true;
   this.sessionTimeout = CreateTimeSpan(0, 0, 20, 0);
   this.applicationTimeout = CreateTimeSpan(1, 0, 0, 0);
-  this.triggerDataMember = true;
 
   variables.framework = {
 
@@ -42,6 +41,8 @@ component extends = "framework.one" {
       { "$GET/plan/miles/:user_id" = "/plan/journey/user_id/:user_id" },
       { "$DELETE/plan/:user_id" = "/plan/delete/user_id/:user_id" },
       { "$GET/debt/miles/" = "/debt/journey/" },
+      { "$GET/pay/reg/" = "/pay" },
+      { "$DELETE/journey/:user_id" = "/plan/deleteEvents/user_id/:user_id" }
     ],
 
   };
@@ -93,8 +94,8 @@ component extends = "framework.one" {
     // when true, Avalanche is used unless interest rates aren't specified / are 0.
     application.AllowAvalanche = false;
 
-    application.start_page = variables.framework.home;  // if you're anonymous/non-authorized, this is where you start
-    application.auth_start_page = 'pay';        // if you're logged-in/authorized, this is where you start
+    application.start_page = variables.framework.home; // if you're anonymous/non-authorized, this is where you start
+    application.auth_start_page = 'pay'; // if you're logged-in/authorized, this is where you start
 
     application.base_url = CGI.SERVER_NAME;
 

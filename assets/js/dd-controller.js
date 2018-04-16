@@ -54,6 +54,29 @@ function round( value, precision ) {
   return Math.round(value * multiplier) / multiplier;
 }
 
+function stringToNumberLink( scope, element, attrs, ngModel ) {
+
+  ngModel.$parsers.push(parser);
+  ngModel.$formatters.push(formatter);
+
+  // in to model
+  function parser(val) {
+    return val != null ? parseInt(val,10) : null;
+  }
+
+  // out to display
+  function formatter(val) {
+
+    if (val < 0) {
+      console.warn("WARNING! stringToNumber formatted a negative integer as an empty string instead of displaying " + val + "!");
+      return "";
+    } else {
+      return (val != null) ? '' + val : null;
+    }
+  }
+
+}
+
 // https://medium.com/made-by-munsters/build-a-text-date-input-with-ngmodel-parsers-and-formatters-5b1732e0ced4
 function interestRateLink( scope, element, attributes, ngModel ) {
 
@@ -111,15 +134,8 @@ directives
 .directive('convertToNumber', function() {
   return {
     require: 'ngModel',
-    link: function(scope, element, attrs, ngModel) {
-      ngModel.$parsers.push(function(val) {
-        return val != null ? parseInt(val,10) : null;
-      });
-      ngModel.$formatters.push(function(val) {
-        return val != null ? '' + val : null;
-      });
-    }
-  };
+    link: stringToNumberLink
+  }
 })
 .directive('interestRateInput', function() {
   return {
@@ -138,6 +154,20 @@ directives
         return val != null ? currencyFormatter.format(val.toString().replace(/,/g,"")) : null; // always display 2 decimals, include .00
       });
     }
+  }
+})
+
+/***************
+
+filters
+
+***************/
+.filter('calculatedPaymentFilter', function( $sce ) {
+  return function(number) {
+    if ( isNaN(number) || number < 0 )
+      return $sce.trustAsHtml("<span style='color:red;'>CALL</span>");
+    else
+      return "$"+currencyFormatter.format(number);
   }
 })
 
@@ -254,6 +284,29 @@ services
 
   }
 
+  service.pDeleteJourney = function( data ) {
+
+    var key = data.user_id;
+    var deferred = $q.defer();
+
+    // purge the plan cache whenever a card
+    $http({
+      method: 'DELETE',
+      url: '/index.cfm/journey/' + key,
+    })
+    .then( function( response ) {
+
+      // do whatever you need to do on the client to flag the cache is purged/nonexistent
+      deferred.resolve({
+        user_id: key
+      });
+
+    });
+
+    return deferred.promise;
+
+  }
+
   service.pSetEmergency = function( data ) {
 
     var e_id = data.card_id;
@@ -297,6 +350,45 @@ services
       deferred.reject( e );
 
     });
+
+    return deferred.promise;
+
+  }
+
+  service.pValidatePreferences = function( data ) {
+
+    var deferred = $q.defer();
+
+    if (data.budget >= data.total_min_payment) {
+      deferred.resolve( data );
+    } else {
+
+      BootstrapDialog.show({
+          size: BootstrapDialog.SIZE_LARGE,
+          type: BootstrapDialog.TYPE_WARNING,
+          closable: false,
+          closeByBackdrop: false,
+          closeByKeyboard: false,
+          title: 'A matter needs your immediate attention!!',
+          message: 'You\'ve entered a budget ($'+ currencyFormatter.format(data.budget) +') that\'s smaller than the total of all your minimum payments. If you do this, your payoff schedule will be much longer than it needs to be!\n\n<b>Should we keep it like this?<\/b>',
+          buttons: [{
+              label: 'Yes, keep my budget at $' + currencyFormatter.format(data.budget),
+              cssClass: 'btn-success pull-left',
+              action: function( dialogItself ) {
+                deferred.resolve( data );
+                dialogItself.close();
+              }
+          }, {
+              label: 'No, go back to what it was',
+              cssClass: 'btn-danger',
+              action: function( dialogItself ) {
+                deferred.reject( data );
+                dialogItself.close();
+              }
+          }]
+      });
+
+    }
 
     return deferred.promise;
 
@@ -346,6 +438,8 @@ controller/main
 
   $scope.orderByField = 'label';
   $scope.reverseSort = false;
+  $scope.totalDebtLoad = 0;
+  $scope.totalMinPayment = 0;
 
   // init-start
   $http({
@@ -364,11 +458,7 @@ controller/main
     // make an array 'keylist' of the keys in the order received (eg. 0:"10",1:"9",2:"8",3:"6",4:"2")
     $scope.keylist = Object.keys($scope.cards).sort(function(a, b){return b-a});
 
-    for (key in $scope.keylist) {
-      if ( $scope.cards[$scope.keylist[key]].is_emergency ) {
-        $scope.selected = $scope.keylist[key];
-      }
-    }
+    $scope.calculateAll();
 
     // chain into the preferences load
     $http({ 
@@ -382,18 +472,34 @@ controller/main
     })
     .catch( function onError( response ) {
 
-      //failure
-      window.location.href = '/index.cfm/login';
+      CF_restErrorHandler( response );
 
     });
 
   })
   .catch ( function onError( response ) {
 
-    //failure
-    window.location.href = 'index.cfm/login';
+    CF_restErrorHandler( response );
 
   }); // init-end
+
+  $scope.calculateAll = function () {
+
+    $scope.totalDebtLoad = 0;
+    $scope.totalMinPayment = 0;
+
+    for (key in $scope.keylist) {
+
+      $scope.totalDebtLoad += $scope.cards[$scope.keylist[key]].balance;
+      $scope.totalMinPayment += $scope.cards[$scope.keylist[key]].min_payment;
+
+      if ( $scope.cards[$scope.keylist[key]].is_emergency ) {
+        $scope.selected = $scope.keylist[key];
+      }
+
+    }
+
+  }
 
   /**************
 
@@ -434,6 +540,7 @@ controller/main
 
     DDService.pSetEmergency( data )
     .then( DDService.pDeletePlan )
+    .then( DDService.pDeleteJourney )
     .then( function onSuccess( response ) {
 
       // actually set the card
@@ -452,15 +559,27 @@ controller/main
 
     var data = {
       user_id: id,
-      budget: val
+      budget: val,
+      total_min_payment: $scope.totalMinPayment
     };
 
-    DDService.pSetPreferences( data )
+    DDService.pValidatePreferences( data )
+    .then( DDService.pSetPreferences )
     .then( DDService.pDeletePlan )
+    .then( DDService.pDeleteJourney )
     .then( function onSuccess( response ) {
 
       // actually set the budget
       $scope.preferences.budget = val;
+
+    }, function onError( e ) {
+
+      DDService.pGetPreferences( e )
+      .then( function onSuccess( result ) {
+
+        $scope.preferences = result;
+
+      })
 
     });
 
@@ -480,6 +599,7 @@ controller/main
 
     DDService.pSetPreferences( data )
     .then( DDService.pDeletePlan )
+    .then( DDService.pDeleteJourney )
     .then( function onSuccess( response ) {
 
       // actually set the pay frequency
@@ -502,6 +622,7 @@ controller/main
     DDService.pGetCard( in_data )
     .then( DDService.pDeleteCard )
     .then( DDService.pDeletePlan )
+    .then( DDService.pDeleteJourney )
     .then( function onSuccess( response ) {
 
       delete $scope.cards[key];
@@ -921,9 +1042,8 @@ controller/plan
     $scope.cards = $scope.plan; // FIXME: you're duping this var, just to make the ordering work? Don't.
 
   }).catch ( function onError( response ) {
-    
-    //failure
-    window.location.href = 'index.cfm/login';
+
+    CF_restErrorHandler( response );
 
   });
 
@@ -1015,15 +1135,13 @@ controller/pay
 
     }).catch( function onError( response ) {
 
-      //failure
-      //window.location.href = '/index.cfm/login';
+      CF_restErrorHandler( response );
 
     });
 
   }).catch ( function onError( response ) {
-    
-    //failure
-    //window.location.href = '/index.cfm/login';
+
+    CF_restErrorHandler( response );
 
   });
 
@@ -1077,6 +1195,7 @@ controller/pay
     DDService.pSaveCard( data )
     .then( DDService.pGetCard )
     .then( DDService.pDeletePlan )
+    .then( DDService.pDeleteJourney )
     .then( DDService.pGetPlan )
     .then( function( result ) {
       $scope.plan = result;
@@ -1410,8 +1529,7 @@ controller/profile
   })
   .catch( function onError( e ) {
 
-    //failure
-    window.location.href = '/index.cfm/login';
+    CF_restErrorHandler( e );
 
   });
 

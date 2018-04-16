@@ -1,5 +1,4 @@
 <!-- views/main/default -->
-
 <div class="page-header">
   <h1>Update Your Budget</h1>
   <h3>This is where you decimate your debt.</h3>
@@ -37,7 +36,11 @@
           </th>
         </tr>
         <tr>
-          <th colspan="5"><button tooltip="Cards can also be loans!" type="button" class="btn button btn-default" ng-click="newCard(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>)"><span class="glyphicon glyphicon-plus"></span> Add a new card</button></th>
+          <th><button uib-tooltip="Cards can also be loans!" type="button" class="btn button btn-default" ng-click="newCard(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>)"><span class="glyphicon glyphicon-plus"></span> Add a new card</button></th>
+          <th><small>Debt Load:<br/></small> <font style="color:red">{{totalDebtLoad | currency}}</font></th>
+          <th></th>
+          <th><small>Monthly Payments:<br/></small> {{totalMinPayment | currency}}</th>
+          <th></th>
         </tr>
         <tr>
           <th class="col-md-4"><a href="javascript:void(0)" ng-click="reorder('label')">Card <span ng-show="orderByField=='label'"><span ng-show="!reverseSort"><i class="fas fa-angle-up"></i></span><span ng-show="reverseSort"><i class="fas fa-angle-down"></i></span></span></a></th>
@@ -73,7 +76,7 @@
             </div>
           </td>
           <td>
-            <button class="btn button btn-default" ng-class="{'btn-success': !myForm.$pristine }" ng-disabled="myForm.$pristine" ng-click="saveCard(key, cards[key]);myForm.$setPristine(true)" ><span class="glyphicon glyphicon-ok"></span> Save Changes</button>
+            <button class="btn button btn-default" ng-class="{'btn-success': !myForm.$pristine }" ng-disabled="myForm.$pristine" ng-click="saveCard(key, cards[key]);calculateAll();myForm.$setPristine(true)" ><span class="glyphicon glyphicon-ok"></span> Save Changes</button>
             <button class="btn button btn-default" ng-class="{'btn-warning': !myForm.$pristine }" ng-disabled="myForm.$pristine" ng-click="resetCard(key);myForm.$setPristine(true)" ><span class="glyphicon glyphicon-refresh"></span> Reset</button>
             <button class="btn button btn-default" ng-click="deleteCard(key);"><span class="glyphicon glyphicon-remove"></span> Delete</button>
           </td>

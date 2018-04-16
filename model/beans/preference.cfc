@@ -1,5 +1,5 @@
 // model/beans/preference
-component accessors = true {
+component accessors = true invokeImplicitAccessor=true {
 
   property user_id;
   property budget;

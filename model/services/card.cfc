@@ -235,6 +235,47 @@ component accessors = true {
 
   }
 
+  public query function qryGetOffendingCardsByUser( string user_id, string include_list='', boolean prioritize_emergency=false ) {
+
+    var sql = '
+      SELECT c.*
+      FROM "pCards" c
+      WHERE c.user_id = :uid
+      AND c.balance > 0
+    ';
+
+    if ( Len( arguments.include_list ) ) {
+      sql = sql & '
+        AND c.card_id IN ( #arguments.include_list# )
+      ';
+    }
+
+    if ( arguments.prioritize_emergency ) {
+
+      sql = sql & '
+        ORDER BY c.is_emergency DESC, c.min_payment DESC, c.balance DESC, c.interest_rate DESC
+      ';
+
+    } else {
+
+      sql = sql & '
+        ORDER BY c.min_payment DESC, c.balance DESC, c.interest_rate DESC
+      ';
+
+    }
+
+    var params = {
+      uid = {
+        value = arguments.user_id, sqltype = 'integer' 
+      }
+    };
+
+    var result = QueryExecute( sql, params, variables.defaultOptions );
+
+    return result;
+
+  }
+
   public query function qryGetNonZeroCardsByUser( string user_id, string include_list='', boolean prioritize_emergency=false ) {
 
     var sql = '
@@ -372,7 +413,8 @@ component accessors = true {
     var card = 0;
 
     for ( card in arguments.cards ) {
-      rtot += arguments.cards[card].getRemaining_Balance();
+      //if ( arguments.cards[card].getCalculated_Payment() > 0 )
+        rtot += arguments.cards[card].getRemaining_Balance();
     }
 
     return rtot;
@@ -385,7 +427,26 @@ component accessors = true {
     var card = 0;
 
     for ( card in arguments.cards ) {
-      tot += arguments.cards[card].getCalculated_Payment();
+      if ( arguments.cards[card].getCalculated_Payment() > 0 )
+        tot += arguments.cards[card].getCalculated_Payment();
+    }
+
+    return tot;
+
+  }
+
+  public numeric function dbCalculateTotalMinPayments( struct cards, boolean consider_balance=false ) {
+
+    var tot = 0;
+    var card = 0;
+
+    for ( card in arguments.cards ) {
+      if ( !arguments.consider_balance )
+        tot += arguments.cards[card].getMin_Payment();
+      else {
+        if ( arguments.cards[card].getBalance() > 0 )
+          tot += arguments.cards[card].getMin_Payment();
+      }
     }
 
     return tot;

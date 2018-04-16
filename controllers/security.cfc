@@ -29,9 +29,10 @@ component accessors = true {
   function authorize( rc ) {
 
     // check to make sure the user is logged on
-    if ( not ( structKeyExists( session, 'auth' ) && session.auth.isLoggedIn ) && 
+    if ( not ( structKeyExists( session, 'auth' ) && session.auth.isLoggedIn ) &&
         !listfindnocase( 'login', variables.fw.getSection() ) && 
         !listfindnocase( 'debt', variables.fw.getSection() ) &&
+        !listfindnocase( 'mail', variables.fw.getSection() ) && 
         !listfindnocase( 'main.error', variables.fw.getFullyQualifiedAction() ) ) {
 
       variables.fw.redirect('login');

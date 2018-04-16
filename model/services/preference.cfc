@@ -59,7 +59,7 @@ component accessors=true  {
 
   }
 
-  public any function save( struct preference ) {
+  public any function save( preference ) {
 
     var f_bud = Replace( preference.budget, ",","","ALL" );
 

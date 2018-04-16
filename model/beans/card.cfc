@@ -39,14 +39,22 @@ component accessors = true {
     // it is what the balance *will be if the calculated payment is applied to the current balance*
     // eg. balance = $100.00, calculated_payment = $15.00, remaining_balance = $85.00
     // automatically handles zeroing account when the balance isn't 0, or when the calculated payment ends up being more than the balance
-    if ( IsNumeric( variables.calculated_payment )
-        && ( variables.balance > 0 )
-        && ( variables.calculated_payment > 0 )
+
+    if ( IsNumeric( variables.calculated_payment ) ) {
+
+      // if the card was deferred (-1), the remaining balance == balance
+      if ( variables.balance > 0 && variables.calculated_payment < 0 )
+        return variables.balance;
+
+      else if ( ( variables.balance > 0 )
+        && ( variables.calculated_payment >= 0 )
         && ( variables.balance > variables.calculated_payment ) 
-    )
-      return Evaluate( variables.balance - variables.calculated_payment );
-    else
+      )
+        return Evaluate( variables.balance - variables.calculated_payment );
+
+    } else {
       return 0;
+    }
 
   }
 

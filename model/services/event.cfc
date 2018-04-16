@@ -73,11 +73,6 @@ component accessors = true {
 
   }
 
-
-
-
-
-
   public any function get( string id ) {
 
     // an event doesn't have a single key - events only come by way of a user_id
@@ -188,7 +183,7 @@ component accessors = true {
 
       for ( var card in event ) {
 
-        if ( event[card].getPay_Date() != '1900-1-1' && event[card].getBalance() > 0 ) {
+        if ( event[card].getPay_Date() != '1900-1-1' ) {
 
           sql = sql & '(
             #event[card].getCalculated_For_Month()#,

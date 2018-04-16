@@ -48,7 +48,7 @@
               {{plan[card].label}}
             </td>
             <td>
-              {{plan[card].calculated_payment | currency}}
+              <span ng-bind-html="plan[card].calculated_payment|calculatedPaymentFilter" />
             </td>
           </tr>
         </tbody>

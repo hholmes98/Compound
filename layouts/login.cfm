@@ -10,10 +10,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <div class="container"> 
   <cfoutput>
-    #view('common/func/msg')#
-
     #body#
+
+    #view('common/func/msg')#
   </cfoutput>
 </div>
-
 </body>

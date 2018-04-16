@@ -40,337 +40,10 @@ component accessors="true" {
 
   }
 
-  /* ***
-  milestones()
 
-  powers the Plan > Milestones tab
-  *** */
 
-  public any function milestones( string user_id ) {
 
-    // return an array of elements (each element is technically a month/year) that declare the remaining balance on each card
-    // (with the implication that the schedule conveyed in events() is committed to by the user)
 
-    // format is:
-    
-    /*
-    data = [
-
-      // milestone1
-      {
-        name: 'card1',
-        data: [100, 88, 72, 69, 51, 48, 27, 12, 4, 0]   // each value in the array the balance_remaining for that month.
-      },
-
-      // milestone2
-      {
-        name: 'card2',
-        data: [100, 72, 59, 34, 18, 9, 0]       // each value in the array the balance_remaining for that month.
-      }
-
-    ]
-      */
-
-    var schedule = dbCalculateSchedule( arguments.user_id );
-    var cards = list( arguments.user_id );
-    var milestones = ArrayNew(1);
-    var thisEvent = 0;
-    var thisCardId = 0;
-
-    // cards is an object(struct)!
-    for ( var card in cards ) {
-
-      var milestone = StructNew();
-
-      milestone["name"] = cards[card].getLabel();
-      milestone["data"] = ArrayNew(1);
-
-      thisCardId = cards[card].getCard_Id();
-
-      // events is an array of structs!
-      for ( var event in schedule ) {
-
-        for (var item in event ) {
-
-          if ( event[item].getCard_Id() == thisCardID && event[item].getRemaining_Balance() > 0 ) {
-
-            // append the remainig balance as a plottable point along the 
-            ArrayAppend( milestone["data"], event[item].getRemaining_Balance() );
-
-          }
-
-        }
-
-      }
-
-      // add new milestones for this card
-      ArrayAppend( milestones, milestone );
-
-    }
-
-    return milestones;
-
-  }
-
-
-
-  /*
-
-  *****************
-  PRIVATE FUNCTIONS
-  *****************
-
-  */
-
-  private any function getHotCard( struct cards ) {
-
-    var _searchCards = duplicate( arguments.cards );
-    var card = 0;
-    var top_cards = structNew();
-    var interest_array = arrayNew(1);
-    var balance_array = arrayNew(1);
-    var top_interest_rate = 0;
-
-    // new logic to determine hot card:
-    // IF
-    //   the is_emergency card set (and have a non-zero balance?) THEN SET 
-    // ELSE
-    //   get the first non-zero balance card with the highest interest rate and the lowest balance.
-
-    for ( card in _searchCards ) {
-
-      /* Determine "hot" card */
-      // TODO: add in individual card priorities
-      if ( IsObject(_searchcards[card]) && _searchcards[card].getIs_Emergency() eq 1 && _searchcards[card].getBalance() > 0 ) {
-        _searchcards[card].setIs_Hot(1);
-        return _searchcards[card];
-      }
-
-    }
-
-    // make an array of interests, sorted by highest first, on only cards with a non-zero balance
-    for ( card in _searchCards ) {
-
-      if ( IsObject(_searchCards[card]) && _searchCards[card].getBalance() > 0 ) {
-
-        arrayAppend( interest_array, _searchcards[card].getInterest_Rate() );
-
-      }
-      
-    }
-    
-    arraySort( interest_array, "numeric", "desc" );
-
-    //eg [.30, .28, .27, .25, .25]
-
-    // make an array of non-zero balances, sorted by lowest first
-    for ( card in _searchcards ) {
-
-      if ( IsObject(_searchCards[card]) && _searchCards[card].getBalance() > 0 ) {
-
-        arrayAppend( balance_array, _searchcards[card].getBalance() );
-
-      }
-      
-    }
-    
-    arraySort( balance_array, "numeric", "asc" );
-
-    //eg [ 0, 0, 0, 12, 24, 180, 620, 772, 1149, 2250 ]
-
-    // find the first non-zero balance card with the highest interest rate and the lowest balance
-    for ( card in _searchCards ) {
-
-      if ( IsObject(_searchCards[card]) && _searchCards[card].getBalance() > 0 ) {
-
-        if ( _searchCards[card].getInterest_Rate() == interest_array[1] ) {
-
-          if ( _searchCards[card].getBalance() == balance_array[1] ) {
-
-            _searchCards[card].setIs_Hot(1);
-            return _searchCards[card];
-          }
-
-        }
-      }
-
-    }
-
-    // I messed up somewhere, so return the first non-zero
-    for ( card in _searchCards ) {
-
-      if ( IsObject(_searchCards[card]) && _searchCards[card].getBalance() > 0) {
-
-        _searchcards[card].setIs_Hot(1);
-        return _searchCards[card];
-
-      }
-
-    }
-
-    // a big mess up!
-    return cardservice.get(0);
-
-  }
-
-  /*
-
-  *********************
-  calculatePayments()
-  *********************
-
-  takes the user's (passed-in) list of cards, examines the user's budget, and calculates a payment for each card that leverages
-  the entire budget, while maximizing the biggest payment to a "hot" card: a card that is:
-  
-  a. either the emergency card, or
-  b. the card with the highest interest rate and the lowest balance.
-
-  input: struct of cards, each with a balance, interst_rate, and min_payment
-  output: struct of cards, each with a balance, interst_rate, min_payment, and *calculated_payment*
-
-  */
-  private any function calculatePayments( struct cards, numeric available_budget ) {
-
-    /* 
-
-      Rules for setting up/distributing payment plan:
-      
-      A. Determine the "hot" card.
-      B. Take the monthly budget.
-      C. Subtrack the minimum payment for the cards that are not the "hot" card.
-      D. Use the remaining budget for the "hot" card.
-
-      Rules for determining the "hot" card (card that MUST be paid off first)
-
-      1. Loop over all cards, looking at priority, lowest is most important.
-      - 1a. Alternately, if priority can't be determined/isn't set by user, look at emergency card.
-      2. For the given list of cards in the highest priority, are all balances 0?
-      - 2a. If yes, go to next priority, return to 1. (and if only emergency, go to all remaining cards)
-      - 2b. If no, stay with the selected list of cards
-      3. For the selected cards that still have a balance, re-order by interest rate (highest first)
-      4. For the selected cards, look at which balance is closest to being paid off. this is the "hot" card.
-      5. Add up all the minimum payments.
-      6. Subtrack the minimum payment of the "hot" card. this is the "available_min_spread" alotted for all remaining minimum balances.
-      7. Take "available_min_spread", subtract it from "preferences.budget", this is now the "hot" card "calculated_payment"
-
-    */
-
-    // if there are no more cards to work with
-    if ( structIsEmpty(cards) )
-      return arguments.cards;
-
-    // if there is no more budget left to work with
-    if ( arguments.available_budget <= 0)
-      return arguments.cards;
-
-    var _cards = duplicate( arguments.cards );
-    var hot_card = getHotCard( _cards );
-
-    if ( hot_card.getCard_Id() lte 0 ) {
-
-      // allegedly no cards with a balance remain
-      return hot_card;
-    } else {
-      _cards[hot_card.getCard_Id()].setIs_Hot(1);
-    }
-
-
-    //NOTE: hot_card should be valid/should have a balance by this point!
-    
-    //5. Add up all the minimum payments.
-    var min_payment_total = 0;
-    
-    for (card in _cards) {
-      min_payment_total += _cards[card].getMin_Payment();
-    }
-    
-
-    //6. Subtrack the minimum payment of the "hot" card. this is the "available_min_spread" alotted for all remaining minimum balances.
-    var available_min_spread = min_payment_total - hot_card.getMin_Payment();
-
-    //7. Take "available_min_spread", subtract it from "preferences.budget", this is now the "hot" card "calculated_payment"
-    var hot_card_calculated_payment = arguments.available_budget - available_min_spread;
-    
-    var total_paid = 0; 
-
-//    writeDump(hot_card);abort;
-
-    for ( card in _cards ) {
-      
-      if ( _cards[card].getCard_Id() != hot_card.getCard_Id() ) {
-
-        if ( _cards[card].getBalance() > 0 ) {
-
-          var min = replace( _cards[card].getMin_Payment(),",","","ALL" );
-          var bal = replace( _cards[card].getBalance(),",","","ALL" );
-
-          if ( min > bal ) {
-          
-            //StructInsert( _cards[card], "calculated_payment", bal, true );
-            _cards[card].setCalculated_Payment( bal );
-            total_paid += bal;
-          
-          } else {
-
-            //StructInsert( _cards[card], "calculated_payment", min, true );
-            _cards[card].setCalculated_Payment( min );
-            total_paid += min;
-          }
-        
-        } else {
-
-          //StructInsert( _cards[card], "calculated_payment", 0, true );
-          _cards[card].setCalculated_Payment( 0 );
-
-        }
-
-      }
-
-//      writeoutput(total_paid & "<br>");
-    
-    }
-
-    var hot_paid = arguments.available_budget - total_paid;
-
-//    writeoutput("precalc hot card payment: " & hot_card_calculated_payment & "<br>");
-//    writeoutput("postcalcl hot card payment: " & hot_paid );abort;
-
-    //StructInsert( _cards[hot_card.getCard_Id()], "calculated_payment", hot_paid, true ); //FIXME: WARNING, SHOULDN'T NEED TRUE HERE, BUT DOES. SOMETHING'S WRONG
-    _cards[hot_card.getCard_Id()].setCalculated_Payment( hot_paid );
-
-//    writeDump(_cards);abort;
-
-    /****** 
-    postCalculation
-    ******/
-
-    // is the hot card's calculated payment greater than its balance?
-    if ( _cards[hot_card.getCard_Id()].getCalculated_Payment() > _cards[hot_card.getCard_Id()].getBalance() ) {
-
-      // set the hot card's calculated payment = to its balance 
-      _cards[hot_card.getCard_Id()].setCalculated_Payment( _cards[hot_card.getCard_Id()].getBalance() );
-
-      // remove (newly updated) calculated payment from the available budget
-      var reduced_budget = arguments.available_budget - _cards[hot_card.getCard_Id()].getCalculated_Payment();
-
-      // temp. remove hot card from entire set of cards (save a copy)
-      var _tmpCard = duplicate( _cards[hot_card.getCard_Id()] );
-      StructDelete( _cards, hot_card.getCard_Id() );
-
-      // recurse, calling calculatePayments() all over but with a smaller card set and a smaller budget
-      var _updatedCards = calculatePayments( _cards, reduced_budget );
-
-      // add the removed card back into the deck.
-      _updatedCards[_tmpCard.getCard_Id()] = _tmpCard;
-
-      // this is now the set of cards we've been working with all along.
-      _cards = _updatedCards;
-
-    }
-
-    return _cards;
-
-  }
 
 
 
@@ -471,7 +144,7 @@ component accessors="true" {
     }
 
     sql = Left( sql, Len(sql)-1 ); // trim trailing comma off
-    sql = sql & ';';      // add a semi-colon to the end
+    sql = sql & ';'; // add a semi-colon to the end
 
     //trace( category="SQL", type="Information", text=sql );  
 
@@ -513,7 +186,7 @@ component accessors="true" {
     payment_plan = get( arguments.user_id );
 
     // if cache expired OR non-existent...
-    if ( StructIsEmpty( payment_plan ) OR arguments.no_cache ) {
+    if ( StructIsEmpty( payment_plan ) || arguments.no_cache ) {
 
       // 1. get the user's budget
       budget = preferenceservice.get( arguments.user_id ).getBudget();
@@ -541,10 +214,12 @@ component accessors="true" {
         payment_plan = dbEvaluateEmergencyCard( payment_plan, e_card.getCard_Id() );
       }
 
+      // TODO: Consider a last minute post analysis on ultra low budgets / ultra high debt loads, where the
+      // budget cannot adequately handle *a single minimum payment*
+
       // 5. Cache the newly generated plan
-      if ( !arguments.no_cache ) {
-        save( payment_plan );
-      }
+      //if ( !arguments.no_cache )
+        //save( payment_plan );
 
     }
 
@@ -578,30 +253,19 @@ component accessors="true" {
 
     for ( each_card in this_deck ) {
 
-      if ( this_deck[each_card].getBalance() > 0 && this_deck[each_card].getMin_Payment() == 0 )
-        thirty_day_rule = true;
-
       // reset all the calculated payments
       this_deck[each_card].setCalculated_Payment( 0 );
       this_deck[each_card].setIs_Hot( 0 );
+
     }
 
-    // Get the list of card IDs in this deck (with a balance)
-    if ( thirty_day_rule )
-      id_list = cardservice.dbGetNonZeroCardIDsWithMinPayment( this_deck );
-    else
-      id_list = cardservice.dbGetNonZeroCardIDs( this_deck );
+    id_list = cardservice.dbGetNonZeroCardIDs( this_deck );
 
     // WARNING: UNKNOWN REASON
     // if the balance is zero across the user's deck
     if ( id_list == '' ) {
       return this_deck;
     }
-
-    // I have no more budget to work with
-    // TODO: Is this where we'll support the ability to stop calculating, if the budget's been used up?
-    if ( arguments.available_budget <= 0 )
-      return this_deck;
 
     // Build a query that sorts these cards so that the hot card is row 1
     var cardsQry = cardservice.qryGetNonZeroCardsByUser( user_id, id_list, arguments.emergency_priority );
@@ -610,85 +274,133 @@ component accessors="true" {
     // firm up the hot card
     this_deck[hot_card_id].setIs_Hot(1);
 
-    // 2. Loop over the cards (starting after the hot card), calculating the payment for each card that is not the hot card.
-    for ( i=2; i lte cardsQry.recordcount; i++ ) {
+    // can the user's budget even withstand this debt load? (aka preCalculation() )
+    var totalMinPayments = cardservice.dbCalculateTotalMinPayments( this_deck, true ); // REMEMBER : a min payment only counts if there's a BALANCE.
 
-      if ( application.AllowAvalanche ) {
+    // it can
+    if ( arguments.available_budget >= totalMinPayments ) {
 
-        if ( cardsQry.interest_rate[i] > 0 && arguments.use_interest ) {
+      // 2. Loop over the cards (starting after the hot card), calculating the payment for each card that is not the hot card.
+      for ( i=2; i lte cardsQry.recordcount; i++ ) {
 
-          this_interest_rate = cardsQry.interest_rate[i];
+        if ( application.AllowAvalanche ) {
+
+          if ( cardsQry.interest_rate[i] > 0 && arguments.use_interest ) {
+
+            this_interest_rate = cardsQry.interest_rate[i];
+
+          } else {
+
+            this_interest_rate = 0.0;
+          }
 
         } else {
 
           this_interest_rate = 0.0;
+
         }
 
-      } else {
+        calc_payment = dbCalculatePayment( this_deck[cardsQry.card_id[i]].getBalance(), this_deck[cardsQry.card_id[i]].getMin_Payment(), this_interest_rate );
 
-        this_interest_rate = 0.0;
+        this_deck[cardsQry.card_id[i]].setCalculated_Payment( calc_payment );
+
+        // 3. add up all the calculated payments...
+        total_payments += calc_payment;
 
       }
 
-      calc_payment = dbCalculatePayment( cardsQry.balance[i], cardsQry.min_payment[i], this_interest_rate );
+      // 3. ...subtract from budget
+      hot_card_calculated_payment = Evaluate( arguments.available_budget - total_payments );
 
-      this_deck[cardsQry.card_id[i]].setCalculated_Payment( calc_payment );
+      if ( hot_card_calculated_payment <= 0 ) {
 
-      // 3. add up all the calculated payments...
-      total_payments += calc_payment;
+        Throw( type="Custom", errorCode="ERR_BUDGET_OVERRUN", message="Budget Overrun", detail="The available budget was drained before being able to calculate the hot card's payment." );
 
-    }
-
-    // 3. ...subtract from budget
-    hot_card_calculated_payment = Evaluate( arguments.available_budget - total_payments );
-
-    if ( hot_card_calculated_payment <= 0 ) {
-
-      Throw( type="Custom", errorCode="ERR_BUDGET_OVERRUN", message="Budget Overrun", detail="The available budget was drained before being able to calculate the hot card's payment." );
-
-    }
-
-    // TODO:
-    // at this point with 1 hot card (and yes, you'll *need* to ensure this is the 1st pass through the function only, because it recurses!!)
-    // we'll probably want to do another check to ensure that the hot card's calculated payment is at least above the application's threshold, otherwise,
-    // calculating with use_interest is probably too aggressive, and *more* $$ should be tossed toward hot card.
-    // look at how we handle the emergency card's threshold too, I feel like that *and this* can be refactored together.
-
-    // 4. Set the hot card's calculated payment
-    this_deck[hot_card_id].setCalculated_Payment( hot_card_calculated_payment );
-
-    // 5. execute postCalcuation()
-    // if the calculated payment is greater than the balance, or evaluates to something less than 0 (when the min. payment
-    // is larger than the balance)....
-    if ( ( hot_card_calculated_payment > this_deck[hot_card_id].getBalance() ) || ( hot_card_calculated_payment < 0 ) ) {
-
-      // 5a. Set the Hot Card's calculated payment to its balance
-      this_deck[hot_card_id].setCalculated_Payment( this_deck[hot_card_id].getBalance() );
-
-      // 5b. Calculate a new budget, reducing it by the amount of the hot card's calculated payment.
-      smaller_budget = Evaluate( arguments.available_budget - this_deck[hot_card_id].getCalculated_Payment() );
-
-      if ( smaller_budget <= 0 ) {
-        Throw( type="Custom", errorCode="ERR_BUDGET_OVERRUN", message="Budget Overrun", detail="While calculating multiple hot cards, the available budget was drained before all cards were accounted for." );
       }
 
-      // 5c. Temporarily remove the hot card from the deck
-      _tmpCard = Duplicate( this_deck[hot_card_id] );
-      StructDelete( this_deck, hot_card_id, true );
+      // TODO:
+      // at this point with 1 hot card (and yes, you'll *need* to ensure this is the 1st pass through the function only, because it recurses!!)
+      // we'll probably want to do another check to ensure that the hot card's calculated payment is at least above the application's threshold, otherwise,
+      // calculating with use_interest is probably too aggressive, and *more* $$ should be tossed toward hot card.
+      // look at how we handle the emergency card's threshold too, I feel like that *and this* can be refactored together.
 
-      // 5d. Recurse into calculatePayments(), using the smaller deck and reduced budget
-      try {
-        this_deck = dbCalculatePayments( this_deck, smaller_budget, true, arguments.emergency_priority );
-      } catch (any e) {
-        if ( e.errorCode == "ERR_BUDGET_OVERRUN" ) {
-          this_deck = dbCalculatePayments( this_deck, smaller_budget, false, arguments.emergency_priority );
-        } else {
-          rethrow;
+      // 4. Set the hot card's calculated payment
+      this_deck[hot_card_id].setCalculated_Payment( hot_card_calculated_payment );
+
+      // 5. execute postCalcuation()
+      // if the calculated payment is greater than the balance, or evaluates to something less than 0 (when the min. payment
+      // is larger than the balance)....
+      if ( ( hot_card_calculated_payment > this_deck[hot_card_id].getBalance() ) || ( hot_card_calculated_payment < 0 ) ) {
+
+        // 5a. Set the Hot Card's calculated payment to its balance
+        this_deck[hot_card_id].setCalculated_Payment( this_deck[hot_card_id].getBalance() );
+
+        // 5b. Calculate a new budget, reducing it by the amount of the hot card's calculated payment.
+        smaller_budget = Evaluate( arguments.available_budget - this_deck[hot_card_id].getCalculated_Payment() );
+
+        if ( smaller_budget <= 0 ) {
+          Throw( type="Custom", errorCode="ERR_BUDGET_OVERRUN", message="Budget Overrun", detail="While calculating multiple hot cards, the available budget was drained before all cards were accounted for." );
         }
+
+        // 5c. Temporarily remove the hot card from the deck
+        _tmpCard = Duplicate( this_deck[hot_card_id] );
+        StructDelete( this_deck, hot_card_id, true );
+
+        // 5d. Recurse into calculatePayments(), using the smaller deck and reduced budget
+        try {
+          this_deck = dbCalculatePayments( this_deck, smaller_budget, true, arguments.emergency_priority );
+        } catch (any e) {
+          if ( e.errorCode == "ERR_BUDGET_OVERRUN" ) {
+            this_deck = dbCalculatePayments( this_deck, smaller_budget, false, arguments.emergency_priority );
+          } else {
+            rethrow;
+          }
+        }
+
+        // 5e. Add the removed hot card back into the deck
+        this_deck[_tmpCard.getCard_Id()] = _tmpCard;
+
       }
 
-      // 5e. Add the removed hot card back into the deck
-      this_deck[_tmpCard.getCard_Id()] = _tmpCard;
+    // it cannot, so...
+    } else {
+
+      // *******
+      // precalculation
+      // *******
+
+      // remove the hot_card_id from the list of candidates
+      id_list = ListDeleteAt( id_list, ListFind( id_list, hot_card_id ) );
+
+      // find the biggest offender in the deck THAT ARE NOT THE HOT CARD (1. highest min_payment 2. highest balance 3. highest interest)
+      var offendingQry = cardservice.qryGetOffendingCardsByUser( user_id, id_list, arguments.emergency_priority );
+      var o_id = offendingQry.card_id[1];
+
+      if ( StructKeyExists( this_deck, o_id ) ) { // you shouldn't need this!
+
+        // firm up the offending card by setting its calc'd payment to -1 (CANT_PAY)
+        this_deck[o_id].setCalculated_Payment(-1);
+
+        // 5c. Temporarily remove the hot card from the deck
+        _tmpCard = Duplicate( this_deck[o_id] );
+
+        StructDelete( this_deck, o_id, true );
+
+        // now perform the *actual* calculation
+        try {
+          this_deck = dbCalculatePayments( this_deck, arguments.available_budget, true, arguments.emergency_priority );
+        } catch (any e) {
+          if ( e.errorCode == "ERR_BUDGET_OVERRUN" ) {
+            this_deck = dbCalculatePayments( this_deck, arguments.available_budget, false, arguments.emergency_priority );
+          } else {
+            rethrow;
+          }
+        }
+
+        // 5e. Add the removed offending back into the deck
+        this_deck[_tmpCard.getCard_Id()] = _tmpCard;
+
+      }
 
     }
 
@@ -896,51 +608,76 @@ component accessors="true" {
     var pay_frequency_capacity = totalcp / num_columns;
     var pay_days = ArrayNew(1);
 
-    for (var a=1; a <= num_columns; a++) {
+    // if there are more/equal payments than there are days/month to pay (eg 2 debts, 2 times a month; 4 debts, 1 time a month)
+    if ( StructCount(cpStruct) >= num_columns ) {
 
-      if ( a < num_columns && !StructIsEmpty(cpStruct) ) {
+      for (var a=1; a <= num_columns; a++) {
 
-        var splits = knapsackservice.knapsack( cpStruct, pay_frequency_capacity );
+        // if its not the last column, and the # of items to split is greater than the num of colums (to catch the edge condition of 1 debt on a multi-month payment schedule)
+        // FIXME: Still broken - cpStruct (when down to 1 debt) is splitting the payment across the num_colums...but only 1 payment per month is displaying
+        if ( a < num_columns && !StructIsEmpty(cpStruct) ) {
 
-        // if it can't split anything
-        if ( ArrayLen(splits) == 0 ) {
+          var splits = knapsackservice.knapsack( cpStruct, pay_frequency_capacity );
 
-          // put everything into the first index of the array
-          ArrayAppend( pay_days, StructNew() );
+          // if it can't split anything
+          if ( ArrayLen(splits) == 0 ) {
 
-          // and clear it out
-          cpStruct = StructNew();
+            // put everything into the first index of the array
+            ArrayAppend( pay_days, StructNew() );
+
+            // and clear it out
+            cpStruct = StructNew();
+
+          } else {
+
+            // TODO: Any list should suffice, but will we ever want to prefer one? The longest? The shortest?
+            var chosen = splits[1];
+
+            var thisPay = StructNew();
+            var remains = StructNew();
+
+            for ( var key in cpStruct ) {
+              if ( ListFind(chosen, key, ',') ) {
+                StructInsert( thisPay, key, cpStruct[key] );
+              } else {
+                StructInsert( remains, key, cpStruct[key] );
+              }
+            }
+
+            // store what you kept
+            ArrayAppend( pay_days, thisPay );
+
+            // the remains are what's left, so pare cpStruct down
+            cpStruct = remains;
+
+          }
 
         } else {
 
-          // TODO: Any list should suffice, but will we ever want to prefer one? The longest? The shortest?
-          var chosen = splits[1];
-
-          var thisPay = StructNew();
-          var remains = StructNew();
-
-          for ( var key in cpStruct ) {
-            if ( ListFind(chosen, key, ',') ) {
-              StructInsert( thisPay, key, cpStruct[key] );
-            } else {
-              StructInsert( remains, key, cpStruct[key] );
-            }
-          }
-
-          // store what you kept
-          ArrayAppend( pay_days, thisPay );
-
-          // the remains are what's left, so pare cpStruct down
-          cpStruct = remains;
+          // we don't knapsack the the final entry in the list - we just accept it and carry on.
+          ArrayAppend( pay_days, cpStruct );
 
         }
 
-      } else {
-
-        // we don't knapsack the the final entry in the list - we just accept it and carry on.
-        ArrayAppend( pay_days, cpStruct );
-
       }
+
+    // if there are less payments than there are days/months to pay (eg. 1 debt, 2 times a momnth)
+    } else {
+
+      ArrayAppend( pay_days, cpStruct );
+      
+      // FIXME: Can't split until you allow 1 card to be paid multiple times per month (negated by lines #901 below)
+      /*
+      var key = StructKeyList(cpStruct);
+      var split_pay = cpStruct[key] / num_columns;
+
+      for (var a=1; a <= num_columns; a++) {
+        var thisStruct = StructNew();
+        StructInsert( thisStruct, key, split_pay );
+
+        ArrayAppend( pay_days, thisStruct);
+      }
+      */
 
     }
 
@@ -1012,13 +749,25 @@ component accessors="true" {
         // 8b. loop over every card in next_plan
         for ( each_card in next_plan ) {
 
-          // account for the 30 day rule immediately
-          if ( next_plan[each_card].getBalance() > 0 && next_plan[each_card].getMin_Payment() == 0 ) {
+          // for resetting the plan
+          // 1. calculated_payment -1 becomes 0 : (deferred)
+          // 2. (balance > 0 && min_payment == 0) becomes min_payment(nonzero) : (30 day rule)
+          // then
+          // if (remaining_balance > 0)
+          //   balance = remaining_balance + next month's interest
+          // else
+          //   balance = 0; 
 
+          // reset any ignored/deferred cards
+          if ( next_plan[each_card].getCalculated_Payment() < 0 )
+            next_plan[each_card].setCalculated_Payment(0);
+
+          // trigger the 30 day rule on a card with a balance but no min. payment
             // just calculate a min. payment, leave the balance alone
+          if ( next_plan[each_card].getBalance() > 0 && next_plan[each_card].getMin_Payment() == 0 )
             next_plan[each_card].calculateMin_Payment();
 
-          } else if ( next_plan[each_card].getRemaining_Balance() > 0 ) {
+          if ( next_plan[each_card].getRemaining_Balance() > 0 ) {
 
             // 8bi. calculate the interest for next month
             this_card_next_interest = dbCalculateMonthInterest( next_plan[each_card].getRemaining_Balance(), next_plan[each_card].getInterest_Rate(), next_date );
@@ -1078,8 +827,8 @@ component accessors="true" {
       }
 
       // save the plan
-      if (!arguments.no_cache)
-        eventservice.save( events );
+      //if (!arguments.no_cache)
+        //eventservice.save( events );
 
     }
 

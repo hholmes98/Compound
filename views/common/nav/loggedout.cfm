@@ -18,7 +18,7 @@
       <ul class="nav navbar-nav">
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li><cfoutput><a href="#buildUrl('login')#"> Login</a></cfoutput></li>
+        <li><cfoutput><a href="#buildUrl('login')#"> Sign In</a></cfoutput></li>
       </ul>
     </div>
   </div>

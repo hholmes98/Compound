@@ -85,7 +85,7 @@ component accessors = true {
     session.auth.user = user;
 
     // off to the default authenticated start page
-    variables.fw.redirect( application.auth_start_page );
+    variables.fw.redirect( application.auth_start_page & '/reg' );
 
   }
 

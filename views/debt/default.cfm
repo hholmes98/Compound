@@ -9,6 +9,12 @@
 
     <div class="col-xs-12" align="center">
 
+      <div class="panel-heading">
+        <div class="panel-title">
+          <h2 shadow-text="#application.locale[session.auth.locale]['name']#">#application.locale[session.auth.locale]['name']#</h2>
+          <h3>The Credit Card Calculator</h3>
+        </div>
+      </div>
       <font style="font-size: 30px; font-weight: 700;">
         <div class="header">
           <span>Tell us your debt.</span> <span>We'll tell you the rest.</span>
