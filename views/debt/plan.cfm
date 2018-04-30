@@ -51,12 +51,12 @@
             </thead>
             <tbody>
 
-            <tr class="align-top" ng-form name="myForm" ng-repeat="card in keylist">
+            <tr class="align-top" ng-form name="myForm" ng-repeat="card in plan">
               <td>
-                {{plan[card].label}}
+                {{card.label}}
               </td>
               <td>
-                {{plan[card].calculated_payment | currency}}
+                {{card.calculated_payment | currency}}
               </td>
             </tr>
             </tbody>

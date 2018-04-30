@@ -46,13 +46,38 @@ function getColor(index) {
 // https://stackoverflow.com/questions/149055/how-can-i-format-numbers-as-dollars-currency-string-in-javascript
 var currencyFormatter = new Intl.NumberFormat('en-US', {
   style: 'decimal',
-  minimumFractionDigits: 2, /* this might not be necessary */
+  minimumFractionDigits: 2
 });
 
 function round( value, precision ) {
   var multiplier = Math.pow( 10, precision || 0 );
   return Math.round(value * multiplier) / multiplier;
 }
+
+// http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/highcharts/plotoptions/series-animation-easing/
+Math.easeOutBounce = function (pos) {
+    if ((pos) < (1 / 2.75)) {
+        return (7.5625 * pos * pos);
+    }
+    if (pos < (2 / 2.75)) {
+        return (7.5625 * (pos -= (1.5 / 2.75)) * pos + 0.75);
+    }
+    if (pos < (2.5 / 2.75)) {
+        return (7.5625 * (pos -= (2.25 / 2.75)) * pos + 0.9375);
+    }
+    return (7.5625 * (pos -= (2.625 / 2.75)) * pos + 0.984375);
+};
+
+function fixDate( date ) {
+  return new Date(date);
+};
+
+
+/*******************
+
+common (directives)
+
+*******************/
 
 function stringToNumberLink( scope, element, attrs, ngModel ) {
 
@@ -83,6 +108,13 @@ function interestRateLink( scope, element, attributes, ngModel ) {
   ngModel.$parsers.push(parser);
   ngModel.$formatters.push(formatter);
 
+  ngModel.$validators.interestRate = function(modelVal, viewVal) {
+
+    var myVal = modelVal || viewVal;
+    return /^[\d|,|.]+$/.test(myVal);
+
+  };
+
   function parser(value) {
 
     // TODO: incoming values  should be checked for %ages greater than 30 or less than 0 (eg 0.1 = conveting to 0.001 interest = triggering validation)
@@ -105,19 +137,40 @@ function interestRateLink( scope, element, attributes, ngModel ) {
 
 }
 
-// http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/highcharts/plotoptions/series-animation-easing/
-Math.easeOutBounce = function (pos) {
-    if ((pos) < (1 / 2.75)) {
-        return (7.5625 * pos * pos);
-    }
-    if (pos < (2 / 2.75)) {
-        return (7.5625 * (pos -= (1.5 / 2.75)) * pos + 0.75);
-    }
-    if (pos < (2.5 / 2.75)) {
-        return (7.5625 * (pos -= (2.25 / 2.75)) * pos + 0.9375);
-    }
-    return (7.5625 * (pos -= (2.625 / 2.75)) * pos + 0.984375);
-};
+function dollarLink( scope, element, attr, ngModel ) {
+
+  ngModel.$parsers.push(parser);
+  ngModel.$formatters.push(formatter);
+
+  ngModel.$validators.dollarInput = function(modelVal, viewVal) {
+
+    var myVal = viewVal; // we care about validating the view.
+    return /^[\d|,|.]+$/.test(myVal);
+
+  };
+
+  // in to model
+  function parser(val) {
+    return val != null ? parseFloat(val.replace(/,/g,"")) : null;
+  }
+
+  // out to display
+  function formatter(val) {
+    return val != null ? currencyFormatter.format(val.toString().replace(/,/g,"")) : null; // always display 2 decimals, include .00
+  }
+
+}
+
+function payDateLink( scope, element, attr, ngModel ) {
+
+  ngModel.$formatters.push(formatter);
+
+  // out to display
+  function formatter(val) {
+    return val != null ? fixDate(val) : null;
+  }
+
+}
 
 /*****************
 
@@ -135,26 +188,19 @@ directives
   return {
     require: 'ngModel',
     link: stringToNumberLink
-  }
+  };
 })
 .directive('interestRateInput', function() {
   return {
     require: 'ngModel',
     link: interestRateLink
-  }
+  };
 })
 .directive('dollarInput', function() {
   return {
     require: 'ngModel',
-    link: function(scope, element, attrs, ngModel) {
-      ngModel.$parsers.push(function(val) {
-        return val != null ? parseFloat(val.replace(/,/g,"")) : null;
-      });      
-      ngModel.$formatters.push(function(val) {
-        return val != null ? currencyFormatter.format(val.toString().replace(/,/g,"")) : null; // always display 2 decimals, include .00
-      });
-    }
-  }
+    link: dollarLink
+  };
 })
 
 /***************
@@ -163,12 +209,91 @@ filters
 
 ***************/
 .filter('calculatedPaymentFilter', function( $sce ) {
+
   return function(number) {
     if ( isNaN(number) || number < 0 )
       return $sce.trustAsHtml("<span style='color:red;'>CALL</span>");
     else
       return "$"+currencyFormatter.format(number);
+  };
+
+})
+.filter('noPaymentFilter', function() {
+
+  function zeroPayFilter( items, all ) {
+
+    var filtered = [];
+
+    angular.forEach(items, function(item, key, items) {
+      if (!all) {
+        if (item.pay_date!='1900-1-1')
+          filtered.push(item);
+      } else
+        filtered.push(item);
+    });
+
+    return filtered;
+
   }
+
+  zeroPayFilter.$stateful = true;
+
+  return zeroPayFilter;
+
+})
+.filter('prettyPayDateFilter', function() {
+
+  return function(date) {
+    if (date == '1900-1-1')
+      return "-";
+    else
+      return new Date(date);
+  }
+
+})
+/***************
+
+sorters (filters)
+
+***************/
+.filter('cardSorter', function() {
+
+  function CustomOrder( left, right, field ) {
+
+    switch(field) {
+
+      default:
+        if ( left[field] > right[field])
+          return 1;
+        if ( left[field] < right[field])
+          return -1;
+
+        break;
+
+    }
+
+    return 0;
+  }
+
+  return function( items, field, reverse ) {
+
+    var filtered = [];
+
+    angular.forEach(items, function(item, key, items) {
+      filtered.push(item);
+    });
+
+    filtered.sort(function( card_a, card_b ) {
+      return ( CustomOrder( card_a, card_b, field ) );
+    });
+
+    if ( reverse )
+      filtered.reverse();
+
+    return filtered;
+
+  };
+
 })
 
 /***************
@@ -180,6 +305,50 @@ services
 
   var service = {};
 
+  // *******
+  // CRUD
+  // *******
+
+  /* CARD */
+  service.pGetCards = function( data ) {
+
+    var key = data.user_id;
+    var deferred = $q.defer();
+
+    $http({
+      method: 'GET',
+      url: '/index.cfm/cards/' + key,
+    })
+    .then( function onSuccess( response ) {
+
+      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
+        throw new Error( 'REST Error' );
+      }
+
+      if ( response.data == -1 ) {
+        throw new Error( 'REST GET Error' );
+      }
+
+      deferred.resolve({
+        user_id: key,
+        cards: response.data,
+        chain: data
+      });
+
+    })
+    .catch( function onError( result ) {
+
+      deferred.reject({
+        error: result.data,
+        chain: data
+      });
+
+    });
+
+    return deferred.promise;
+
+  };
+
   service.pGetCard = function( data ) {
 
     var key = data.card_id;
@@ -189,15 +358,33 @@ services
       method: 'GET',
       url: '/index.cfm/card/' + key,
     })
-    .then( function( response ) {
+    .then( function onSuccess( response ) {
 
-      deferred.resolve( response.data );
+      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
+        throw new Error( 'REST Error' );
+      }
+
+      if ( response.data == -1 ) {
+        throw new Error( 'REST GET Error' );
+      }
+
+      deferred.resolve({
+        card: response.data
+      });
+
+    })
+    .catch( function onError( result ) {
+
+      deferred.reject({
+        error: result.data,
+        chain: data
+      });
 
     });
 
     return deferred.promise;
 
-  }
+  };
 
   service.pSaveCard = function( data ) {
 
@@ -211,22 +398,38 @@ services
         'Content-Type': 'application/x-www-form-urlencoded'
       } // set the headers so angular passing info as form data (not request payload)
     })
-    .then( function( response ) {
+    .then( function onSuccess( response ) {
+
+      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
+        throw new Error( 'REST Error' );
+      }
+
+      if ( response.data == -1 ) {
+        throw new Error( 'REST POST Error' );
+      }
 
       deferred.resolve({
-        card_id: response.data
+        card_id: response.data,
+        chain: data
+      });
+
+    })
+    .catch( function onError( result ) {
+
+      deferred.reject({
+        error: result.data,
+        chain: data
       });
 
     });
 
     return deferred.promise;
 
-  }
+  };
 
   service.pDeleteCard = function( data ) {
 
-    var in_data = data;
-    var key = data.card_id;
+    var key = data.card.card_id;
     var deferred = $q.defer();
 
     $http({
@@ -235,82 +438,386 @@ services
     })
     .then( function onSuccess( response ) {
 
-      // FIXME: if you're going to pass data back to the chain, this should be a card (with the right user_id) that is blank
-      // (because it was deleted, remember?!?)
-      deferred.resolve( in_data );
+      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
+        throw new Error( 'REST Error' );
+      }
 
-    });
+      if ( response.data == -1 ) {
+        throw new Error( 'REST DELETE Error' );
+      }
 
-    return deferred.promise;
-
-  }
-
-  service.pGetPlan = function( data ) {
-
-    var key = data.user_id;
-    var deferred = $q.defer();
-
-    $http.get( '/index.cfm/plan/list/user_id/' + key )
-    .then( function( response ) {
-
-      deferred.resolve( response.data );
-
-    });
-
-    return deferred.promise;
-
-  }
-
-  service.pDeletePlan = function( data ) {
-
-    var key = data.user_id;
-    var deferred = $q.defer();
-
-    // purge the plan cache whenever a card
-    $http({
-      method: 'DELETE',
-      url: '/index.cfm/plan/' + key,
-    })
-    .then( function( response ) {
-
-      // do whatever you need to do on the client to flag the cache is purged/nonexistent
       deferred.resolve({
-        user_id: key
+        data: 0,
+        chain: data
+      });
+
+    })
+    .catch( function onError( result ) {
+
+      deferred.reject({
+        error: result.data,
+        chain: data
       });
 
     });
 
     return deferred.promise;
 
-  }
+  };
+
+  /* PLAN */
+  service.pGetPlan = function( data ) {
+
+    var key = data.user_id;
+    var deferred = $q.defer();
+
+    $http({
+      method: 'GET',
+      url: '/index.cfm/plan/list/user_id/' + key,
+    })
+    .then( function onSuccess( response ) {
+
+      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
+        throw new Error( 'REST Error' );
+      }
+
+      if ( response.data == -1 ) {
+        throw new Error( 'REST GET Error' );
+      }
+
+      deferred.resolve({
+        user_id: key,
+        plan: response.data,
+        chain: data
+      });
+
+    })
+    .catch( function onError( result ) {
+
+      deferred.reject({
+        error: result.error,
+        chain: data
+      });
+
+    });
+
+    return deferred.promise;
+
+  };
+
+  service.pGetTempPlan = function( data ) {
+
+    var deferred = $q.defer();
+
+    $http({
+      method: 'GET',
+      url: '/index.cfm/debt/list/'
+    })
+    .then( function onSuccess( response ) {
+
+      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
+        throw new Error( 'REST Error' );
+      }
+
+      if ( response.data == -1 ) {
+        throw new Error( 'REST GET Error' );
+      }
+
+      deferred.resolve({
+        plan: response.data,
+        chain: data
+      });
+
+    })
+    .catch( function onError( result ) {
+
+      deferred.reject({
+        error: result.error,
+        chain: data
+      });
+
+    });
+
+    return deferred.promise;
+
+  };
+
+  service.pDeletePlan = function( data ) {
+
+    var key = data.user_id;
+    if (key == null) {
+      key = walkChain(data, 'user_id');
+    }
+    var deferred = $q.defer();
+
+    $http({
+      method: 'DELETE',
+      url: '/index.cfm/plan/' + key,
+    })
+    .then( function onSuccess( response ) {
+
+      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
+        throw new Error( 'REST Error' );
+      }
+
+      if ( response.data == -1 ) {
+        throw new Error( 'REST DELETE Error' );
+      }
+
+      deferred.resolve({
+        user_id: key,
+        data: 0
+      });
+
+    })
+    .catch( function onError( result ) {
+
+      deferred.reject({
+        error: result.data,
+        chain: data
+      });
+
+    });
+
+    return deferred.promise;
+
+  };
+
+  /* EVENT */
+  service.pGetEvents = function( data ) {
+
+    var key = data.user_id;
+    var deferred = $q.defer();
+
+    $http({
+      method: 'GET',
+      url: '/index.cfm/plan/events/user_id/' + key
+    })
+    .then( function onSuccess( response ) {
+
+      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
+        throw new Error( 'REST Error' );
+      }
+
+      deferred.resolve({
+        user_id: key,
+        chain: data,
+        events: response.data
+      });
+
+    })
+    .catch( function onError( result ) {
+
+      deferred.reject({
+        error: result.data,
+        chain: data
+      });
+
+    });
+
+    return deferred.promise;
+
+  };
+
+  service.pGetEvent = function( data ) {
+
+    var key = data.user_id;
+    var deferred = $q.defer();
+
+    $http({
+      method: 'GET',
+      url: '/index.cfm/plan/event/user_id/' + key
+    })
+    .then( function onSuccess( response ) {
+
+      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
+        throw new Error( 'REST Error' );
+      }
+
+      if ( response.data == -1 ) {
+        throw new Error( 'REST GET Error' );
+      }
+
+      deferred.resolve({
+        user_id: key,
+        chain: data,
+        event: response.data
+      });
+
+    })
+    .catch( function onError( result ) {
+
+      deferred.reject({
+        error: result.data,
+        chain: data
+      });
+
+    });
+
+    return deferred.promise;
+
+  };
+
+  service.pGetSchedule = function ( data ) {
+
+    var key = data.user_id;
+    var deferred = $q.defer();
+
+    $http({
+      method: 'GET',
+      url: '/index.cfm/plan/schedule/user_id/' + key
+    })
+    .then( function onSuccess( response ) {
+
+      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
+        throw new Error( 'REST Error' );
+      }
+
+      if ( response.data == -1 ) {
+        throw new Error( 'REST GET Error' );
+      }
+
+      deferred.resolve({
+        user_id: key,
+        chain: data,
+        schedule: response.data
+      });
+
+    })
+    .catch( function onError( result ) {
+
+      deferred.reject({
+        error: result.data,
+        chain: data
+      });
+
+    });
+
+    return deferred.promise;
+
+  };
+
+  service.pGetTempSchedule = function ( data ) {
+
+    var deferred = $q.defer();
+
+    $http({
+      method: 'GET',
+      url: '/index.cfm/debt/miles/'
+    })
+    .then( function onSuccess( response ) {
+
+      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
+        throw new Error( 'REST Error' );
+      }
+
+      if ( response.data == -1 ) {
+        throw new Error( 'REST GET Error' );
+      }
+
+      deferred.resolve({
+        chain: data,
+        schedule: response.data
+      });
+
+    })
+    .catch( function onError( result ) {
+
+      deferred.reject({
+        error: result.data,
+        chain: data
+      });
+
+    });
+
+    return deferred.promise;
+
+  };
+
+  service.pGetJourney = function( data ) {
+
+    var key = data.user_id;
+    var deferred = $q.defer();
+
+    // FIXME: this should be $http.jsonp(), whitelist the URL: https://docs.angularjs.org/api/ng/service/$http#jsonp
+    $http({
+      method: 'GET',
+      url: '/index.cfm/plan/miles/' + key
+    })
+    .then( function onSuccess( response ) {
+
+      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
+        throw new Error( 'REST Error' );
+      }
+
+      if ( response.data == -1 ) {
+        throw new Error( 'REST GET Error' );
+      }
+
+      deferred.resolve({
+        user_id: key,
+        chain: data,
+        journey: response.data
+      });
+
+    })
+    .catch( function onError( result ) {
+
+      deferred.reject({
+        error: result.data,
+        chain: data
+      });
+
+    });
+
+    return deferred.promise;
+
+  };
 
   service.pDeleteJourney = function( data ) {
 
     var key = data.user_id;
     var deferred = $q.defer();
 
-    // purge the plan cache whenever a card
     $http({
       method: 'DELETE',
       url: '/index.cfm/journey/' + key,
     })
     .then( function( response ) {
 
-      // do whatever you need to do on the client to flag the cache is purged/nonexistent
+      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
+        throw new Error( 'REST Error' );
+      }
+
+      if ( response.data == -1 ) {
+        throw new Error( 'REST DELETE Error' );
+      }
+
       deferred.resolve({
-        user_id: key
+        user_id: key,
+        data: 0,
+        chain: data
+      });
+
+    })
+    .catch( function( result ) {
+
+      deferred.reject({
+        error: result.data,
+        chain: data
       });
 
     });
 
     return deferred.promise;
 
-  }
+  };
 
+  /* PREFERENCES */
   service.pSetEmergency = function( data ) {
 
     var e_id = data.card_id;
-    var u_id = data.user_id;  // FIXME: why is this needed? you can get user_id from card_id.
+    var u_id = data.user_id;
     var deferred = $q.defer();
 
     $http({
@@ -322,45 +829,79 @@ services
     })
     .then( function onSuccess( response ) {
 
-      // resolve the inc. data, since this REST method doesn't return enough data to chain
-      deferred.resolve( data );
+      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
+        throw new Error( 'REST Error' );
+      }
+
+      if ( response.data == -1 ) {
+        throw new Error( 'REST POST Error' );
+      }
+
+      deferred.resolve({
+        user_id: u_id,
+        chain: data,
+        data: response.data
+      });
+
+    })
+    .catch( function onError( result ) {
+
+      deferred.reject({
+        error: result.data,
+        chain: data
+      });
 
     });
 
     return deferred.promise;
 
-  }
+  };
 
   service.pGetPreferences = function( data ) {
 
-    var user_id = data.user_id;
+    var key = data.user_id;
     var deferred = $q.defer();
 
     $http({
         method: 'GET',
-        url: '/index.cfm/prefs/uid/' + user_id
+        url: '/index.cfm/prefs/uid/' + key
     })
     .then( function onSuccess( response ) {
 
-      deferred.resolve( response.data )
+      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
+        throw new Error( 'REST Error' );
+      }
+
+      if ( response.data == -1 ) {
+        throw new Error( 'REST GET Error' );
+      }
+
+      deferred.resolve({
+        preferences: response.data,
+        user_id: key,
+        chain: data
+      });
 
     })
     .catch( function onError( e ) {
 
-      deferred.reject( e );
+      deferred.reject({
+        error: e.data,
+        chain: data
+      });
 
     });
 
     return deferred.promise;
 
-  }
+  };
 
   service.pValidatePreferences = function( data ) {
 
     var deferred = $q.defer();
 
     if (data.budget >= data.total_min_payment) {
-      deferred.resolve( data );
+      deferred.resolve(data); // passthrough
     } else {
 
       BootstrapDialog.show({
@@ -392,7 +933,7 @@ services
 
     return deferred.promise;
 
-  }
+  };
 
   service.pSetPreferences = function( data ) {
 
@@ -408,20 +949,56 @@ services
     })
     .then( function( response ) {
 
-      if ( response.data == -1 ) {
+      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
         throw new Error( 'REST Error' );
       }
 
-      deferred.resolve( data );
+      if ( response.data == -1 ) {
+        throw new Error( 'REST POST Error' );
+      }
+
+      deferred.resolve({
+        data: response.data,
+        user_id: data.user_id,
+        chain: data
+      });
 
     })
     .catch( function( e ) {
 
-      deferred.reject( 'REST Error' );
+      deferred.reject({
+        error: e.data,
+        chain: data
+      });
 
     });
 
     return deferred.promise;
+
+  };
+
+
+  function walkChain(source, key) {
+
+    if (source.chain != null) {
+
+      var chain = source.chain;
+
+      if (chain.key != null) {
+        return chain.key; // data.user_id
+      } else {
+        var o = Object.keys(chain);
+        for (var obj in o) {
+          if (chain[o[obj]][key] != null) {
+            return chain[o[obj]][key]; // data.card.user_id
+          }
+        }
+        // if you're here, go deeper
+        return walkChain(chain, key);
+      }
+    } else {
+      return null;
+    }
 
   }
 
@@ -434,79 +1011,90 @@ services
 controller/main
 
 ***************/
-.controller( 'ddMain' , function ( $scope, $http, $q, DDService ) {
+//cardSorter:orderByField:reverseSort
+//$scope, $http, $q, DDService ) {
+.controller( 'ddMain' , ['$http','$q','$scope','$filter','DDService', function($http, $q, $scope, $filter, DDService) {
 
   $scope.orderByField = 'label';
   $scope.reverseSort = false;
   $scope.totalDebtLoad = 0;
   $scope.totalMinPayment = 0;
 
+  $scope.cardManagerTab = true;
+  $scope.emergencyTab = false;
+  $scope.budgetTab = false;
+  $scope.pagecheckFrequencyTab = false;
+
   // init-start
-  $http({
-    method: 'GET',
-    url: 'index.cfm/card/user_id/' + CF_getUserID()
-  })
+  DDService.pGetCards({user_id:CF_getUserID()})
   .then( function onSuccess( response ) {
 
-    if ( response.data.toString().indexOf('DOCTYPE') != -1) {
-      throw 'TIMEOUT';
-    }
-
-    //success
-    $scope.cards = response.data;
-
-    // make an array 'keylist' of the keys in the order received (eg. 0:"10",1:"9",2:"8",3:"6",4:"2")
-    $scope.keylist = Object.keys($scope.cards).sort(function(a, b){return b-a});
-
+    $scope.cards = $filter('cardSorter')(response.cards, $scope.orderByField, $scope.reverseSort);
+    //$scope.keylist = Object.keys($scope.cards).sort(function(a, b){return b-a;});
     $scope.calculateAll();
 
-    // chain into the preferences load
-    $http({ 
-      method: 'GET',
-      url: '/index.cfm/prefs/uid/' + CF_getUserID()
-    })
+    console.log($scope.cards);
+    //console.log($scope.keylist);
+
+    DDService.pGetPreferences({user_id:CF_getUserID()})
     .then( function onSuccess( response ) {
 
-      $scope.preferences = response.data;
+      $scope.preferences = response.preferences;
 
     })
-    .catch( function onError( response ) {
+    .catch( function onError( result ) {
 
-      CF_restErrorHandler( response );
+      CF_restErrorHandler( result );
 
     });
 
   })
-  .catch ( function onError( response ) {
+  .catch ( function onError( result ) {
 
-    CF_restErrorHandler( response );
+    CF_restErrorHandler( result );
 
   }); // init-end
+
+  /************
+     METHODS
+  ************/
+
+  $scope.sortBy = function(propertyName, initReverse) {
+    if (propertyName != $scope.orderByField) {
+      $scope.reverseSort = initReverse;
+    } else {
+      $scope.reverseSort = !($scope.reverseSort);
+    }
+    $scope.orderByField = propertyName;
+    $scope.cards = $filter('cardSorter')($scope.cards, $scope.orderByField, $scope.reverseSort);
+  }
 
   $scope.calculateAll = function () {
 
     $scope.totalDebtLoad = 0;
     $scope.totalMinPayment = 0;
 
-    for (key in $scope.keylist) {
+    for (var card in $scope.cards) {
 
-      $scope.totalDebtLoad += $scope.cards[$scope.keylist[key]].balance;
-      $scope.totalMinPayment += $scope.cards[$scope.keylist[key]].min_payment;
+      $scope.totalDebtLoad += $scope.cards[card].balance;
 
-      if ( $scope.cards[$scope.keylist[key]].is_emergency ) {
-        $scope.selected = $scope.keylist[key];
+      if ($scope.cards[card].balance > 0)
+        $scope.totalMinPayment += $scope.cards[card].min_payment;
+
+      if ( $scope.cards[card].is_emergency ) {
+        $scope.selected = $scope.cards[card];
       }
 
     }
 
-  }
+  };
 
   /**************
 
   saveCard
 
   **************/
-  $scope.saveCard = function( key, data ) {
+  $scope.saveCard = function( data ) {
 
     // https://stackoverflow.com/questions/28250680/how-do-i-access-previous-promise-results-in-a-then-chain
     var one = DDService.pSaveCard( data );
@@ -518,8 +1106,11 @@ controller/main
     .then( function( [resultOne, resultTwo] ) {
 
       // really only needs to update when it is a brand new card; safe to update on key otherwise
-      $scope.cards[key].card_id = resultOne.card_id;
+      data.card_id = resultOne.card_id;
 
+    })
+    .catch( function onError( result ) {
+      CF_restErrorHandler( result );
     });
 
     console.log( $scope.cards );
@@ -531,21 +1122,22 @@ controller/main
   setAsEmergency
 
   **************/
-  $scope.setAsEmergency = function( eid, uid ) {
-
-    var data = {
-      card_id: eid,
-      user_id: uid
-    };
+  $scope.setAsEmergency = function( data ) {
 
     DDService.pSetEmergency( data )
     .then( DDService.pDeletePlan )
     .then( DDService.pDeleteJourney )
     .then( function onSuccess( response ) {
 
-      // actually set the card
-      $scope.cards[eid].is_emergency = 1;
+      // update the is_emergency field on the cards themselves.
+      Object.keys($scope.cards).forEach(function(card){
+        $scope.cards[card].is_emergency = 0;
+      });
+      $scope.cards[data.card_id].is_emergency = 1;
 
+    })
+    .catch( function onError( result ) {
+      CF_restErrorHandler( result );
     });
 
   };
@@ -569,17 +1161,21 @@ controller/main
     .then( DDService.pDeleteJourney )
     .then( function onSuccess( response ) {
 
-      // actually set the budget
+      // update budget in view
       $scope.preferences.budget = val;
 
-    }, function onError( e ) {
+    })
+    .catch( function onError( e ) {
 
       DDService.pGetPreferences( e )
-      .then( function onSuccess( result ) {
+      .then( function onSuccess( response ) {
 
-        $scope.preferences = result;
+        $scope.preferences = response.preferences;
 
       })
+      .catch( function onError( result ) {
+        CF_restErrorHandler( result );
+      });
 
     });
 
@@ -590,7 +1186,7 @@ controller/main
   setPayFrequency
 
   *****************/
-  $scope.setPayFrequency = function( id, freq ) { 
+  $scope.setPayFrequency = function( id, freq ) {
 
     var data = {
       user_id: id,
@@ -605,30 +1201,9 @@ controller/main
       // actually set the pay frequency
       $scope.preferences.pay_frequency = freq;
 
-    });
-
-  };
-
-
-  /**************
-
-  deleteCard
-
-  **************/
-  $scope.deleteCard = function( key ) {
-
-    var in_data = { card_id:key }
-
-    DDService.pGetCard( in_data )
-    .then( DDService.pDeleteCard )
-    .then( DDService.pDeletePlan )
-    .then( DDService.pDeleteJourney )
-    .then( function onSuccess( response ) {
-
-      delete $scope.cards[key];
-      //for modern browsers ( > IE8 )
-      $scope.keylist.splice( $scope.keylist.indexOf(key), 1 );
-
+    })
+    .catch( function onError( result ) {
+      CF_restErrorHandler( result );
     });
 
   };
@@ -638,19 +1213,77 @@ controller/main
   newCard
 
   **************/
-  $scope.newCard = function( uid ) { 
+  $scope.newCard = function( uid ) {
 
-    if ( $scope.keylist.length ) {
-      var newid = parseInt( $scope.keylist[0] ) + 1;
+    var newid = 0;
+
+    $scope.cards.unshift({ "user_id":uid, "card_id":0, "label":"", "is_emergency":0 }); 
+
+    console.log( $scope.cards );
+    //console.log( $scope.keylist );
+
+  };
+
+  /**************
+
+  deleteCard
+
+  **************/
+  $scope.deleteCard = function( index ) {
+
+    var in_data = {
+      user_id: $scope.cards[index].user_id,
+      card: $scope.cards[index]
+    };
+
+    // temp cards get no warning, just delete
+    if ($scope.cards[index].card_id == 0) {
+
+      $scope.cards.splice( index, 1 );
+
+    } else {
+
+      BootstrapDialog.show({
+          size: BootstrapDialog.SIZE_LARGE,
+          type: BootstrapDialog.TYPE_DANGER,
+          closable: false,
+          closeByBackdrop: false,
+          closeByKeyboard: false,
+          title: 'DANGER WILL ROBINSON!!',
+          message: 'Are you absolutely sure you want to delete "' + $scope.cards[index].label + '"? Once deleted, there\'s no going back!! (But you could always re-enter it later).',
+          buttons: [{
+              label: 'Yes, delete the card.',
+              cssClass: 'btn-success pull-left',
+              action: function( dialogItself ) {
+
+                DDService.pDeleteCard ( in_data )
+                .then( DDService.pDeletePlan )
+                .then( DDService.pDeleteJourney )
+                .then( function onSuccess( response ) {
+
+                  $scope.cards.splice( index, 1 );
+                  //$scope.keylist.splice( $scope.keylist.indexOf(index), 1 );
+
+                })
+                .catch( function onError( result ){
+                  CF_restErrorHandler( result );
+                });
+
+                dialogItself.close();
+              }
+          }, {
+              label: 'No, I changed my mind.',
+              cssClass: 'btn-danger',
+              action: function( dialogItself ) {
+                dialogItself.close();
+              }
+          }]
+      });
+
     }
-    else 
-      var newid = parseInt(1);
 
-    $scope.cards[ newid ] = { "user_id":uid, "card_id":0, "label":"", "is_emergency":0 };
-
-    $scope.keylist.unshift( newid );
-
-    console.log( $scope.keylist );
+    console.log($scope.cards);
+    //console.log($scope.keylist);
 
   };
 
@@ -659,105 +1292,306 @@ controller/main
   resetCard
 
   ****************/
-  $scope.resetCard = function( eid ) {
+  $scope.resetCard = function( data ) {
 
-    var data = {
-      card_id: eid
-    };
+    // if the card is new...
+    if ( data.card_id == 0 ) {
+      // ...just empty the fields
+      data.label = '';
+      data.interest_rate = '';
+      data.balance = '';
+      data.min_payment = '';
 
-    DDService.pGetCard( data )
-    .then( function onSuccess( response ) {
-
-      if ( response.card_id == 0 ) {
-        delete $scope.cards[ eid ];
-        // for modern browsers ( > IE8)
-        $scope.keylist.splice( $scope.keylist.indexOf(eid), 1 );
-      } else
-        $scope.cards[ eid ] = response;
-
-    });
-
-  }
-
-  $scope.reorder = function( by_field ) {
-
-    if ( by_field == $scope.orderByField ) {
-      $scope.reverseSort = !$scope.reverseSort;
+    // ...otherwise, grab the card's original values
     } else {
-      $scope.orderByField = by_field;
-      $scope.reverseSort = false;
+
+      DDService.pGetCard( data )
+      .then( function onSuccess( response ) {
+
+        var idx = Object.keys($scope.cards).find(thisCard => $scope.cards[thisCard].card_id == response.card.card_id);
+
+        if (idx != "") {
+          $scope.cards[idx] = response.card; 
+        } else {
+          throw new Error('fail to reset!');
+        }
+
+      })
+      .catch( function onError( result ) {
+        CF_restErrorHandler( result );
+      });
+
     }
 
-  }
+  };
 
-  /******************
-
-  cardLabelCompare
-
-  ******************/
-
-  // FIXME: duplicate!!
-  $scope.cardLabelCompare = function( v1, v2 ) {
-
-    switch($scope.orderByField) {
-      case 'label':
-        if ( $scope.cards[$scope.keylist[v1.index]].label > $scope.cards[$scope.keylist[v2.index]].label )
-          return 1;
-        if ( $scope.cards[$scope.keylist[v1.index]].label < $scope.cards[$scope.keylist[v2.index]].label )
-          return -1;
-
-        break;
-
-      case 'balance':
-        if ( $scope.cards[$scope.keylist[v1.index]].balance > $scope.cards[$scope.keylist[v2.index]].balance )
-          return 1;
-        if ( $scope.cards[$scope.keylist[v1.index]].balance < $scope.cards[$scope.keylist[v2.index]].balance )
-          return -1;
-
-        break;
-
-      case 'interest_rate':
-
-        if ( $scope.cards[$scope.keylist[v1.index]].interest_rate > $scope.cards[$scope.keylist[v2.index]].interest_rate )
-          return 1;
-        if ( $scope.cards[$scope.keylist[v1.index]].interest_rate < $scope.cards[$scope.keylist[v2.index]].interest_rate )
-          return -1;
-
-        break;
-
-      case 'min_payment':
-
-        if ( $scope.cards[$scope.keylist[v1.index]].min_payment > $scope.cards[$scope.keylist[v2.index]].min_payment )
-          return 1;
-        if ( $scope.cards[$scope.keylist[v1.index]].min_payment < $scope.cards[$scope.keylist[v2.index]].min_payment )
-          return -1;
-
-        break;
-    }
-
-    return 0;
-  }
-
-}) // controller-main
+}]) // controller-main
 
 /***************
 
 controller/plan
 
 ***************/
-.controller( 'ddPlan' , function ( $scope , $http, $timeout ) {
+.controller( 'ddPlan' , function ( $scope , $http, $timeout, DDService ) {
 
+  /********/
+  /* init */
+  /********/
   $scope.orderByField = 'label';
   $scope.reverseSort = false;
-
-  // Calendar: for the calendar init
   $scope.schedule = [];
   $scope.events   = [];
+
+  $scope.thisMonthTab = true;
+  $scope.scheduleTab = false;
+  $scope.milestoneTab = false;
+
+  /*********/
+  /* main  */
+  /*********/
+  var in_data = { user_id:CF_getUserID() };
+
+  /* since plan loads the main screen, we do it first */
+  DDService.pGetPlan( in_data )
+  .then( function onSuccess( response ) {
+
+    // ********************
+    // 1. Populate the Plan
+    $scope.plan = response.plan;
+    //$scope.keylist = Object.keys($scope.plan).sort(function(a, b){return b-a;});
+
+    $scope.selected = Object.keys($scope.plan).find(thisCard => thisCard.is_emergency == 1);
+
+    /*
+    for (var card in $scope.plan) {
+      if ( card.is_emergency ) {
+
+        $scope.selected = $scope.keylist[card];
+      }
+    }
+    */
+
+    $scope.cards = $scope.plan; // FIXME: you're duping this var, just to make the ordering work? Don't.
+
+    /* ...then, we do the calendar and chart */
+    DDService.pGetSchedule( in_data )
+    .then( DDService.pGetJourney )
+    .then( function onSuccess( response ) {
+
+      // **************************************
+      // 2. Populate the Schedule (-> Calendar)
+      var result = response.chain.schedule;
+      var i=0;
+
+      for (i=0; i < result.length; i++) {
+        $scope.events.push({
+          title:result[i].title,
+          start:new Date(result[i].start)
+        });
+      }
+
+      $scope.schedule.push($scope.events);
+      // NOTE: we no longer populate at this stage, because if calendar is hidden by default,
+      // errors get thrown!! (see #601)
+
+      // **************************************
+      // 3. Populate the Journey (-> Highchart)
+      var wins = [];
+      result = response.journey;
+
+      for (i=0; i<result.length;i++) {
+
+        // inject id
+        result[i].id = 'id_' + i;
+
+        // inject color
+        result[i].color = getColor(i);
+
+        // if this card has elements...
+        if ( result[i].data.length > 0 ) {
+
+          // ..it needs one more element to indicate $0.00
+          result[i].data.push(0);
+
+          // ..and it needs a partner series to display a milestone flag
+          var win = {
+            id: 'milestone_' + i,
+            type: 'flags',
+            shape: 'squarepin',
+            width: 82,
+            onSeries: 'id_' + i,
+            tooltip: {
+              pointFormatter: function() {
+                return this.text;
+              }
+            },
+            lineWidth: 2,
+            data: []
+          };
+
+          var startMoment = moment(new Date(y,m,1));
+          var endMoment = startMoment.add( result[i].data.length-1, 'months');
+
+          win.data.push({
+            color: getColor(i),
+            x: endMoment.toDate(),
+            title: 'CHECKPOINT!!',
+            text: (result[i].name + ' paid off in: <b>' + endMoment.format('MMMM') + ' of ' + endMoment.format('YYYY') + '</b>' ),
+          });
+
+          wins.push(win);
+
+        }
+
+      }
+
+      // cat the two arrays together
+      result = result.concat(wins);
+
+      Highcharts.SVGRenderer.prototype.symbols.doublearrow = function(x, y, w, h) {
+        return [
+          // right arrow
+          'M', x + w / 2 + 1, y,
+          'L', x + w / 2 + 1, y + h,
+          x + w + w / 2 + 1, y + h / 2,
+          'Z',
+          // left arrow
+          'M', x + w / 2 - 1, y,
+          'L', x + w / 2 - 1, y + h,
+          x - w / 2 - 1, y + h / 2,
+          'Z'
+        ];
+      };
+
+      if (Highcharts.VMLRenderer) {
+        Highcharts.VMLRenderer.prototype.symbols.doublearrow = Highcharts.SVGRenderer.prototype.symbols.doublearrow;
+      }
+
+      Highcharts.stockChart('milestones', {
+
+        //title: {
+        //  text: 'Payoff Milestones'
+        //},
+
+        credits: {
+          enabled: false
+        },
+
+        chart: {
+          type: 'spline'
+        },
+
+        rangeSelector: {
+          enabled: false
+        },
+
+        // this is the visual display of the spline graph, and will only visibly show a smaller, selected range of the full timeline
+        xAxis: {
+          type: 'datetime',
+          ordinal: false,
+          min: Date.UTC(y,m,1),     // note: initial range start (today)
+          max: Date.UTC(y,m+4,1),    // TODO: calculate this range to be 1/5th of the complete timeline (so that the initial selection 1/5th of the navigator bar)
+          //tickInterval: 30 * 24 * 3600 * 1000 // a tick every month
+        },
+
+        // this start and end should be equal-to-or-longer than the visual display of the spline (set above in xAxis)
+        navigator: {
+          height: 80,
+          maskFill: 'rgba(131,145,120,0.6)', //'#839178',
+          maskInside: false,
+          outlineColor: '#000',
+          outlineWidth: 1,
+          xAxis: {
+            type: 'datetime',
+            ordinal: false,
+            min: Date.UTC(y,m,1), // full range start (today)
+            tickInterval: 2 * 30 * 24 * 3600 * 1000 // a tick every 2 month
+          },
+          handles: {
+            symbols: ['doublearrow','doublearrow'],
+            height: 20,
+            width: 12,
+            lineWidth: 1,
+            backgroundColor: '#d2691e',
+            borderColor: '#000'
+          }
+        },
+
+        yAxis: {
+          type: 'linear',
+          min: 0,
+        },
+
+        tooltip: {
+          split: true,
+          distance: 70, // undocumented, distance in pixels away from the point (calculated either + or -, based on best positioning of cursor)
+          padding: 5,
+          pointFormatter: function() {
+            return '<span style="color:' + this.color + '">\u25CF</span> ' + this.series.name + '\'s Balance: <b>$' + currencyFormatter.format(this.y) + '</b><br/>';
+          }
+        },
+
+        plotOptions: {
+          series: {
+            pointStart: Date.UTC(y,m,1), // we begin plotting on the 1st of the current month
+            pointIntervalUnit: 'month',  // every point along the x axis represents 1 month
+            animation: {
+              duration: 6200,
+              //easing: 'easeOutBounce'
+            },
+            lineWidth: 4
+          }
+        },
+
+        series: result
+
+        /*
+        REF 1 (adding something on the end): http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/highcharts/point/datalabels/
+        REF 2 (a 2nd series of flags): http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/stock/demo/flags-general/
+        REF 3 (multiple series, loaded asynchronously): http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/stock/demo/compare/
+        REF 4 (diff flags on diff series): http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/stock/demo/flags-placement/
+        */
+
+      });
+
+    })
+    .catch( function onError( result ) {
+
+      CF_restErrorHandler( result );
+
+    });
+
+  })
+  .catch( function onError( result ) {
+
+    CF_restErrorHandler( result );
+
+  });
+
+  /************
+     METHODS
+  ************/
 
   // Calendar: alert on eventClick
   $scope.alertOnEventClick = function( date, jsEvent, view ) {
     $scope.alertMessage = date.title + ' on ' + moment(date.start._d).format('dddd, MMMM Do');
   };
+
+  // Calendar: hack to render
+  /*
+  $scope.renderCalendar = function( calendar ) {
+
+    $timeout( function() {
+      // such a fuckin' hack, thx to calendar not rendering if hidden by default!
+      if (!$scope.schedule.length && $scope.events.length) {
+        $scope.schedule.push($scope.events);
+        calendarTag = $('#' + calendar);
+        calendarTag.fullCalendar('render');
+      }
+    }, 0);
+
+  };
+  */
 
   // Calendar: config object
   $scope.uiConfig = {
@@ -766,328 +1600,6 @@ controller/plan
       timezone: 'UTC'
     }
   };
-
-  $scope.renderCalendar = function(calendar) {
-    $timeout(function(){
-      // such a fuckin' hack, thx to calendar not rendering if hidden by default!
-      if (!$scope.schedule.length)
-        $scope.schedule.push($scope.events);
-
-      calendarTag = $('#' + calendar);
-      calendarTag.fullCalendar('render');
-
-    }, 0);
-  };
-
-  // FIXME : Plan, Calendar, and Chart init() should all be promise-chained
-  // Intended Step 2
-  // Calendar: main()
-  $http({ 
-    method: 'GET',
-    url: 'index.cfm/plan/schedule/user_id/' + CF_getUserID()
-  }).then( function onSuccess( response ) {
-
-    var result = response.data;
-
-    for(var i=0; i< result.length; i++){
-      $scope.events.push({
-        title:result[i].title,
-        start:new Date(result[i].start)
-      });
-    };
-
-    //$scope.schedule.push($scope.events); 
-    // NOTE: we no longer populate at this stage, because if calendar is hidden by default,
-    // errors get thrown!! (see #601)
-
-  }).catch( function onError( response ) {
-
-    //failure
-
-  });
-
-  /* Chart */
-
-  /*
-    format is:
-    
-    [
-      {
-        id: 'id_1',
-        name: 'name of card',
-        data:
-        [
-          100.00, 75.00, 50.00, 25.00, 10.00, 5.00, 2.50, 1.00  // balance at the end of each month
-        ],
-      },
-      {
-        id: 'id_2',
-        name: 'name of card 2',
-        data:
-        [
-          100.00, 75.00, 50.00, 25.00, 10.00, 5.00, 2.50, 1.00  // balance at the end of each month
-        ],
-      },
-      ...
-      {
-        id: 'milestone_1',
-        type: 'flags',
-        data:
-        [
-        ],
-        onSeries: 'id_1',  // the id of the data that just ended - ran out of data[]
-        shape: 'circlepin',
-        width: 16
-      }
-    ]
-
-  */
-
-  // Chart: main()
-  // Intended Step 3
-  // FIXME: this should be $http.jsonp(), whitelist the URL: https://docs.angularjs.org/api/ng/service/$http#jsonp
-  $http({ 
-    method: 'GET',
-    url: 'index.cfm/plan/miles/' + CF_getUserID()
-  })
-  .then( function onSuccess( response ) {
-
-    var wins = [];
-    var result = response.data;
-
-    for (var i=0; i<result.length;i++) {
-
-      // inject id
-      result[i]['id'] = 'id_' + i;
-
-      // inject color
-      result[i]['color'] = getColor(i);
-
-      // if this card has elements...
-      if ( result[i].data.length > 0 ) {
-
-        // ..it needs one more element to indicate $0.00
-        result[i].data.push(0);
-
-        // ..and it needs a partner series to display a milestone flag
-        var win = {
-          id: 'milestone_' + i,
-          type: 'flags',      
-          shape: 'squarepin',
-          width: 82,
-          onSeries: 'id_' + i,
-          tooltip: {
-            pointFormatter: function() {
-              return this.text;
-            }
-          },
-          lineWidth: 2,
-          data: []
-        };
-
-        var startMoment = moment(new Date(y,m,1));
-        var endMoment = startMoment.add( result[i].data.length-1, 'months');
-
-        win.data.push({
-          color: getColor(i),
-          x: endMoment.toDate(),
-          title: 'CHECKPOINT!!',
-          text: (result[i].name + ' paid off in: <b>' + endMoment.format('MMMM') + ' of ' + endMoment.format('YYYY') + '</b>' ),
-        });
-
-        wins.push(win);
-
-      }
-
-    }
-
-    // cat the two arrays together
-    result = result.concat(wins);
-
-    Highcharts.SVGRenderer.prototype.symbols.doublearrow = function(x, y, w, h) {
-      return [
-        // right arrow
-        'M', x + w / 2 + 1, y,
-        'L', x + w / 2 + 1, y + h,
-        x + w + w / 2 + 1, y + h / 2,
-        'Z',
-        // left arrow
-        'M', x + w / 2 - 1, y,
-        'L', x + w / 2 - 1, y + h,
-        x - w / 2 - 1, y + h / 2,
-        'Z'
-      ];
-    };
-
-    if (Highcharts.VMLRenderer) {
-      Highcharts.VMLRenderer.prototype.symbols.doublearrow = Highcharts.SVGRenderer.prototype.symbols.doublearrow;
-    }
-
-    Highcharts.stockChart('milestones', {
-
-      //title: {
-      //  text: 'Payoff Milestones'
-      //},
-
-      credits: {
-        enabled: false
-      },
-
-      chart: {
-        type: 'spline'
-      },
-
-      rangeSelector: {
-        enabled: false
-      },
-
-      // this is the visual display of the spline graph, and will only visibly show a smaller, selected range of the full timeline
-      xAxis: {
-        type: 'datetime',
-        ordinal: false,
-        min: Date.UTC(y,m,1),     // note: initial range start (today)
-        max: Date.UTC(y,m+4,1),    // TODO: calculate this range to be 1/5th of the complete timeline (so that the initial selection 1/5th of the navigator bar)
-        //tickInterval: 30 * 24 * 3600 * 1000 // a tick every month
-      },
-
-      // this start and end should be equal-to-or-longer than the visual display of the spline (set above in xAxis)
-      navigator: {
-        height: 80,
-        maskFill: 'rgba(131,145,120,0.6)', //'#839178',
-        maskInside: false,
-        outlineColor: '#000',
-        outlineWidth: 1,
-        xAxis: {
-          type: 'datetime',
-          ordinal: false,
-          min: Date.UTC(y,m,1), // full range start (today)
-          tickInterval: 2 * 30 * 24 * 3600 * 1000 // a tick every 2 month
-        },
-        handles: {
-          symbols: ['doublearrow','doublearrow'],
-          height: 20,
-          width: 12,
-          lineWidth: 1,
-          backgroundColor: '#d2691e',
-          borderColor: '#000'
-        }
-      },
-
-      yAxis: {
-        type: 'linear',
-        min: 0,
-      },
-
-      tooltip: {
-        split: true,
-        distance: 70, // undocumented, distance in pixels away from the point (calculated either + or -, based on best positioning of cursor)
-        padding: 5,
-        pointFormatter: function() {
-          return '<span style="color:' + this.color + '">\u25CF</span> ' + this.series.name + '\'s Balance: <b>$' + currencyFormatter.format(this.y) + '</b><br/>';
-        }
-      },
-
-      plotOptions: {
-        series: {
-          pointStart: Date.UTC(y,m,1), // we begin plotting on the 1st of the current month
-          pointIntervalUnit: 'month',  // every point along the x axis represents 1 month
-          animation: {
-            duration: 6200,
-            //easing: 'easeOutBounce'
-          },
-          lineWidth: 4
-        }
-      },
-
-      series: result
-
-      /*
-      REF 1 (adding something on the end): http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/highcharts/point/datalabels/
-      REF 2 (a 2nd series of flags): http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/stock/demo/flags-general/
-      REF 3 (multiple series, loaded asynchronously): http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/stock/demo/compare/
-      REF 4 (diff flags on diff series): http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/stock/demo/flags-placement/
-      */
-
-    });
-
-  }).catch ( function onError( response ) {
-    
-    //failure
-
-  });
-
-  // Intended Step 1
-  // Plan : main()
-  // FIXME: separate global handler that verifies person is logged in / redirects them if fails, from plan/events/milestones init.
-  $http({
-      method: 'GET',
-      url: 'index.cfm/plan/list/user_id/' + CF_getUserID()
-  }).then( function onSuccess( response ) {
-  
-    if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
-      throw 'TIMEOUT';
-    }
-
-    $scope.plan = response.data;
-
-    // make an array 'keylist' of the keys in the order received (eg. 0:"10",1:"9",2:"8",3:"6",4:"2")
-    $scope.keylist = Object.keys($scope.plan).sort(function(a, b){return b-a});
-
-    for (card in $scope.keylist) {
-      if ( $scope.plan[$scope.keylist[card]].is_emergency ) {
-        $scope.selected = $scope.keylist[card];
-      }
-    }
-
-    $scope.cards = $scope.plan; // FIXME: you're duping this var, just to make the ordering work? Don't.
-
-  }).catch ( function onError( response ) {
-
-    CF_restErrorHandler( response );
-
-  });
-
-  // FIXME: duplicate!!
-  $scope.cardLabelCompare = function( v1, v2 ) {
-
-    switch($scope.orderByField) {
-      case 'label':
-        if ( $scope.cards[$scope.keylist[v1.index]].label > $scope.cards[$scope.keylist[v2.index]].label )
-          return 1;
-        if ( $scope.cards[$scope.keylist[v1.index]].label < $scope.cards[$scope.keylist[v2.index]].label )
-          return -1;
-
-        break;
-
-      case 'balance':
-        if ( $scope.cards[$scope.keylist[v1.index]].balance > $scope.cards[$scope.keylist[v2.index]].balance )
-          return 1;
-        if ( $scope.cards[$scope.keylist[v1.index]].balance < $scope.cards[$scope.keylist[v2.index]].balance )
-          return -1;
-
-        break;
-
-      case 'interest_rate':
-
-        if ( $scope.cards[$scope.keylist[v1.index]].interest_rate > $scope.cards[$scope.keylist[v2.index]].interest_rate )
-          return 1;
-        if ( $scope.cards[$scope.keylist[v1.index]].interest_rate < $scope.cards[$scope.keylist[v2.index]].interest_rate )
-          return -1;
-
-        break;
-
-      case 'min_payment':
-
-        if ( $scope.cards[$scope.keylist[v1.index]].min_payment > $scope.cards[$scope.keylist[v2.index]].min_payment )
-          return 1;
-        if ( $scope.cards[$scope.keylist[v1.index]].min_payment < $scope.cards[$scope.keylist[v2.index]].min_payment )
-          return -1;
-
-        break;
-    }
-
-    return 0;
-  }
 
 }) // controller/plan
 
@@ -1098,52 +1610,93 @@ controller/pay
 ******************/
 .controller( 'ddPay' , function ( $scope, $http, $q, $location, DDService ) {
 
-  $scope.fail = false;
   $scope.orderByField = 'pay_date';
   $scope.reverseSort = false;
+  $scope.showAllCards = false;
 
-  $http({
-    method: 'GET',
-    url: '/index.cfm/plan/events/user_id/' + CF_getUserID()
-  }).then( function onSuccess( response ) {
-    
-    if ( response.data.toString().indexOf('DOCTYPE') != -1) {
-      throw 'TIMEOUT';
-    }
+  /*********/
+  /* main  */
+  /*********/
+  DDService.pGetEvent({user_id:CF_getUserID()})
+  .then( function onSuccess( response ) {
 
     //success
-    $scope.cards = response.data[0];
+    $scope.cards = response.event;
+    //$scope.keylist = Object.keys($scope.cards).sort( function(a, b){return b-a;});
 
-    // make an array 'keylist' of the keys in the order received (eg. 0:"10",1:"9",2:"8",3:"6",4:"2")
-    $scope.keylist = Object.keys($scope.cards).sort( function(a, b) {
-      return b-a
-    });
-
-    for (key in $scope.keylist) {
+    /*
+    for (var key in $scope.keylist) {
       if ( $scope.cards[$scope.keylist[key]].is_emergency ) {
         $scope.selected = $scope.keylist[key];
       }
     }
+    */
+
+    $scope.selected = Object.keys($scope.cards).find(thisCard => thisCard.is_emergency == 1);
 
     // chain into the preferences load
-    $http({ 
-      method: 'GET',
-      url: '/index.cfm/prefs/uid/' + CF_getUserID()
-    }).then( function onSuccess( response ) {
+    DDService.pGetPreferences({user_id:CF_getUserID()})
+    .then( function onSuccess( response ) {
 
       $scope.preferences = response.data;
 
-    }).catch( function onError( response ) {
+    })
+    .catch( function onError( result ) {
 
-      CF_restErrorHandler( response );
+      CF_restErrorHandler( result );
 
     });
 
-  }).catch ( function onError( response ) {
+  })
+  .catch( function onError( result ) {
 
-    CF_restErrorHandler( response );
+      CF_restErrorHandler( result );
 
   });
+
+  /***********
+    METHODS
+  ***********/
+
+  /*
+  $scope.reset = function( form ) {
+    if (form) {
+
+      for (var i=0; i < form.$$controls.length; i++) {
+        form.$$controls[i].$setViewValue(undefined);
+        form.$$controls[i].$render();
+      }
+
+      form.$setPristine();
+      form.$setUntouched();
+      //form.$render();
+    }
+  }
+  */
+  $scope.resetForm = function( forms ) {
+
+    $scope.card = {};
+
+    /*
+    for (var i=0; i < forms.length; i++ ) {
+      var form = forms[i];
+
+      var controlNames = Object.keys(form).filter(key => key.indexOf('$') !== 0);
+
+      // Set each control back to undefined. This is the only way to clear validation messages.
+      // Calling `form.$setPristine()` won't do it (even though you wish it would).
+      for (var name of controlNames) {
+          var control = form[name];
+          control.$setViewValue(undefined);
+          control.$render();
+      }
+
+      form.$setPristine();
+      form.$setUntouched();
+    }
+    */
+
+  };
 
   // compatibility bridge between angular $location and fw/1 buildUrl()
   $scope.navigateTo = function( path ) {
@@ -1151,24 +1704,24 @@ controller/pay
     //$location.url( path ); // FIXME:this is angular pro-hash navigation
     location.href = path;
 
-  }
+  };
 
   $scope.panTo = function( pageIndex ) {
 
     AnimatePage.panForward( pageIndex );
     addHistory('AnimatePage.panBack(' + (pageIndex-1).toString() + ');','#!/nb'+(pageIndex-1).toString());
 
-  }
+  };
 
-  $scope.selectCard = function( cid, destIndex ) {
+  $scope.selectCard = function( card, destIndex ) {
 
-    var user_id = $scope.cards[cid].user_id;
+    var user_id = card.user_id;
 
     DDService.pGetPlan( { user_id: user_id } )
     .then( function( result ) {
 
-      $scope.plan = result;
-      $scope.card = $scope.plan[cid];
+      $scope.plan = result.plan;
+      $scope.card = $scope.plan[card.card_id];
 
       console.log( $scope.card );
 
@@ -1184,87 +1737,25 @@ controller/pay
     AnimatePage.panBack( destIndex );
     addHistory('AnimatePage.panForward(' + (destIndex-1).toString() + ');','#!/nb'+(destIndex-1).toString());
 
-  }
+  };
 
-  $scope.recalculateCard = function( data ) {
+  $scope.recalculateCard = function( card ) {
 
-    var key = data.card_id;
+    var key = card.card_id;
 
     $scope.card.calculated_payment = '-'; // setting this to a non-number will trigger the || output filter on the display, which is 'Recalculating...'
 
-    DDService.pSaveCard( data )
+    DDService.pSaveCard( card )
     .then( DDService.pGetCard )
     .then( DDService.pDeletePlan )
     .then( DDService.pDeleteJourney )
     .then( DDService.pGetPlan )
     .then( function( result ) {
-      $scope.plan = result;
+      $scope.plan = result.plan;
       $scope.card = $scope.plan[key];
     });
 
-  }
-
-  // FIXME: don't duplicate!
-  $scope.reorder = function( by_field ) {
-
-    if ( by_field == $scope.orderByField ) {
-      $scope.reverseSort = !$scope.reverseSort;
-    } else {
-      $scope.orderByField = by_field;
-      $scope.reverseSort = false;
-    }
-
-  }
-
-  // FIXME: this shouldn't be duplicated!
-  $scope.cardLabelCompare = function( v1, v2 ) {
-
-    switch($scope.orderByField) {
-      case 'label':
-        if ( $scope.cards[$scope.keylist[v1.index]].label > $scope.cards[$scope.keylist[v2.index]].label )
-          return 1;
-        if ( $scope.cards[$scope.keylist[v1.index]].label < $scope.cards[$scope.keylist[v2.index]].label )
-          return -1;
-
-        break;
-      case 'balance':
-        if ( $scope.cards[$scope.keylist[v1.index]].balance > $scope.cards[$scope.keylist[v2.index]].balance )
-          return 1;
-        if ( $scope.cards[$scope.keylist[v1.index]].balance < $scope.cards[$scope.keylist[v2.index]].balance )
-          return -1;
-
-        break;
-      case 'interest_rate':
-
-        if ( $scope.cards[$scope.keylist[v1.index]].interest_rate > $scope.cards[$scope.keylist[v2.index]].interest_rate )
-          return 1;
-        if ( $scope.cards[$scope.keylist[v1.index]].interest_rate < $scope.cards[$scope.keylist[v2.index]].interest_rate )
-          return -1;
-
-        break;
-      case 'min_payment':
-
-        if ( $scope.cards[$scope.keylist[v1.index]].min_payment > $scope.cards[$scope.keylist[v2.index]].min_payment )
-          return 1;
-        if ( $scope.cards[$scope.keylist[v1.index]].min_payment < $scope.cards[$scope.keylist[v2.index]].min_payment )
-          return -1;
-
-      case 'pay_date':
-
-        if ( $scope.cards[$scope.keylist[v1.index]].pay_date > $scope.cards[$scope.keylist[v2.index]].pay_date )
-          return 1;
-        if ( $scope.cards[$scope.keylist[v1.index]].pay_date < $scope.cards[$scope.keylist[v2.index]].pay_date )
-          return -1;
-
-        break;
-    }
-
-    return 0;
-  }
-
-  $scope.fixDate = function(date) {
-    return new Date(date);
-  }
+  };
 
 }) // controller/pay
 
@@ -1273,43 +1764,84 @@ controller/pay
 controller/debt
 
 *****************/
-.controller( 'ddDebt' , function ( $scope, $http, $q, $location ) {
+.controller( 'ddDebt' , function ( $scope, $http, $q, $location, $compile, DDService ) {
 
-  $scope.fail = false;
   $scope.cardTotal = 1;
 
+  /*
   $('#pan-main').on('click', '.btn-more', function() {
     $scope.buildAndPan(this);
   });
+  */
 
   $('#pan-main').on('click', '.btn-submit', function() {
     $('#entry').submit();
   });
 
-  /*
-  $('#pan-main').on('click', '.btn-login', function() {
-    // FIXME: location.href='#buildUrl("login.default")#';
-  });
-  */
+  /***********
+     METHODS
+  ***********/
 
-  $scope.buildAndPan = function() {
-    $scope.cardTotal++;
-    var cards = $scope.cardTotal;
-    AnimatePage.panForward(cards);
-    addHistory('AnimatePage.panBack(' + parseInt(cards-1) + ');','#!/nb'+(cards-1).toString());
-    AnimatePage.addAnother();
-  }
+  $scope.buildAndPan = function(index) {
+
+    /* now smart enough to build a card in the future - but only if needed */
+    // add a history back to yourself
+    // hack in field validation
+    if (index == 1) {
+      if ($('#budget').val() == "") {
+        alert('Enter a budget before moving forward! If you have $200 a month to spend on paying off bills, enter \'200.00\' below!');
+        return;
+      } 
+    } else {
+      var label = $('input[name=credit-card-label' + (index-1).toString() + ']');
+      var cc_balance = $('input[name=credit-card-balance' + (index-1).toString() + ']');
+
+      if (cc_balance.val() == "") {
+        alert("Whoops! You forgot to enter a balance for this credit card! Whatever you have left to pay off on this card, just enter it below.");
+        return;
+      }
+
+      if (label.val() =="") {
+        alert('Don\'t forget to label the card! Anything will do...just use something you\'ll remember!');
+        return;
+      }
+
+    }
+
+
+    if (index > ($scope.cardTotal-1)) {
+
+      $scope.cardTotal = AnimatePage.addAnother() - 1; // we ignore the home card.
+
+      // grab the .btn-more div
+      var $last_div = $('div[id^="page"]:last');
+      // figure out the true next number
+      var num = parseInt($last_div.prop('id').match(/\d+/g)[0]);
+      // set the true next number into its buildAndPan method
+      $last_div.find('.btn-more').attr('ng-click','buildAndPan('+num+')');
+      // recompile the div
+      $compile($last_div)($scope);
+
+    }
+
+    AnimatePage.panForward(index+1);
+    addHistory('AnimatePage.panBack(' + (index) + ');','#!/nb'+(index).toString());
+
+    // if you need to build a card into the future...
+
+
+  };
 
   // compatibility bridge between angular $location and fw/1 buildUrl()
   $scope.navigateTo = function( path ) {
     //$location.url( path ); // FIXME:this is angular pro-hash navigation
     location.href = path;
-  }
+  };
 
   $scope.panTo = function( pageIndex ) {
     AnimatePage.panForward( pageIndex );
     addHistory('AnimatePage.panBack(' + pageIndex + ');','#!/nb'+pageIndex.toString());
-  }
+  };
 
   /* Chart */
 
@@ -1353,20 +1885,20 @@ controller/debt
   // FIXME: this should be $http.jsonp(), whitelist the URL: https://docs.angularjs.org/api/ng/service/$http#jsonp
 
   $scope.getTempSchedule = function() {
-    
-    $http.get( '/index.cfm/debt/miles/' )
+
+    DDService.pGetTempSchedule({})
     .then( function onSuccess( response ) {
 
-      var result = response.data;
+      var result = response.schedule;
       var wins = [];
 
       for (var i=0; i<result.length;i++) {
 
         // inject id
-        result[i]['id'] = 'id_' + i;
+        result[i].id = 'id_' + i;
 
         // inject color
-        result[i]['color'] = getColor(i);
+        result[i].color = getColor(i);
 
         // if this card has elements...
         if ( result[i].data.length > 0 ) {
@@ -1377,7 +1909,7 @@ controller/debt
           // ..and it needs a partner series to display a milestone flag
           var win = {
             id: 'milestone_' + i,
-            type: 'flags',      
+            type: 'flags',
             shape: 'squarepin',
             width: 82,
             onSeries: 'id_' + i,
@@ -1474,40 +2006,44 @@ controller/debt
 
       });
 
+    })
+    .catch( function onError( result ){
+      CF_restErrorHandler( result );
     });
-  
-  };
 
-  
+  };
 
   // Intended Step 1
   // Plan : main()
   // FIXME: separate global handler that verifies person is logged in / redirects them if fails, from plan/events/milestones init.
-  
+
   $scope.getTempPlan = function() {
-    $http({
-      method: 'GET',
-      url: '/index.cfm/debt/list/'
-    }).then( function onSuccess( response ) {
 
-      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
-        throw 'TIMEOUT';
-      }
+    DDService.pGetTempPlan({})
+    .then( function onSuccess( response ) {
 
-      $scope.plan = response.data;
+      $scope.plan = response.plan;
+      //$scope.keylist = Object.keys($scope.plan).sort(function(a, b){return b-a;});
 
-      // make an array 'keylist' of the keys in the order received (eg. 0:"10",1:"9",2:"8",3:"6",4:"2")
-      $scope.keylist = Object.keys($scope.plan).sort(function(a, b){return b-a});
-
-      for (card in $scope.keylist) {
+      /*
+      for (var card in $scope.keylist) {
         if ( $scope.plan[$scope.keylist[card]].is_emergency ) {
           $scope.selected = $scope.keylist[card];
         }
       }
+      */
+
+      $scope.selected = Object.keys($scope.plan).find(thisCard => thisCard.is_emergency == 1);
+
+    })
+    .catch( function onError( result ) {
+
+      CF_restErrorHandler( result );
+
     });
 
   };
-  
+
 }) // controller/debt
 
 /*****************
@@ -1517,14 +2053,10 @@ controller/profile
 *****************/
 .controller( 'ddProfile' , function ( $scope, $http, $q, DDService ) {
 
-  var load_data = {
-    user_id: CF_getUserID()
-  };
-
-  DDService.pGetPreferences( load_data )
+  DDService.pGetPreferences({user_id:CF_getUserID()})
   .then( function onSuccess( result ) {
 
-    $scope.preferences = result;
+    $scope.preferences = result.preferences;
 
   })
   .catch( function onError( e ) {
@@ -1533,26 +2065,29 @@ controller/profile
 
   });
 
+  /***********
+     METHODS
+  ***********/
+
   $scope.savePreferences = function( data ) {
 
     DDService.pSetPreferences( data )
     .then( function onSuccess( response ) {
-
-      var a=1;
-      //$scope.preferences = result.data;
-      if ( response.data == -1 ) {
-        throw new Error('REST failure');
-      }
-
-      a=2;
 
     })
     .catch( function onError( e ) {
 
       // load old values back into the model
       DDService.pGetPreferences( data )
-      .then( function onSuccess( result ) {
-        $scope.preferences = result;
+      .then( function onSuccess( response ) {
+
+        $scope.preferences = response.data;
+
+      })
+      .catch( function onError( result ) {
+
+        CF_restErrorHandler( result );
+
       });
 
     });

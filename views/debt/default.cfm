@@ -7,11 +7,11 @@
 
     <cfoutput>
 
-    <div class="col-xs-12" align="center">
+    <div class="col-md-12" align="center">
 
       <div class="panel-heading">
         <div class="panel-title">
-          <h2 shadow-text="#application.locale[session.auth.locale]['name']#">#application.locale[session.auth.locale]['name']#</h2>
+          <h1>#application.locale[session.auth.locale]['name']#</h1>
           <h3>The Credit Card Calculator</h3>
         </div>
       </div>
@@ -30,8 +30,8 @@
         </div>
       </font>
 
-      <div class="col-xs-2"></div>
-      <div class="col-xs-8">
+      <div class="col-md-2"></div>
+      <div class="col-md-8">
 
         <hr>
 
@@ -45,7 +45,7 @@
           </div>
         </div>
         <span>
-          <button type="button" class="btn button btn-primary btn-more"><span class="glyphicon glyphicon-circle-arrow-right"></span> Next: Enter Some Debt</button>
+          <button type="button" class="btn button btn-primary btn-more" ng-click="buildAndPan(1)"><span class="glyphicon glyphicon-circle-arrow-right"></span> Next: Enter Some Debt</button>
         </span>
         <span>
           <br/>
@@ -55,7 +55,7 @@
         </span>
 
       </div>
-      <div class="col-xs-2"></div>
+      <div class="col-md-2"></div>
 
     </div>
 
@@ -100,12 +100,12 @@
         <div class="form-group" align="left">
           <label for="credit-card-label1" class="col-sm-3 control-label">Give it a name:</label>
           <div class="col-sm-7">
-              <input class="form-control credit-card-label" type="text" placeholder="(eg. WF checking atm card)" name="credit-card-label1">
+            <input class="form-control credit-card-label" type="text" placeholder="(eg. WF checking atm card)" name="credit-card-label1">
           </div>
         </div>
         <div class="form-group" align="left">
           <div class="col-sm-offset-3 col-sm-7">
-            <button type="button" class="btn button btn-default btn-sm btn-more"><span class="glyphicon glyphicon-plus"></span> Enter More Debt</button>
+            <button type="button" class="btn button btn-default btn-sm btn-more" ng-click="buildAndPan(2)"><span class="glyphicon glyphicon-plus"></span> Enter More Debt</button>
           </div>
         </div>
         <br/>

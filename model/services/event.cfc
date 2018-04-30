@@ -90,19 +90,8 @@ component accessors = true {
   public array function getByUser( string user_id ) {
 
     var sql = '
-      SELECT c.card_id, c.user_id, c.card_label, c.min_payment, c.is_emergency, c.interest_rate, p.is_hot, p.calculated_payment, e.calculated_for_month, e.calculated_for_year, e.pay_date, e.balance
+      SELECT c.card_id, c.user_id, c.card_label, c.min_payment, c.is_emergency, c.interest_rate, e.is_hot, e.calculated_payment, e.calculated_for_month, e.calculated_for_year, e.pay_date, e.balance
       FROM "pCards" c
-      INNER JOIN "pPlans" p ON
-        c.card_id = p.card_id
-      INNER JOIN (
-        SELECT last_updated
-        FROM "pPlans"
-        WHERE user_id = :uid
-        GROUP BY last_updated
-        ORDER BY last_updated DESC
-        LIMIT 1
-      ) AS PP ON 
-        pp.last_updated = p.last_updated
       INNER JOIN "pEvents" e ON
         c.card_id = e.card_id
       INNER JOIN (
@@ -172,6 +161,8 @@ component accessors = true {
       INSERT INTO "pEvents" (
         calculated_for_month,
         calculated_for_year,
+        calculated_payment,
+        is_hot,
         card_id,
         pay_date,
         balance,
@@ -188,6 +179,8 @@ component accessors = true {
           sql = sql & '(
             #event[card].getCalculated_For_Month()#,
             #event[card].getCalculated_For_Year()#,
+            #event[card].getCalculated_Payment()#,
+            #event[card].getIs_Hot()#,
             #event[card].getCard_Id()#,
             #CreateODBCDateTime(event[card].getPay_Date())#,
             #event[card].getBalance()#,
@@ -203,9 +196,7 @@ component accessors = true {
     }
 
     sql = Left( sql, Len(sql)-1 ); // trim trailing comma off
-    sql = sql & ';';      // add a semi-colon to the end
-
-    //trace( category="SQL", type="Information", text=sql );  
+    sql = sql & ';'; // add a semi-colon to the end
 
     result = QueryExecute( sql, params, variables.defaultOptions );
 

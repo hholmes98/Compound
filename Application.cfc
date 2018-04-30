@@ -31,8 +31,8 @@ component extends = "framework.one" {
     },
 
     routes = [
-      { "$GET/card/user_id/:user_id" = "/main/list/id/:user_id" },
-      { "$GET/card/:id" = "/main/get/id/:id" },
+      { "$GET/cards/:user_id" = "/main/list/id/:user_id" },
+      { "$GET/card/:card_id" = "/main/get/id/:card_id" },
       { "$DELETE/card/:card_id" = "/main/delete/card_id/:card_id" },
       { "$POST/card/eid/:eid/uid/:uid" = "/main/setAsEmergency/eid/:eid/uid/:uid" },
       { "$POST/card/" = "/main/save" },

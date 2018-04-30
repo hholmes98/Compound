@@ -17,10 +17,10 @@
 <div class="panel panel-default form-horizontal">
 
   <!--- top tab nav --->
-  <ul class="nav nav-tabs" role="tablist">
-    <li role="presentation" class="active"><a href="#plan" aria-controls="plan" role="tab" data-toggle="tab"><i class="fas fa-eye"></i> This Month (At A Glance)</a></li>
-    <li role="presentation"><a href="#schedule" ng-click="renderCalendar('eventCalendar')" aria-controls="schedule" role="tab" data-toggle="tab"><i class="fas fa-calendar-alt"></i> Schedule By Month</a></li>
-    <li role="presentation"><a href="#journey" aria-controls="journey" role="tab" data-toggle="tab"><i class="fas fa-chart-area"></i> Future Milestones</a></li>
+  <ul class="nav nav-tabs">
+    <li ng-class="{'active': thisMonthTab==true}"><a ng-click="thisMonthTab=true;scheduleTab=false;milestoneTab=false" href="javascript:void(0)" aria-controls="plan"><i class="fas fa-eye"></i> This Month (At A Glance)</a></li>
+    <li ng-class="{'active': scheduleTab==true}"><a ng-click="thisMonthTab=false;scheduleTab=true;milestoneTab=false;renderCalendar('eventCalendar')" href="javascript:void(0)" aria-controls="schedule"><i class="fas fa-calendar-alt"></i> Schedule By Month</a></li>
+    <li ng-class="{'active': milestoneTab==true}"><a ng-click="thisMonthTab=false;scheduleTab=false;milestoneTab=true" href="javascript:void(0)" aria-controls="journey"><i class="fas fa-chart-area"></i> Future Milestones</a></li>
   </ul>
 
   <div class="tab-content">
@@ -30,29 +30,22 @@
     List out the cards, and display the calculated payment for each card. 
 
     --->
-    <div role="tabpanel" class="panel-body tab-pane active" id="plan">
-      <span>
-        <h3>For This Month</h3>
-        <cfoutput><h2 shadow-text="#MonthAsString(Month(Now()))# #Year(Now())#">#MonthAsString(Month(Now()))# #Year(Now())#</h2></cfoutput>
-      </span>
-      <table class="table table-striped table-bordered table-valign-middle">
-        <thead>
-          <tr>
-            <th class="col-md-6">For This Card</th>
-            <th class="col-md-4">Pay This Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="align-top" ng-form name="myForm" ng-repeat="card in keylist | orderBy:'null':false:cardLabelCompare">
-            <td>
-              {{plan[card].label}}
-            </td>
-            <td>
-              <span ng-bind-html="plan[card].calculated_payment|calculatedPaymentFilter" />
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div id="plan" class="panel-body" ng-show="thisMonthTab">
+      <div class="row panel-header">
+        <div class="col-md-12">
+          <h3>For This Month</h3>
+          <cfoutput><h2 shadow-text="#MonthAsString(Month(Now()))# #Year(Now())#">#MonthAsString(Month(Now()))# #Year(Now())#</h2></cfoutput>
+        </div>
+      </div>
+      <div class="row panel-header col-names"><!--- class="table table-striped table-bordered table-valign-middle" --->
+        <div class="col-md-6">For This Card</div>
+        <div class="col-md-6">Pay This Amount</div>
+      </div>
+      <div class="row panel-body" ng-form name="myForm" ng-repeat="card in cards | cardSorter:orderByField:reverseSort">
+        <div class="col-md-6">{{card.label}}</div>
+        <div class="col-md-6"><span ng-bind-html="card.calculated_payment|calculatedPaymentFilter" /></div>
+      </div>
+      </div>
     </div>
 
     <!--- tab 2
@@ -61,12 +54,15 @@
     paid per selection (so if twice a month, show the calculated $$ for 1st half and the calculated $$ for 2nd half)
 
     --->
-    <div role="tabpanel" class="panel-body tab-pane" id="schedule">
+    <div class="panel-body" id="schedule" ng-show="scheduleTab">
       <!-- using https://github.com/angular-ui/ui-calendar -->
+      <div ng-if="!(schedule.length)">
+        Loading...<div class="loader"></div>
+      </div>
       <div class="alert-success calAlert" ng-show="alertMessage != undefined && alertMessage != ''">
         <h4>{{alertMessage}}</h4>
       </div>
-      <div ui-calendar="uiConfig.calendar" id="eventCalendar" class="span8 calendar" ng-model="schedule"></div>
+      <div ui-calendar="uiConfig.calendar" id="eventCalendar" class="span8 calendar" ng-model="schedule" ng-if="schedule.length"></div>
     </div>
 
     <!--- tab 3
@@ -75,8 +71,10 @@
     (where certain cards are paid off) to convey a sense of progression, regardless of debt load.
 
     --->
-    <div role="tabpanel" class="panel-body tab-pane" id="journey">
-      <div id="milestones"></div>
+    <div class="panel-body" id="journey" ng-show="milestoneTab">
+      <div id="milestones">
+        Loading...<div class="loader"></div>
+      </div>
     </div>
 
   </div><!-- /tab-content -->

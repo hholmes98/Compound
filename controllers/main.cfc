@@ -9,6 +9,14 @@ component accessors = true {
 
   }
 
+  public void function list( struct rc ) {
+
+    var cards = cardservice.list( arguments.rc.id );
+
+    variables.fw.renderdata( 'JSON', cards );
+
+  }
+
   public void function get( struct rc ) {
 
     var cardbean = cardservice.get( arguments.rc.id );
@@ -41,13 +49,6 @@ component accessors = true {
 
   }
 
-  public void function list( struct rc ) {
-
-    var cards = cardservice.list( arguments.rc.id );
-
-    variables.fw.renderdata( 'JSON', cards );
-
-  }
 
   public void function save( struct rc ) {
 

@@ -34,6 +34,21 @@ Chocolate
 
 */
 
+/* Loader... */
+.loader {
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 /* MODAL */
 .modal { 
   display: block;
@@ -91,6 +106,15 @@ Chocolate
 .toggle-off.btn {
   padding-left: 14px;
   padding-top: 7px;
+}
+
+/* toggle on the pay screen */
+.toggle.btn {
+  min-width: 155px;
+}
+
+.btn.toggle-off.btn-sm {
+  padding: 8px 0px 8px 8px;
 }
 
 /* glyphs */
@@ -182,7 +206,7 @@ a:focus .svg-inline--fa, a:hover .svg-inline--fa {
 }
 
 hr {
-  border-top: 1px solid #171717;
+  border-top: 1px solid #D2691E;
 }
 
 p {
@@ -306,7 +330,7 @@ label {
   /* vertical-align:  middle; */
 }
 
-.btn-default:hover, .btn-default:focus, .btn-primary:hover, .btn-primary:focus {
+.btn-default:hover, .btn-default:focus, .btn-primary:hover, .btn-primary:focus, .btn-primary.active:hover, .btn-primary.active:focus {
   color: #D2691E;
   background-color: #F9Ece3;
   border-color: #4F270B;
@@ -328,7 +352,7 @@ label {
 }
 
 /* button-primary */
-.btn-primary {
+.btn-primary, .btn-primary.active {
   color: #fff;
   background-color: #1c6a3a;
   /*border-color: #cccccc;*/
@@ -361,7 +385,7 @@ label {
 .navbar-fixed-top {
   top: 0;
   z-index: 1030;
-  box-shadow: 0 4px 7px 2px rgba(0,0,0,0.4);
+  box-shadow: 0 1px 11px 1px rgba(0,0,0,0.7);
 }
 
 /* nav */
@@ -438,6 +462,11 @@ label {
   border: 2px solid #171717;
 }
 
+.panel .row {
+  margin-right: 0px;
+  margin-left: 0px;
+}
+
 .panel .tab-content {
   background: #839178;
   border-radius: 8px;
@@ -445,6 +474,45 @@ label {
 
 .panel table > thead > tr > th {
   background: #fff;
+}
+
+.panel-header {
+  background-color: #fff;
+}
+
+.panel-header.col-names {
+  font-weight: 700;
+  border-top-width: 2px;
+  border-top-style: solid;
+  border-top-color: #ddd;
+}
+
+.panel-header.col-names div {
+  margin-top: -8px;
+  padding-top: 8px;
+  border-right-width: 2px;
+  border-right-style: solid;
+  border-right-color: #ddd;
+  padding-bottom: 8px;
+  margin-bottom: -8px;
+}
+
+.panel-header.row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.panel-body {
+  width: 100%;
+  background-color: #839178;
+}
+
+.row.panel-body:nth-child(odd) {
+  background-color: #bcc3a2;
+}
+
+.row.panel-body:nth-child(even) {
+  background-color: #acc3a2;
 }
 
 .panel-default

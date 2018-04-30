@@ -40,6 +40,16 @@ component accessors="true" {
 
   }
 
+  public any function event( string user_id ) {
+
+    var t_date = Now();
+    var t_plan = list( arguments.user_id );
+    var t_event = dbCalculateEvent( t_plan, t_date );
+
+    return t_event;
+
+  }
+
 
 
 
@@ -94,7 +104,7 @@ component accessors="true" {
       }
     };
 
-    var result = queryExecute( sql, params, variables.defaultOptions );
+    var result = QueryExecute( sql, params, variables.defaultOptions );
     var deck = {};
 
     for ( i=1; i lte result.recordcount; i++ ) {
@@ -145,8 +155,6 @@ component accessors="true" {
 
     sql = Left( sql, Len(sql)-1 ); // trim trailing comma off
     sql = sql & ';'; // add a semi-colon to the end
-
-    //trace( category="SQL", type="Information", text=sql );  
 
     result = QueryExecute( sql, params, variables.defaultOptions );
 
@@ -218,8 +226,8 @@ component accessors="true" {
       // budget cannot adequately handle *a single minimum payment*
 
       // 5. Cache the newly generated plan
-      //if ( !arguments.no_cache )
-        //save( payment_plan );
+      if ( !arguments.no_cache )
+        save( payment_plan );
 
     }
 
@@ -597,7 +605,7 @@ component accessors="true" {
       this_plan[card].setCalculated_For_Month( Month(arguments.calculated_for) );
       this_plan[card].setCalculated_For_Year( Year(arguments.calculated_for) );
 
-      // set aside a copy of all the cards that have a calculated payment.
+      // set aside a copy of all the cards that have a calculated payment (included ignored)
       if ( this_plan[card].getCalculated_Payment() > 0 )
 
         StructInsert( cpStruct, card, this_plan[card].getCalculated_Payment() );
@@ -698,6 +706,14 @@ component accessors="true" {
       }
 
     }
+
+    // set the ignored card to the last pay date
+    for (var i_card in this_plan) {
+      if (this_plan[i_card].getCalculated_Payment() == -1) {
+        this_plan[i_card].setPay_Date( pay_dates[ArrayLen(pay_dates)] );
+      }
+    }
+
 
     return this_plan;
 
@@ -827,8 +843,8 @@ component accessors="true" {
       }
 
       // save the plan
-      //if (!arguments.no_cache)
-        //eventservice.save( events );
+      if (!arguments.no_cache)
+        eventservice.save( events );
 
     }
 

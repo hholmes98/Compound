@@ -27,6 +27,14 @@ component accessors = true {
 
   }
 
+  public void function event( struct rc ) {
+
+    var event = planservice.event( arguments.rc.user_id );
+
+    variables.fw.renderdata( 'JSON', event );
+
+  }
+
   public void function deleteEvents( struct rc ) {
 
     var result = eventservice.delete( arguments.rc.user_id );

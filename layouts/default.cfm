@@ -53,6 +53,7 @@
   function CF_restErrorHandler( e ) {
     <cfif getEnvironment() == "development">
     alert(e);
+    console.log(e);
     <cfelse>
     // by default, we throw the user back to the login page.
     window.location.href = '/index.cfm/login';
