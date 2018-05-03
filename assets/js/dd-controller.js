@@ -181,6 +181,26 @@ ddApp
 
 /****************
 
+config
+
+****************/
+.config(['$uibTooltipProvider', function($uibTooltipProvider){
+
+  $uibTooltipProvider.setTriggers({
+    'mouseenter': 'mouseleave',
+    'click': 'click',
+    'focus': 'blur',
+    'never': 'mouseleave'
+  });
+
+  $uibTooltipProvider.options({
+    'popupCloseDelay': 3000
+  });
+
+}])
+
+/****************
+
 directives
 
 *****************/
@@ -211,8 +231,10 @@ filters
 .filter('calculatedPaymentFilter', function( $sce ) {
 
   return function(number) {
-    if ( isNaN(number) || number < 0 )
-      return $sce.trustAsHtml("<span style='color:red;'>CALL</span>");
+    if ( isNaN(number) )
+      return number;
+    else if ( number < 0 )
+      return $sce.trustAsHtml("<span style='color:red;'>CALL<sup><i class='far fa-question-circle'></i></sup></span>");
     else
       return "$"+currencyFormatter.format(number);
   };
@@ -544,10 +566,7 @@ services
 
   service.pDeletePlan = function( data ) {
 
-    var key = data.user_id;
-    if (key == null) {
-      key = walkChain(data, 'user_id');
-    }
+    var key = deepGet(data, 'user_id');
     var deferred = $q.defer();
 
     $http({
@@ -977,9 +996,18 @@ services
 
   };
 
+  // I dunno how i feel about this
+  function deepGet(source, key) {
 
-  function walkChain(source, key) {
+    // 1. look at any/all the keys of the base obj
+    var io = Object.keys(source);
+    for (var iobj in io) {
+      if (source[io[iobj]][key] != null) {
+        return source[io[iobj]][key]; // source.user_id (equating source=card)
+      }
+    }
 
+    // 2. nothing yet? start looking at the chain.
     if (source.chain != null) {
 
       var chain = source.chain;
@@ -994,7 +1022,7 @@ services
           }
         }
         // if you're here, go deeper
-        return walkChain(chain, key);
+        return deepGet(chain, key);
       }
     } else {
       return null;
@@ -1578,25 +1606,27 @@ controller/plan
   };
 
   // Calendar: hack to render
-  /*
+  $scope.eventAfterAllRender = function ( view ) {
+    var h2Text = $('.fc-left h2').text();
+    $('.fc-left h2').attr('shadow-text', h2Text);
+  }
+
   $scope.renderCalendar = function( calendar ) {
 
-    $timeout( function() {
-      // such a fuckin' hack, thx to calendar not rendering if hidden by default!
-      if (!$scope.schedule.length && $scope.events.length) {
-        $scope.schedule.push($scope.events);
-        calendarTag = $('#' + calendar);
-        calendarTag.fullCalendar('render');
-      }
-    }, 0);
+    if (!$scope.schedule.length)
+      return;
+    else {
+      calendarTag = $('#' + calendar);
+      calendarTag.fullCalendar('render');
+    }
 
   };
-  */
 
   // Calendar: config object
   $scope.uiConfig = {
     calendar:{
       eventClick: $scope.alertOnEventClick,
+      eventAfterAllRender: $scope.eventAfterAllRender,
       timezone: 'UTC'
     }
   };
@@ -1673,6 +1703,7 @@ controller/pay
     }
   }
   */
+
   $scope.resetForm = function( forms ) {
 
     $scope.card = {};
@@ -1743,7 +1774,7 @@ controller/pay
 
     var key = card.card_id;
 
-    $scope.card.calculated_payment = '-'; // setting this to a non-number will trigger the || output filter on the display, which is 'Recalculating...'
+    $scope.card.calculated_payment = 'Thinking...'; // setting this to a non-number will trigger the || output filter on the display, which is 'Recalculating...'
 
     DDService.pSaveCard( card )
     .then( DDService.pGetCard )

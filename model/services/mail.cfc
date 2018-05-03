@@ -160,20 +160,75 @@ Your friends at ' & application.locale[session.auth.locale]['name'];
 
   /********
 
-   main scheduled task
+  main scheduled task
+  - Usage may be confusing so, for the purposes of all examples below, assume today's TRUE date is *Apr 3, 2018*.
+  - each example shows the actual evaluated values of the 1st test (approx. line 216).
+
+  -------------
+  default usage : pass 1 parameter:
+  1. today's TRUE date (for_date) 
+  -------------
+  - used when running once a day by scheduled task 
+  - this is what is used in the controller
+  - behaves as if it is testing results for the day specified (for_date=today), and run on that same day (today).
+  
+  eg. for_date = Apr 3, 2018
+  1. if (Apr 3, 2018 == Apr 30th, 2018)...
+
+  ------------
+  test usage A : pass 1 parameter:
+  1. the date you want to test results against (for_date)
+  ------------
+  - used to test the reminders of a specific date, pass 1 parameter
+  - behaves as if it is testing results for the day specified, but producing results as if it were run today.
+
+  eg. for_date = Apr 15th, 2018
+  1. if (Apr 15th, 2018 == Apr 30th, 2018)...
+
+  -------------
+  test usage B: pass 2 parameters:
+  1. today's TRUE date (for_date) aka Now()
+  2. the date you're pretending "today" is (today)
+  -------------
+  - used to test today's reminders as if run on a completely different day other than today
+  - behaves as if it is testing today's results, but producing results as if it were run on the day specified
+
+  eg. for_date = Apr 3rd, 2018; "today" is overridden to May 17th, 2018
+  1. if (Apr 3rd, 2018 == May 30th, 2018)...
+
+  -------------
+  test usage C: pass 2 parameters:
+  1. the date you wish to test (for_date)
+  2. the date you're pretending "today" is (today)
+  -------------
+  - used to test the reminders of a specfic date as if run on a completely different day other than today
+  - this makes it behave as if it is testing the results for the day specified, and producing results as if it were run on the day specified
+
+  eg. for_date = Apr 15th, 2018; "today" is overridden to May 17th, 2018
+  1. if (Apr 15th, 2018 == May 30th, 2018)...
 
   *********/
   remote function processReminders( date for_date, date today=Now() ) {
 
+    trace( var=GetTickCount(), text="START", type="Information", category="processReminders", inline=false, abort=false );
+
     var email_list = StructNew();
+
+    trace( var=GetTickCount(), text="qryGetUsersWithEmailReminders", type="Information", category="processReminders", inline=false, abort=false );
 
     // 0. load all users into memory that allow email reminders
     var qUsersToRemind = qryGetUsersWithEmailReminders();
 
-    // 1. if (today = Last Day of Month)
+    trace( var=GetTickCount(), text="if (today == Last Day of Month)", type="Information", category="processReminders", inline=false, abort=false );
+
+    // 1. if (today == Last Day of Month)
     if ( !DateCompare( arguments.for_date, GetEndDateOfMonth( arguments.today ), "d" ) ) {
 
+      trace( var=GetTickCount(), text="qryGetLastDayUsers", type="Information", category="processReminders", inline=false, abort=false );
+
       var qLastDayUsers = qryGetLastDayUsers( qUsersToRemind, arguments.for_date, arguments.today );
+
+      trace( var=GetTickCount(), text="qLastDayUsers:loop", type="Information", category="processReminders", inline=false, abort=false );
 
       cfloop( query=qLastDayUsers ) {
         email_list[qLastDayUsers.user_id[qLastDayUsers.currentRow]] = qLastDayUsers.email[qLastDayUsers.currentRow];
@@ -183,10 +238,16 @@ Your friends at ' & application.locale[session.auth.locale]['name'];
 
     }
 
-    // 2. if (today = 15th of Month)
+    trace( var=GetTickCount(), text="if (today == 15th of Month)", type="Information", category="processReminders", inline=false, abort=false );
+
+    // 2. if (today == 15th of Month)
     if ( !DateCompare( arguments.for_date, CreateDate( Year( arguments.today ), Month( arguments.today ), 15), "d" ) ) {
 
+      trace( var=GetTickCount(), text="qryGetFifteenthDayUsers", type="Information", category="processReminders", inline=false, abort=false );
+
       var qFifteenthDayUsers = qryGetFifteenthDayUsers( qUsersToRemind, arguments.for_date, arguments.today );
+
+      trace( var=GetTickCount(), text="qFifteenthDayUsers:loop", type="Information", category="processReminders", inline=false, abort=false );
 
       cfloop( query=qFifteenthDayUsers ) {
         email_list[qFifteenthDayUsers.user_id[qFifteenthDayUsers.currentRow]] = qFifteenthDayUsers.email[qFifteenthDayUsers.currentRow];
@@ -196,14 +257,22 @@ Your friends at ' & application.locale[session.auth.locale]['name'];
 
     }
 
-    // 3. if (today = one of the calculated pay dates)
+    trace( var=GetTickCount(), text="qGetPayPeriodsInMonthOfDate", type="Information", category="processReminders", inline=false, abort=false );
+
+    // 3. if (today == one of the calculated pay dates)
     var qryPayDatesInThisMonth = eventservice.qGetPayPeriodsInMonthOfDate( arguments.today );
+
+    trace( var=GetTickCount(), text="qGetPayPeriodsInMonthOfDate:loop:outer", type="Information", category="processReminders", inline=false, abort=false );
 
     cfloop( query=qryPayDatesInThisMonth ) {
 
       if ( !DateCompare( arguments.for_date, qryPayDatesInThisMonth.pay_date[qryPayDatesInThisMonth.currentRow], "d" ) ) {
 
+        trace( var=GetTickCount(), text="qryGetEveryTwoWeekUsers", type="Information", category="processReminders", inline=false, abort=false );
+
         var qEveryTwoWeekUsers = qryGetEveryTwoWeekUsers( qUsersToRemind, arguments.for_date, arguments.today );
+
+        trace( var=GetTickCount(), text="qryGetEveryTwoWeekUsers:loop:inner", type="Information", category="processReminders", inline=false, abort=false );
 
         cfloop( query=qEveryTwoWeekUsers ) {
 
@@ -225,8 +294,12 @@ Your friends at ' & application.locale[session.auth.locale]['name'];
     // 5. TODO: return all users whose email_frequency == 1 and have had email sent this month already (pEmails)
     // remove all those user_ids from email_list
 
+    trace( var=GetTickCount(), text="emailReminders", type="Information", category="processReminders", inline=false, abort=false );
+
     // 6. Batch out all the emails in email_list, logging each email into pEmails (email_id, user_id, email, date_sent, body)
     emailReminders( email_list );
+
+    trace( var=GetTickCount(), text="END", type="Information", category="processReminders", inline=false, abort=false );
 
     // return struct of of emails (key:user_id) that were emailed a reminder.
     return email_list;

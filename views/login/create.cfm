@@ -1,26 +1,51 @@
 <!-- views/login/create.cfm -->
-<div class="page-header">
-  <h1>Create an Account</h1>
-</div>
+<div class="row">
 
-<div class="panel panel-default form-horizontal">
-<cfoutput>
+  <div class="col-md-4 col-md-offset-4">
 
-<cfform name="account" id="account" action="#buildURL('login.new')#" method="post">
-  <div class="input-group">
-    <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
-    <cfinput id="name" type="text" class="form-control" name="name" placeholder="Enter a Nickname" required="yes" message="Please enter a nickname for this account" />
+    <div class="panel-heading">
+     <div class="panel-title">
+        <h2 shadow-text="Create an Account">Create an Account</h2>
+      </div>
+    </div>
+
+    <div class="main-login main-center">
+      <cfform id="account" name="account" class="form-horizontal" method="POST" action="#buildUrl('login.new')#">
+
+        <div class="form-group">
+          <label for="name" class="control-label">Enter a nickname:</label>
+          <div>
+            <div class="input-group">
+              <span class="input-group-addon"><i class="fas fa-user" aria-hidden="true"></i></span>
+              <cfinput type="text" class="form-control" name="name" id="name" placeholder="eg. WarrenBuffet1930" required="true" message="You forgot to give yourself a nickname! (We suggest 'RichMoneyPennybags')" />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email" class="control-label">Enter your e-mail address:</label>
+          <div>
+            <div class="input-group">
+              <span class="input-group-addon"><i class="fa fa-envelope fa" aria-hidden="true"></i></span>
+              <cfinput type="text" class="form-control" name="email" id="email" placeholder="eg. omaha-dude@berkhathaway.com" required="true" message="Don't forget your e-mail address! (We'll help with your e-mail settings inside)" />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <button class="btn button btn-primary btn-block" form="account"><span class="glyphicon glyphicon-circle-arrow-right"></span> Start Decimating Debt!</button>
+        </div>
+
+      </cfform>
+
+      <div class="form-group sub-main-center" align="center">
+        <cfoutput><button class="btn button btn-default btn-sm" onClick="location.href='#buildUrl('login.default')#';"></cfoutput><span class="glyphicon glyphicon-exclamation-sign"></span> I already have an account</button>
+      </div>
+
+    </div>
+
   </div>
 
-  <div class="input-group">
-    <span class="input-group-addon"><i class="glyphicon glyphicon-envelope"></i></span>
-    <cfinput id="email" type="text" class="form-control" name="email" placeholder="Enter Your Email Address" required="yes" message="Please enter your email address" />
-  </div>
+  <div class="col-md-4"></div>
 
-  <button class="btn button btn-default" form="account"><span class="glyphicon glyphicon-circle-arrow-right"></span> Decimate Some Debt!</button>
-</cfform>
-
-<button class="btn button btn-default" onClick="location.href='#buildUrl('login.default')#';"><span class="glyphicon glyphicon-exclamation-sign"></span> I already have an account</button>
-
-</cfoutput>
 </div>

@@ -45,7 +45,7 @@
       var ad = document.querySelector("ins.adsbygoogle");
       if (ad && ad.innerHTML.replace(/\s/g, "").length == 0) {
         ad.style.cssText = 'display:block !important'; 
-        ad.parentNode.innerHTML += '<div style="padding:5px; background-color:#171717; border:1px solid #fff; margin:5px 5px 10px 5px; display:inline-block; text-align:left">You appear to be blocking our ads with an Ad Blocker. <cfoutput>#application.locale[session.auth.locale]['name']#</cfoutput> depends on these ads to help cover our high server costs. Please add *.<cfoutput>#application.site_domain#</cfoutput> to your ad blocker\'s whitelist or consider upgrading to a paid account.</div>';
+        ad.parentNode.innerHTML += '<div style="padding:5px; background-color:#171717; border:1px solid #fff; margin:5px 5px 10px 5px; display:inline-block; text-align:left; position: absolute; top: 0px; left: 0px;"><cfoutput>#application.ad_blocker#</cfoutput></div>';
       }
     }, 1000);
   };

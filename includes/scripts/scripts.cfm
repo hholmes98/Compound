@@ -8,9 +8,7 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.14.3/ui-bootstrap-tpls.js"></script>
 
   <!--- http://www.bootstraptoggle.com/ --->
-  <!--- <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script> --->
   <script src="//ziscloud.github.io/angular-bootstrap-toggle/js/angular-bootstrap-toggle.min.js"></script>
-  <!--- <script src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.6.0.js" type="text/javascript"></script> --->
 
   <!-- font awesome -->
   <script defer src="//use.fontawesome.com/releases/v5.0.8/js/all.js"></script>
@@ -28,12 +26,12 @@
   <script src="/node_modules/moment/min/moment.min.js" type="text/javascript"></script>
 
   <!-- calendar --> 
-  <script type="text/javascript" src="/node_modules/angular-ui-calendar/src/calendar.js"></script>
-  <script type="text/javascript" src="/node_modules/fullcalendar/dist/fullcalendar.min.js"></script>
-  <script type="text/javascript" src="/node_modules/fullcalendar/dist/gcal.js"></script>
+  <script src="/node_modules/angular-ui-calendar/src/calendar.js" type="text/javascript"></script>
+  <script src="/node_modules/fullcalendar/dist/fullcalendar.min.js" type="text/javascript"></script>
+  <script src="/node_modules/fullcalendar/dist/gcal.js" type="text/javascript"></script>
 
   <!-- graphing -->
-  <script type="text/javascript" src="/node_modules/highcharts/highstock.js"></script>
+  <script src="/node_modules/highcharts/highstock.js" type="text/javascript"></script>
 
   <!-- feature detection -->
   <script src="/assets/js/modernizr.js"></script>

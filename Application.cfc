@@ -109,6 +109,17 @@ component extends = "framework.one" {
       application.base_url = application.base_url & ":" & CGI.SERVER_PORT;
     }
 
+    // **** SITE VARS ****
+
+    // static URLs that are hard-linked within app (things like permalinks, help links, blog posts, forum, etc)
+    application.static_urls = StructNew();
+
+    // CALL Url
+    application.static_urls.call = 'https://www.nolo.com/legal-encyclopedia/negotiating-credit-card-debt.html'; // placeholder
+
+    // ad blocking
+    application.ad_blocker = 'We get it. Ads suck. But not everybody can pay for an account. Please consider whitelisting *.' & application.site_domain & ', upgrading to a paid account, or purchasing keys for other users who cannot.';
+
     // overrides
     variables.framework['environments']['production']['password'] = XmlSearch( conf, '//fw1/password' )[1].XmlText;
 

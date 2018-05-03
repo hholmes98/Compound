@@ -88,14 +88,28 @@
 
     <div class="row">
       <div class="col-md-12" align="center">
-
         <h3>Recommended Payment:</h3>
-        <span class="dollar-large" ng-model="card">{{(card.calculated_payment|currency) || "Thinking..."}}</span>
-        <br/><br/>
-        <span>
-            <cfoutput><button class="btn button btn-default" ng-click="returnToList(#pageStart#);payForm.$setPristine(true);balanceForm.$setPristine(true)"><span class="glyphicon glyphicon-circle-arrow-left"></span> Done / Return to Cards</button></cfoutput>
-        </span>
+      </div>
+    </div>
 
+    <div class="row">
+      <div class="col-md-4 col-md-offset-2">
+        <span class="dollar-large" ng-model="card">
+          <span uib-tooltip-html="'<cfoutput>#application.locale[session.auth.locale]['name']#</cfoutput> recommends you do not make a payment on this card this month. Instead, call the company to request a deferral. If you need help with this, <a href=\'<cfoutput>#application.static_urls.call#</cfoutput>\'>follow this guide</a>.'" tooltip-enable="{{card.calculated_payment < 0}}" ng-bind-html="card.calculated_payment|calculatedPaymentFilter" />
+        </span>
+      </div>
+      <div class="col-md-2">
+        <div ng-show="card.calculated_payment=='Thinking...'" class='loader'></div>
+      </div>
+      <div class="col-md-4">
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12" align="center">
+        <span>
+          <cfoutput><button class="btn button btn-default" ng-disabled="card.calculated_payment=='Thinking...'" ng-click="returnToList(#pageStart#);payForm.$setPristine(true);balanceForm.$setPristine(true)"><span class="glyphicon glyphicon-circle-arrow-left"></span> Done / Return to Cards</button></cfoutput>
+        </span>
       </div>
     </div>
 
