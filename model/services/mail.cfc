@@ -36,8 +36,8 @@ Here is the next batch of cards you''ll want to pay, and when:' & nl & nl;
     }
 
     mailBody = mailBody & nl & 'Be sure to head on back to the calculator to update the balances & minimum payments as you go!' & nl & nl;
-    mailBody = mailBody & ' - Pay bills now: ' & application.base_url & '/index.cfm/pay/cards' & nl;
-    mailBody = mailBody & ' - Update Email Preferences/Unsubscribe: ' & application.base_url & '/index.cfm/profile/basic' & nl & nl;
+    mailBody = mailBody & ' - Pay bills now: ' & request.abs_url & '/index.cfm/pay/cards' & nl;
+    mailBody = mailBody & ' - Update Email Preferences/Unsubscribe: ' & request.abs_url & '/index.cfm/profile/basic' & nl & nl;
     mailBody = mailBody & 'Sincerely,
 
 Your friends at ' & application.locale[session.auth.locale]['name'];
@@ -62,7 +62,7 @@ Your friends at ' & application.locale[session.auth.locale]['name'];
 
 Someone (possibly you) requested a password reset. If you requested this reset, please click the link below to confirm the reset.
 
-' & application.base_url & dest_url & '/q/' & key & '
+' & request.abs_url & dest_url & '/q/' & key & '
 
 If it was not you, please disregard this email completely.
 
@@ -336,19 +336,30 @@ Your friends at ' & application.locale[session.auth.locale]['name'];
 
   public void function emailReminders( struct users ) {
 
+    trace( var=GetTickCount(), text="START", type="Information", category="emailReminders", inline=false, abort=false );
+
     for ( var thisUser in arguments.users ) {
 
       var id = thisUser;
       var email = arguments.users[thisUser];
+
+      trace( var=GetTickCount(), text="dbCalculateSchedule:" & id, type="Information", category="emailReminders", inline=false, abort=false );
+
       var events = planservice.dbCalculateSchedule( id );
+
+      trace( var=GetTickCount(), text="sendReminderEmail:" & StructKeyList(events), type="Information", category="emailReminders", inline=false, abort=false );
 
       // email it
       var bodyCopy = sendReminderEmail( email, events[1] );
+
+      trace( var=GetTickCount(), text="logReminderEmail:" & email, type="Information", category="emailReminders", inline=false, abort=false );
 
       // log it
       var email_id = logReminderEmail( id, email, bodyCopy );
 
     }
+
+    trace( var=GetTickCount(), text="END", type="Information", category="emailReminders", inline=false, abort=false );
 
   }
 

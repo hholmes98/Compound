@@ -97,17 +97,8 @@ component extends = "framework.one" {
     application.start_page = variables.framework.home; // if you're anonymous/non-authorized, this is where you start
     application.auth_start_page = 'pay'; // if you're logged-in/authorized, this is where you start
 
-    application.base_url = CGI.SERVER_NAME;
-
-    if ( CGI.SERVER_PORT_SECURE ) {
-      application.base_url = "https://" & application.base_url;
-    } else {
-      application.base_url = "http://" & application.base_url;
-    }
-
-    if ( CGI.SERVER_PORT <> 80 ) {
-      application.base_url = application.base_url & ":" & CGI.SERVER_PORT;
-    }
+    // *** DISCOURSE SSO ***
+    application.sso_secret = XmlSearch( conf, '//discourse/sso-secret' )[1].XmlText;
 
     // **** SITE VARS ****
 
@@ -150,6 +141,8 @@ component extends = "framework.one" {
 
     controller( 'security.authorize' );
 
+    request.abs_url = buildAbsoluteUrl();
+
   }
 
   function getEnvironment() {
@@ -159,6 +152,55 @@ component extends = "framework.one" {
     }
     else 
       return "production";
+
+  }
+
+  /* methods below are REQUEST scope-safe only!! */
+  function getHTTPHeader( headerName ) {
+    var requestData = getHTTPRequestData();
+
+    // if the header data is absent...
+    if ( !StructKeyExists( requestData, 'headers') ) {
+      return '';
+    }
+
+    if ( StructKeyExists( requestData.headers, arguments.headerName ) ) {
+      return requestData.headers[arguments.headerName];
+    } else {
+      return '';
+    }
+
+  }
+
+  boolean function isSSL() {
+
+    // standard test
+    if( IsBoolean( cgi.server_port_secure ) AND cgi.server_port_secure ){ return true; }
+
+    // Add typical proxy headers for SSL
+    if( getHTTPHeader( "x-forwarded-proto" ) eq "https" ){ return true; }
+
+    if( getHTTPHeader( "x-scheme" ) eq "https" ){ return true; }
+
+    return false;
+
+  }
+
+  function buildAbsoluteUrl() {
+
+    var abs_url = CGI.SERVER_NAME;
+
+    if ( isSSL() ) {
+      abs_url = "https://" & abs_url;
+    } else {
+      abs_url = "http://" & abs_url;
+    }
+
+    if ( CGI.SERVER_PORT <> 80 ) {
+      abs_url = abs_url & ":" & CGI.SERVER_PORT;
+    }
+
+    return abs_url;
 
   }
 

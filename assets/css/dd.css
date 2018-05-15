@@ -34,6 +34,11 @@ Chocolate
 
 */
 
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 /* Loader... */
 .loader {
   border: 16px solid #f3f3f3; /* Light grey */
@@ -70,7 +75,7 @@ Chocolate
 
 /* others */
 
-.main-login{
+.main-login {
   background-color: #fff;
   /* shadows and rounded borders */
   -moz-border-radius: 2px;
@@ -81,7 +86,7 @@ Chocolate
   box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.3);
 }
 
-.main-center{
+.main-center {
   margin: 0 auto;
   padding: 20px 40px 0px 40px;
   border-top: 1px;
@@ -155,12 +160,16 @@ Chocolate
 }
 
 /* glyphs in the fixed nav */
-.navbar-nav > li > a > .glyphicon, .navbar-nav > li > a > .svg-inline--fa {
+.navbar-brand > .svg-inline--fa, .navbar-nav > li > a > .glyphicon, .navbar-nav > li > a > .svg-inline--fa, .dropdown-menu > li > a > .svg-inline--fa {
   color: #fff;
 }
 
 .navbar-nav > .active > a > .glyphicon, .navbar-nav > .active > a > .svg-inline--fa {
   color: #D2691E;;
+}
+
+.dropdown-menu > li > a:hover > .svg-inline--fa {
+  color: #171717;
 }
 
 html, body { 
@@ -218,20 +227,31 @@ th > p,ol,ul {
 }
 
 /* the money font */
-h1, h2, h3 {
+h1, h2, h3, .navbar-brand, .navbar-brand a, .navbar-inverse .navbar-brand a {
   font-family: 'Ultra', serif;
   /* margin: 0.5em; */
   opacity: 0.9;
 }
 
+
 /* H1: Look at the no. '20' in the upper left corner of a 20 dollar bill */
+.navbar-brand, .navbar-inverse .navbar-brand a, h1 {
+  color: #fff;
+  opacity: 1;
+}
+
+.navbar-brand, .navbar-inverse .navbar-brand a {
+  font-family: 'Slabo 13px', serif;
+}
+
 h1 {
   font-size: 62px;
-
+  
   -webkit-text-fill-color: #e0e9dd;
   -webkit-text-stroke-width: 2px;
   -webkit-text-stroke-color: #171717;
-
+  
+  
   text-shadow:
     3px 3px 0 #000,
     -1px -1px 0 #000,
@@ -410,7 +430,6 @@ label {
 
 .navbar-inverse .navbar-nav > li > a:hover {
   background-color: #fff;
-  text-decoration: underline;
   color: #171717;
 }
 
@@ -418,8 +437,17 @@ label {
   color: #171717;
 }
 
+.navbar-inverse .navbar-nav > li.dropdown > a:hover > .svg-inline--fa {
+  color: #171717;
+}
+
+.navbar-inverse .navbar-nav > li.dropdown.open > a:hover > .svg-inline--fa {
+  color: #fff;
+}
+
 .navbar-inverse .navbar-nav > .active > a:hover {
   background-color: #fff;
+  color: #000;
 }
 
 .navbar-inverse .navbar-nav > .active > a > .glyphicon {
@@ -465,6 +493,9 @@ label {
 .panel .row {
   margin-right: 0px;
   margin-left: 0px;
+  /* border: 1px; */
+  /* border-color: #000; */
+  /* border:  1px solid black; */
 }
 
 .panel .tab-content {
@@ -509,10 +540,16 @@ label {
 
 .row.panel-body:nth-child(odd) {
   background-color: #bcc3a2;
+  border-top: 1px;
+  border-top-style: solid;
+  border-top-color: #171717;
 }
 
 .row.panel-body:nth-child(even) {
   background-color: #acc3a2;
+  border-top-width: 1px;
+  border-top-style: solid;
+  border-top-color: #171717;
 }
 
 .panel-default
@@ -622,8 +659,8 @@ label {
   left:0;
   bottom: 0;
   text-align: center;
-  width: 320px;
-  height: 100px;
+  width: 100%;
+  height: 50px;
   z-index: 999;
   background-color: transparent;
 }
@@ -631,7 +668,7 @@ label {
 /* default-mobile first: smallest screens (up to 800px); */
 .responsive_ad {
   width: 320px;
-  height: 100px;
+  height: 50px;
 }
 
 
@@ -754,6 +791,56 @@ label {
   bottom: 0;
   color: #fff;
   background-color: #1c6a3a;
+}
+
+.dropdown-menu {
+  background-color: #1c6a3a;
+}
+
+.dropdown-menu > li > a {
+  color: #fff;
+}
+
+@media screen and (max-width: 767px) {
+  .navbar-right .dropdown-menu {
+    left: 0;
+  }
+
+  .nav-label {
+    display: inline-block;
+  }
+}
+
+@media (max-width: 767px) {
+
+  .navbar-inverse .navbar-nav .open .dropdown-menu>li>a {
+    color: #fff;
+  }
+
+}
+
+@media screen and (max-width: 553px) {
+
+  .about {
+    padding-top: 780px;
+  }
+
+  .nav-tabs > li {
+    width: 100%;
+  }
+
+}
+
+@media screen and (min-width: 767px) and (max-width: 1140px) {
+
+  .navbar-right .dropdown-menu {
+    min-width: 70px;
+  }
+
+  .nav-label {
+    display: none;
+  }
+
 }
 
 @media screen and (max-width: 768px) {
@@ -981,11 +1068,19 @@ label {
   }
 
   .about {
-    padding-top: 625px;
+    padding-top: 700px;
   }
 
   .pan-perspective {
     margin-top: 20px;
+  }
+
+}
+
+@media screen and (max-width: 394px) {
+
+  .about {
+    padding-top: 820px;
   }
 
 }
