@@ -15,7 +15,7 @@
         <button class="btn button btn-default btn-tile" ng-click="navigateTo('#buildUrl('main')#')"><i class="fas fas-large fa-chart-pie"></i><br/><br/> UPDATE my<br/>budget</button>
       </span>
       <span align="right">
-        <button class="btn button btn-default btn-tile" ng-click="navigateTo('#buildUrl('plan')#')"><i class="fas fas-large fa-calculator"></i><br/><br/> CALCULATE my<br/>future</button>
+        <button class="btn button btn-default btn-tile" ng-click="navigateTo('#buildUrl('plan')#')"><i class="fas fas-large fa-calculator"></i><br/><br/> CALCULATE my<br/>payoff</button>
       </span>
     </div>
     </cfoutput>

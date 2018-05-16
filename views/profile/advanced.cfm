@@ -2,10 +2,10 @@
 <h2 shadow-text="Account Information">Account Information</h2>
 <div role="form">
   <cfoutput>
-  <span>
+  <!--- <span>
     <button class="btn button btn-default" onClick="location.href='#buildUrl('profile.basic')#';"><i class="fas fa-cog"></i> User Settings</button>
     <button class="btn button btn-default pull-right" onClick="location.href='#buildUrl('login.logout')#';"> Logout</button>
-  </span>
+  </span> --->
   </cfoutput>
 </div>
 

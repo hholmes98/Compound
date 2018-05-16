@@ -347,7 +347,7 @@ Your friends at ' & application.locale[session.auth.locale]['name'];
 
       var events = planservice.dbCalculateSchedule( id );
 
-      trace( var=GetTickCount(), text="sendReminderEmail:" & StructKeyList(events), type="Information", category="emailReminders", inline=false, abort=false );
+      trace( var=GetTickCount(), text="sendReminderEmail:" & StructKeyList(events[1]), type="Information", category="emailReminders", inline=false, abort=false );
 
       // email it
       var bodyCopy = sendReminderEmail( email, events[1] );

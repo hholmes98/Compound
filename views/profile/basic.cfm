@@ -2,10 +2,10 @@
 <h2 shadow-text="User Settings">User Settings</h2>
 <div role="form">
   <cfoutput>
-  <span>
+  <!--- <span>
     <button class="btn button btn-default" onClick="location.href='#buildUrl('profile.advanced')#';"><span class="glyphicon glyphicon-credit-card"></span> Account Information</button>
     <button class="btn button btn-default pull-right" onClick="location.href='#buildUrl('login.logout')#';"> Logout</button>
-  </span>
+  </span> --->
   </cfoutput>
 </div>
 

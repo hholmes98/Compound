@@ -999,34 +999,36 @@ services
   // I dunno how i feel about this
   function deepGet(source, key) {
 
-    // 1. look at any/all the keys of the base obj
+    // 1. look at any/all the keys of the base obj - eg. try to find source.key (data.user_id)
     var io = Object.keys(source);
-    for (var iobj in io) {
-      if (source[io[iobj]][key] != null) {
-        return source[io[iobj]][key]; // source.user_id (equating source=card)
+
+    for (var iobj in io) {  // for all the keys in the source
+
+      // is this key the same as the key we're looking for? (eg. 'user_id')
+      if (io[iobj] == key) {
+        if (source[io[iobj]] != null) { // does this key actually have a value in source? (eg. source.user_id)
+          return source[io[iobj]];
+        }
+      } else {
+        // if its not the key looking for, is this a key an object with its own keys, one of which matching?
+        var ikeys = Object.keys(source[io[iobj]]);
+
+        if (ikeys.length && source[io[iobj]][key] != null) { // eg. source.card.user_id
+          return source[io[iobj]][key];
+        }
       }
+
     }
 
-    // 2. nothing yet? start looking at the chain.
+    // 3. if nothing yet, is there a chain?
     if (source.chain != null) {
 
-      var chain = source.chain;
+      return deepGet(source.chain, key);
 
-      if (chain.key != null) {
-        return chain.key; // data.user_id
-      } else {
-        var o = Object.keys(chain);
-        for (var obj in o) {
-          if (chain[o[obj]][key] != null) {
-            return chain[o[obj]][key]; // data.card.user_id
-          }
-        }
-        // if you're here, go deeper
-        return deepGet(chain, key);
-      }
-    } else {
-      return null;
     }
+
+    // 4. nothing found
+    return null;
 
   }
 

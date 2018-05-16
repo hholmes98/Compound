@@ -19,7 +19,7 @@
       <ul class="nav navbar-nav">
         <li<cfif REQUEST.section is 'pay'> class="active"</cfif>><cfoutput><a href="#buildUrl('pay.cards')#"><i class="fas fa-dollar-sign"></i> <span class="nav-label">Pay Bills</span><cfif REQUEST.section is 'pay'> <span class="sr-only">(current)</span></cfif></a></cfoutput></li>
         <li<cfif REQUEST.section is 'main'> class="active"</cfif>><cfoutput><a href="#buildUrl('main')#"><i class="fas fa-chart-pie"></i> <span class="nav-label">Update Budget</span><cfif REQUEST.section is 'main'> <span class="sr-only">(current)</span></cfif></a></cfoutput></li>
-        <li<cfif REQUEST.section is 'plan'> class="active"</cfif>><cfoutput><a href="#buildUrl('plan')#"></cfoutput><i class="fas fa-calculator"></i> <span class="nav-label">Calculate Future</span><cfif REQUEST.section is 'plan'> <span class="sr-only">(current)</span></cfif></a></li>
+        <li<cfif REQUEST.section is 'plan'> class="active"</cfif>><cfoutput><a href="#buildUrl('plan')#"></cfoutput><i class="fas fa-calculator"></i> <span class="nav-label">Calculate Payoff</span><cfif REQUEST.section is 'plan'> <span class="sr-only">(current)</span></cfif></a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li class="dropdown">
@@ -29,7 +29,17 @@
             <li><a href="http://forum.<cfoutput>#application.site_domain#</cfoutput>"><i class="far fa-comments"></i> <span class="nav-label">Discussion</span></a></li>
           </ul>
         </li>
-        <li<cfif REQUEST.section is 'profile'> class="active"</cfif>><cfoutput><a href="#buildUrl('profile.basic')#"><i class="fas fa-user"></i> <span class="nav-label">Profile</span><cfif REQUEST.section is 'profile'> <span class="sr-only">(current)</span></cfif></a></cfoutput></li>
+        <li class="dropdown<cfif REQUEST.section is 'profile'> active</cfif>">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fas fa-user"></i> <span class="nav-label">Profile</span> <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <cfoutput>
+            <li><a href="#buildUrl('profile.basic')#"><i class="fas fa-cog"></i> <span class="nav-label">User Settings</span></a></li>
+            <li><a href="#buildUrl('profile.advanced')#"><span class="glyphicon glyphicon-credit-card"></span> <span class="nav-label">Account Info</span></a></li>
+            <li><a href="#buildUrl('login.logout')#"><i class="fas fa-sign-out-alt"></i> <span class="nav-label">Sign out</span></a></li>
+            </cfoutput>
+          </ul>
+        </li>
+          
       </ul>
     </div>
   </div>
