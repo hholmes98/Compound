@@ -56,7 +56,7 @@
     console.log(e);
     <cfelse>
     // by default, we throw the user back to the login page.
-    window.location.href = '/index.cfm/login';
+    window.location.href = '/index.cfm/login.oops';
     </cfif>
   }
   </script>

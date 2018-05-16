@@ -247,6 +247,14 @@ component accessors = true {
 
   }
 
+  function oops( rc ) {
+
+    rc.message = ["Oops! There may have been an error! You're probably still logged in, try clicking the link in the upper left."];
+
+    VARIABLES.fw.redirect( 'login', 'message' );
+
+  }
+
   function sso( rc ) {
 
     var payload = rc.sso; // discourse param for payload.

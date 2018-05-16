@@ -1160,10 +1160,13 @@ controller/main
     .then( function onSuccess( response ) {
 
       // update the is_emergency field on the cards themselves.
-      Object.keys($scope.cards).forEach(function(card){
-        $scope.cards[card].is_emergency = 0;
+      Object.keys($scope.cards).forEach(function(id){
+        $scope.cards[id].is_emergency = 0;
       });
-      $scope.cards[data.card_id].is_emergency = 1;
+
+      var idx = Object.keys($scope.cards).find(thisIndex => $scope.cards[thisIndex].card_id == data.card.card_id);
+
+      $scope.cards[idx].is_emergency = 1;
 
     })
     .catch( function onError( result ) {
