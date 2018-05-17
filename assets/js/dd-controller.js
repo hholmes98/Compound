@@ -1164,7 +1164,7 @@ controller/main
         $scope.cards[id].is_emergency = 0;
       });
 
-      var idx = Object.keys($scope.cards).find(thisIndex => $scope.cards[thisIndex].card_id == data.card.card_id);
+      var idx = Object.keys($scope.cards).find(thisIndex => $scope.cards[thisIndex].card_id == data.card_id);
 
       $scope.cards[idx].is_emergency = 1;
 
