@@ -1,4 +1,4 @@
-// controllers/profile.cfc
+// controllers/calculate
 component accessors=true {
 
   function init( fw ) {

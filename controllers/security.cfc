@@ -1,7 +1,7 @@
-//  controllers/security.cfc
-component accessors = true {
+//controllers/security.cfc
+component accessors=true {
 
-  property userservice;
+  property userService;
 
   function init( fw ) {
 
@@ -16,7 +16,7 @@ component accessors = true {
     session.auth.isLoggedIn = false;
     session.auth.fullname = 'Guest';
     session.auth.locale = application.default_locale;
-    session.auth.user = userservice.getTemp();
+    session.auth.user = userService.getTemp();
 
     // set up the anonymous user's tmp session structure
     session.tmp = {};
@@ -29,11 +29,10 @@ component accessors = true {
   function authorize( rc ) {
 
     // check to make sure the user is logged on
-    if ( not ( structKeyExists( session, 'auth' ) && session.auth.isLoggedIn ) &&
-        !listfindnocase( 'login', variables.fw.getSection() ) && 
-        !listfindnocase( 'debt', variables.fw.getSection() ) &&
-        !listfindnocase( 'mail', variables.fw.getSection() ) && 
-        !listfindnocase( 'main.error', variables.fw.getFullyQualifiedAction() ) ) {
+    if ( not ( StructKeyExists( session, 'auth' ) && session.auth.isLoggedIn ) &&
+        !ListFindNoCase( 'login', variables.fw.getSection() ) && 
+        !ListFindNoCase( 'main', variables.fw.getSection() ) &&
+        !ListFindNoCase( 'mail', variables.fw.getSection() ) ) {
 
       variables.fw.redirect('login');
 

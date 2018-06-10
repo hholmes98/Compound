@@ -17,9 +17,9 @@
 
     <div class="collapse navbar-collapse">
       <ul class="nav navbar-nav">
-        <li<cfif REQUEST.section is 'pay'> class="active"</cfif>><cfoutput><a href="#buildUrl('pay.cards')#"><i class="fas fa-dollar-sign"></i> <span class="nav-label">Pay Bills</span><cfif REQUEST.section is 'pay'> <span class="sr-only">(current)</span></cfif></a></cfoutput></li>
-        <li<cfif REQUEST.section is 'main'> class="active"</cfif>><cfoutput><a href="#buildUrl('main')#"><i class="fas fa-chart-pie"></i> <span class="nav-label">Update Budget</span><cfif REQUEST.section is 'main'> <span class="sr-only">(current)</span></cfif></a></cfoutput></li>
-        <li<cfif REQUEST.section is 'plan'> class="active"</cfif>><cfoutput><a href="#buildUrl('plan')#"></cfoutput><i class="fas fa-calculator"></i> <span class="nav-label">Calculate Payoff</span><cfif REQUEST.section is 'plan'> <span class="sr-only">(current)</span></cfif></a></li>
+        <li<cfif REQUEST.section is 'pay'> class="active"</cfif>><cfoutput><a href="#buildUrl('pay.bills')#"><i class="fas fa-dollar-sign"></i> <span class="nav-label">Pay Bills</span><cfif REQUEST.section is 'pay'> <span class="sr-only">(current)</span></cfif></a></cfoutput></li>
+        <li<cfif REQUEST.section is 'main'> class="active"</cfif>><cfoutput><a href="#buildUrl('manage.budget')#"><i class="fas fa-chart-pie"></i> <span class="nav-label">Update Budget</span><cfif REQUEST.section is 'main'> <span class="sr-only">(current)</span></cfif></a></cfoutput></li>
+        <li<cfif REQUEST.section is 'calculate'> class="active"</cfif>><cfoutput><a href="#buildUrl('calculate.future')#"></cfoutput><i class="fas fa-calculator"></i> <span class="nav-label">Calculate Payoff</span><cfif REQUEST.section is 'plan'> <span class="sr-only">(current)</span></cfif></a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li class="dropdown">

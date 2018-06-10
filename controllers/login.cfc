@@ -8,11 +8,11 @@ component accessors = true {
 
   function init( fw ) {
 
-    VARIABLES.fw = fw;
+    variables.fw = fw;
 
   }
 
-  function before( rc ) {
+  function before( struct rc ) {
 
     // you must be logged in for 'logout','updateConfirm' methods, and
     // must be logged out for all others. Otherwise, back to main.
@@ -21,14 +21,14 @@ component accessors = true {
     // 2. methods that require !isLoggedin, and
     // 3. methods than don't care/can handle either (sso)
 
-    switch( VARIABLES.fw.getItem() ) {
+    switch( variables.fw.getItem() ) {
 
       // REQUIRES: logged in
       case 'logout':
       case 'updateConfirm':
 
-        if ( !(StructKeyExists(SESSION,'auth') && SESSION.auth.isLoggedIn) )
-          VARIABLES.fw.redirect( 'main' );
+        if ( !(StructKeyExists( session,'auth' ) && session.auth.isLoggedIn ) )
+          variables.fw.redirect( 'budget' );
 
         break;
 
@@ -36,30 +36,30 @@ component accessors = true {
 
     /* old
     if ( structKeyExists( session, 'auth' ) && 
-        SESSION.auth.isLoggedIn &&
-        VARIABLES.fw.getItem() != 'logout' && 
-        VARIABLES.fw.getItem() != 'updateConfirm' ) {
+        session.auth.isLoggedIn &&
+        variables.fw.getItem() != 'logout' && 
+        variables.fw.getItem() != 'updateConfirm' ) {
 
-      VARIABLES.fw.redirect( 'main' );
+      variables.fw.redirect( 'budget' );
 
     }
     */
 
   }
 
-  function new( rc ) {
+  function new( struct rc ) {
 
     // create a new account
 
     // if the form variables do not exist, redirect to the create form
     if ( !structKeyExists( rc, 'name' ) || !structKeyExists( rc, 'email' ) ) {
 
-      VARIABLES.fw.redirect( 'login.create' );
+      variables.fw.redirect( 'login.create' );
 
     }
 
     // look up the user's record by the email address
-    var user = VARIABLES.userService.getByEmail( rc.email );
+    var user = variables.userService.getByEmail( rc.email );
 
     // if the user alredy exists, error!
     var emailAvailable = !user.getUser_Id();
@@ -69,134 +69,134 @@ component accessors = true {
 
       rc.message = ["Email Already In Use"];
 
-      VARIABLES.fw.redirect( 'login.create', 'message' );
+      variables.fw.redirect( 'login.create', 'message' );
 
     }
 
     // if you're here, create checks pass, create the user...
-    user = VARIABLES.userService.createUser( rc.name, rc.email );
+    user = variables.userService.create( rc.name, rc.email );
 
     // ...if they came via the onboarding process:
-    if ( !StructIsEmpty(SESSION.tmp.cards) ) {
+    if ( !StructIsEmpty( session.tmp.cards ) ) {
 
       // 1. capture the tmp.preferences.budget
       var prefs = preferenceService.get( user.getUser_Id() );
-      prefs.setBudget( SESSION.tmp.preferences.budget );
-      preferenceService.save( VARIABLES.preferenceService.flatten( prefs ) );
+      prefs.setBudget( session.tmp.preferences.budget );
+      preferenceService.save( prefs.flatten() );
 
       // 2. convert to legit (new) cards and save
-      for ( var tmpCard in SESSION.tmp.cards ) {
+      for ( var tmpCard in session.tmp.cards ) {
 
         // card_id to 0
-        SESSION.tmp.cards[tmpCard].setCard_Id(0);
+        session.tmp.cards[tmpCard].setCard_Id( 0 );
 
         // user_id to legit id
-        SESSION.tmp.cards[tmpCard].setUser_Id( user.getUser_Id() );
+        session.tmp.cards[tmpCard].setUser_Id( user.getUser_Id() );
 
         // flatten bean to struct, pass to save service
-        VARIABLES.cardService.save( VARIABLES.cardService.flatten( SESSION.tmp.cards[tmpCard] ) );
+        variables.cardService.save( session.tmp.cards[tmpCard].flatten() );
 
       }
 
       // 3. wipe the tmp session clean
-      StructClear( SESSION.tmp );
+      StructClear( session.tmp );
 
     }
 
     // ... and log 'em in!
-    SESSION.auth.isLoggedIn = true;
-    SESSION.auth.fullname = user.getName();
-    SESSION.auth.user = user;
+    session.auth.isLoggedIn = true;
+    session.auth.fullname = user.getName();
+    session.auth.user = user;
 
     // off to the default authenticated start page
-    VARIABLES.fw.redirect( application.auth_start_page & '/reg' );
+    variables.fw.redirect( application.auth_start_page & '/reg' );
 
   }
 
-  function login( rc ) {
+  function login( struct rc ) {
 
     // if the form variables do not exist, redirect to the login form
-    if ( !structKeyExists( rc, 'email' ) || !structKeyExists( rc, 'password' ) ) {
+    if ( !StructKeyExists( rc, 'email' ) || !StructKeyExists( rc, 'password' ) ) {
 
-      VARIABLES.fw.redirect( 'login' );
+      variables.fw.redirect( 'login' );
 
     }
 
     // look up the user's record by the email address
-    var user = VARIABLES.userService.getByEmail( rc.email );
+    var user = variables.userService.getByEmail( rc.email );
 
     // if that's a real user, verify their password is also correct
-    var userValid = user.getUser_Id() ? VARIABLES.userService.validatePassword( user, rc.password ) : false;
+    var userValid = user.getUser_Id() ? variables.userService.validatePassword( user.flatten(), rc.password ) : false;
 
     // on invalid credentials, redisplay the login form
     if ( !userValid ) {
       rc.message = ["Invalid Username or Password"];
-      VARIABLES.fw.redirect( 'login', 'message' );
+      variables.fw.redirect( 'login', 'message' );
     }
 
     // set session variables from valid user
-    SESSION.auth.isLoggedIn = true;
-    SESSION.auth.fullname = user.getName();
-    SESSION.auth.user = user;
+    session.auth.isLoggedIn = true;
+    session.auth.fullname = user.getName();
+    session.auth.user = user;
 
     // is this an sso login?
-    if ( StructKeyExists(SESSION, 'sso') ) {
+    if ( StructKeyExists( session, 'sso' ) ) {
 
       // grab the sso data temp. stored.
-      var sso_data = SESSION.sso;
+      var sso_data = session.sso;
 
       // kill the sso key from the session (to ensure we can't reuse)
-      StructDelete( SESSION, 'sso' );
+      StructDelete( session, 'sso' );
 
       // many whelps, handle it!
-      var dest_url = discourseSSO( sso_data, SESSION.auth.user );
+      var dest_url = discourseSSO( sso_data, session.auth.user );
 
       location( url=dest_url, addToken=false );
 
     }
 
     // off to the default authenticated start page
-    VARIABLES.fw.redirect( application.auth_start_page );
+    variables.fw.redirect( application.auth_start_page );
 
   }
 
-  function resetConfirm( rc ) {
+  function resetConfirm( struct rc ) {
 
     // first, verify the user exists
-    var user = VARIABLES.userService.getByEmail( rc.email );
+    var user = variables.userService.getByEmail( rc.email );
 
     // if that's a real user, verify their password is also correct
     var userValid = user.getUser_Id();
 
     var tmpKey = CreateUUID();
 
-    SESSION.tempPasswordReset[tmpKey] = userValid;
+    session.tempPasswordReset[tmpKey] = userValid;
 
     // fire the temp password off in an email
-    destUrl = VARIABLES.fw.buildUrl('login.passwordChoose');
-    VARIABLES.mailService.sendPasswordResetEmail( rc.email, tmpKey, destUrl );
+    destUrl = variables.fw.buildUrl('login.passwordChoose');
+    variables.mailService.sendPasswordResetEmail( rc.email, tmpKey, destUrl );
 
     // redirect to message
     rc.message = ["An email was sent to your account to help you confirm & reset your password."];
 
-    VARIABLES.fw.redirect( 'login.default', 'message' );
+    variables.fw.redirect( 'login.default', 'message' );
 
   }
 
-  function changeConfirm( rc ) {
+  function changeConfirm( struct rc ) {
 
-    if ( StructKeyExists(rc, 'q') && StructKeyExists( SESSION.tempPasswordReset, rc.q ) ) {
+    if ( StructKeyExists( rc, 'q' ) && StructKeyExists( session.tempPasswordReset, rc.q ) ) {
 
-      var userId = SESSION.tempPasswordReset[rc.q];
+      var userId = session.tempPasswordReset[rc.q];
 
-      rc.user = VARIABLES.userService.get( userId );
+      rc.user = variables.userService.get( userId );
 
-      var newPassword = VARIABLES.userService.hashPassword( rc.new_password );
+      var newPassword = variables.userService.hashPassword( rc.new_password );
 
       rc.user.setPassword_Hash( newPassword.hash );
       rc.user.setPassword_Salt( newPassword.salt );
 
-      VARIABLES.userService.save( rc.user );
+      variables.userService.save( rc.user );
 
       rc.message = ["Your account password was succesfully reset!"];
 
@@ -206,44 +206,44 @@ component accessors = true {
 
     }
 
-    VARIABLES.fw.redirect( 'login.default', 'message' );
+    variables.fw.redirect( 'login.default', 'message' );
 
   }
 
-  function updateConfirm( rc ) {
+  function updateConfirm( struct rc ) {
 
-    rc.user = SESSION.auth.user;
-    rc.message = VARIABLES.userService.checkPassword( argumentCollection = rc );
+    rc.user = session.auth.user;
+    rc.message = variables.userService.checkPassword( argumentCollection = rc );
 
     if ( !ArrayIsEmpty( rc.message ) ) {
-      VARIABLES.fw.redirect( 'profile.basic', 'message' );
+      variables.fw.redirect( 'profile.basic', 'message' );
     }
 
-    var newPassword = VARIABLES.userService.hashPassword( rc.new_password );
+    var newPassword = variables.userService.hashPassword( rc.new_password );
 
     rc.user.setPassword_Hash( newPassword.hash );
     rc.user.setPassword_Salt( newPassword.salt );
 
-    VARIABLES.userService.save( rc.user );
+    variables.userService.save( rc.user.flatten() );
 
     rc.message = ["Your password was successfully updated."];
 
-    VARIABLES.fw.redirect( 'profile.basic', 'message' );
+    variables.fw.redirect( 'profile.basic', 'message' );
 
   }
 
-  function logout( rc ) {
+  function logout( struct rc ) {
 
     // reset session variables
-    SESSION.auth.isLoggedIn = false;
-    SESSION.auth.fullname = "Guest";
+    session.auth.isLoggedIn = false;
+    session.auth.fullname = "Guest";
 
-    StructDelete( SESSION.auth, 'user' );
-    SESSION.auth.user = userservice.getTemp();
+    StructDelete( session.auth, 'user' );
+    session.auth.user = userservice.getTemp();
 
     rc.message = ["You have safely logged out"];
 
-    VARIABLES.fw.redirect( 'login', 'message' );
+    variables.fw.redirect( 'login', 'message' );
 
   }
 
@@ -251,7 +251,7 @@ component accessors = true {
 
     rc.message = ["Oops! There may have been an error! You're probably still logged in, try clicking the link in the upper left."];
 
-    VARIABLES.fw.redirect( 'login', 'message' );
+    variables.fw.redirect( 'login', 'message' );
 
   }
 
@@ -271,25 +271,25 @@ component accessors = true {
       // 2. Perform whatever authentication it has to
       // next step:
       // is the user already logged-in?
-      if ( StructKeyExists(SESSION,'auth') and SESSION.auth.isLoggedIn ) {
+      if ( StructKeyExists( session,'auth' ) and session.auth.isLoggedIn ) {
 
-      // 3. create a new payload with nonce, email, external_id and optionally username,name)
-      /*
-      avatar_url will be downloaded and set as the user’s avatar if the user is new or SiteSetting.sso_overrides_avatar is set.
-      avatar_force_update is a boolean field. If set to true, it will force Discourse to update the user’s avatar, whether avatar_url has changed or not.
-      bio will become the contents of the user’s bio if the user is new, their bio is empty or SiteSetting.sso_overrides_bio is set.
-      Additional boolean (“true” or “false”) fields are: admin, moderator, suppress_welcome_message
-      */
+        // 3. create a new payload with nonce, email, external_id and optionally username,name)
+        /*
+        avatar_url will be downloaded and set as the user’s avatar if the user is new or SiteSetting.sso_overrides_avatar is set.
+        avatar_force_update is a boolean field. If set to true, it will force Discourse to update the user’s avatar, whether avatar_url has changed or not.
+        bio will become the contents of the user’s bio if the user is new, their bio is empty or SiteSetting.sso_overrides_bio is set.
+        Additional boolean (“true” or “false”) fields are: admin, moderator, suppress_welcome_message
+        */
 
-        var dest = DiscourseSSO( data, SESSION.auth.user );
+        var dest = DiscourseSSO( data, session.auth.user );
 
         location( url=dest, addToken=false );
 
       } else {
 
-        SESSION.sso = data; // store the nonce & return_sso_url for now.
+        session.sso = data; // store the nonce & return_sso_url for now.
 
-        VARIABLES.fw.redirect( 'login' ); // send them to the login page.
+        variables.fw.redirect( 'login' ); // send them to the login page.
 
       }
 
@@ -306,7 +306,7 @@ component accessors = true {
   }
 
   //private
-  private function urlToStruct( uri ) {
+  private function urlToStruct( string uri ) {
 
     var data = StructNew();
     var pair = '';
@@ -324,7 +324,7 @@ component accessors = true {
 
   }
 
-  private function structToUrl( obj ) {
+  private function structToUrl( struct obj ) {
 
     var key = '';
     var uri = '';
@@ -368,7 +368,7 @@ component accessors = true {
     var payload_url_hash = hashDiscoursePayload( payload_url_encoded );
 
     // 6. Redirect back to http://discourse_site/session/sso_login?sso=payload&sig=sig
-    //VARIABLES.fw.redirect( action='', path=data.return_sso_url, queryString="sso=#payload_url_encoded#&sig=#payload_url_hash#" );
+    //variables.fw.redirect( action='', path=data.return_sso_url, queryString="sso=#payload_url_encoded#&sig=#payload_url_hash#" );
     var dest = auth_params.return_sso_url & '?sso=' & payload_url_encoded & '&sig=' & payload_url_hash;
 
     return dest;

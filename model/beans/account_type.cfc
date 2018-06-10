@@ -1,4 +1,5 @@
-component accessors = true {
+//model/beans/account_type
+component accessors=true {
 
   property account_type_id;
   property name;

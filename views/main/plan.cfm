@@ -1,4 +1,4 @@
-<!-- views/debt/plan.cfm -->
+<!-- views/main/plan.cfm -->
 <!--- this mirrors plan.default, but shows to anonymous/non-auth'd users --->
 
   <div class="container">
@@ -96,7 +96,7 @@
               <tr>
                 <th>
                   <div id="sold" align="center">
-                    <cfoutput><button class="btn button btn-primary btn-lg" onClick="location.href='#buildUrl('debt.create')#';"><span class="glyphicon glyphicon-floppy-disk"></span> Save Plan</button></cfoutput>
+                    <cfoutput><button class="btn button btn-primary btn-lg" onClick="location.href='#buildUrl('main.create')#';"><span class="glyphicon glyphicon-floppy-disk"></span> Save Plan</button></cfoutput>
                   </div>
                 </th>
               </tr>

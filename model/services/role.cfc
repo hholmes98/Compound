@@ -3,7 +3,7 @@ component accessors=true {
 
   function init( beanFactory ) {
 
-    variables.beanFactory = beanFactory;
+    variables.beanFactory = arguments.beanFactory;
 
     variables.defaultOptions = {
       datasource = application.datasource
@@ -13,7 +13,7 @@ component accessors=true {
 
   }
 
-  function get( id ) {
+  function get( string id ) {
 
     var sql = '
       SELECT r.*

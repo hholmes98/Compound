@@ -1,72 +1,33 @@
-// model/beans/card
+//model/beans/card
 component accessors = true {
 
-  property card_id;
-  property user_id;
-  property label;
-  property balance;
-  property interest_rate;
-  property is_emergency;
-  property min_payment;
-  property is_hot; // plan
-  property calculated_payment; // plan
-  property pay_date; // event
-  property calculated_for_month; // event
-  property calculated_for_year; // event
+  property card_id; // number
+  property credit_limit; // number (8,2)
+  property due_on_day; // int (day of month)
+  property user_id; // number
+  property label; // string
+  property min_payment; // number (8,2)
+  property is_emergency; // smallint
+  property balance; // number (8,2)
+  property interest_rate; // decimal
+  property zero_apr_end_date; // date
 
-  function init( string card_id = 0, string user_id = 0, string label = "", string balance = 0, string interest_rate = 0.29, string is_emergency = 0, string min_payment = "", string is_hot = 0, string calculated_payment = "", date pay_date='1900-1-1', string calculated_for_month = "", string calculated_for_year = "" ) {
+  function init( string card_id = 0, string credit_limit= -1, string due_on_day= 0, string user_id="", string label="", 
+    string min_payment="", string is_emergency=0, string balance=0, string interest_rate=0.29, 
+    string zero_apr_end_date="1900-01-01" ) {
 
-    variables.card_id = card_id;
-    variables.user_id = user_id;
-    variables.label = label;
-    variables.balance = balance;
-    variables.interest_rate = interest_rate;
-    variables.is_emergency = is_emergency;
-    variables.min_payment = min_payment; // "" = init; populated on first get() if there is a balance and min_payment was never set after init.
-    variables.is_hot = is_hot;
-    variables.calculated_payment = calculated_payment; // "" = init, 0 or positive = calculated payment, -1 = do not/can not pay
-    variables.pay_date = pay_date;
-    variables.calculated_for_month = calculated_for_month;
-    variables.calculated_for_year = calculated_for_year;
+    variables.card_id = arguments.card_id;
+    variables.credit_limit = arguments.credit_limit;
+    variables.due_on_day = arguments.due_on_day;
+    variables.user_id = arguments.user_id;
+    variables.label = arguments.label;
+    variables.min_payment = arguments.min_payment;
+    variables.is_emergency = arguments.is_emergency;
+    variables.balance = arguments.balance;
+    variables.interest_rate = arguments.interest_rate;
+    variables.zero_apr_end_date = arguments.zero_apr_end_date;
 
     return this;
-
-  }
-
-  function getRemaining_Balance() {
-
-    // remaining balance is never stored, always calculated
-    // it is what the balance *will be if the calculated payment is applied to the current balance*
-    // eg. balance = $100.00, calculated_payment = $15.00, remaining_balance = $85.00
-    // automatically handles zeroing account when the balance isn't 0, or when the calculated payment ends up being more than the balance
-
-    if ( IsNumeric( variables.calculated_payment ) ) {
-
-      // if the card was deferred (-1), the remaining balance == balance
-      if ( variables.balance > 0 && variables.calculated_payment < 0 )
-        return variables.balance;
-
-      else if ( ( variables.balance > 0 )
-        && ( variables.calculated_payment >= 0 )
-        && ( variables.balance > variables.calculated_payment ) 
-      )
-        return Evaluate( variables.balance - variables.calculated_payment );
-
-    } else {
-      return 0;
-    }
-
-  }
-
-  function IsHot() {
-
-    return variables.is_hot;
-
-  }
-
-  function IsEmergency() {
-
-    return variables.is_emergency;
 
   }
 
@@ -104,15 +65,23 @@ component accessors = true {
 
   }
 
-  function calculated_for() {
+  // workaround until this bug is fixed: https://luceeserver.atlassian.net/browse/LDEV-1789?inbox=true
+  function flatten() {
 
-    if ( IsNumeric(variables.calculated_for_year) && IsNumeric(variables.calculated_for_month) )
+    var c_data = StructNew();
 
-      return CreateDate( variables.calculated_for_year, variables.calculated_for_month, 1 );
+    c_data.card_id = variables.getcard_id();
+    c_data.credit_limit = variables.getcredit_limit();
+    c_data.due_on_day = variables.getdue_on_day();
+    c_data.user_id = variables.getuser_id();
+    c_data.label = variables.getlabel();
+    c_data.min_payment = variables.getmin_payment();
+    c_data.is_emergency = variables.getis_emergency();
+    c_data.balance = variables.getbalance();
+    c_data.interest_rate = variables.getinterest_rate();
+    c_data.zero_apr_end_date = variables.getzero_apr_end_date();
 
-    else
-
-      return '1900-01-01';
+    return c_data;
 
   }
 

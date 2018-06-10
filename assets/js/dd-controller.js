@@ -242,16 +242,23 @@ filters
 })
 .filter('noPaymentFilter', function() {
 
-  function zeroPayFilter( items, all ) {
+  function zeroPayFilter( items, pick_list, all ) {
 
     var filtered = [];
+    var picked = pick_list;
 
-    angular.forEach(items, function(item, key, items) {
-      if (!all) {
-        if (item.pay_date!='1900-1-1')
-          filtered.push(item);
-      } else
-        filtered.push(item);
+    angular.forEach( items, function( item, key, items ) {
+      if ( !all ) {
+        if ( Object.keys(picked).find(key=>key == item.card_id) ) {
+          item.pay_date = picked[item.card_id];
+          filtered.push( item );
+        }
+      } else {
+        if ( Object.keys(picked).find(key=>key == item.card_id ) ) {
+          item.pay_date = picked[item.card_id];
+        }
+        filtered.push( item );
+      }
     });
 
     return filtered;
@@ -266,7 +273,7 @@ filters
 .filter('prettyPayDateFilter', function() {
 
   return function(date) {
-    if (date == '1900-1-1')
+    if (date == undefined)
       return "-";
     else
       return new Date(date);
@@ -284,10 +291,18 @@ sorters (filters)
 
     switch(field) {
 
-      default:
-        if ( left[field] > right[field])
+      case 'pay_date':
+        if ( left[field] > right[field] || left[field] == null )
           return 1;
-        if ( left[field] < right[field])
+        if ( left[field] < right[field] || right[field] == null )
+          return -1;
+
+        break;
+
+      default:
+        if ( left[field] > right[field] )
+          return 1;
+        if ( left[field] < right[field] )
           return -1;
 
         break;
@@ -301,8 +316,8 @@ sorters (filters)
 
     var filtered = [];
 
-    angular.forEach(items, function(item, key, items) {
-      filtered.push(item);
+    angular.forEach(items, function( item, key, items ) {
+      filtered.push( item );
     });
 
     filtered.sort(function( card_a, card_b ) {
@@ -334,12 +349,12 @@ services
   /* CARD */
   service.pGetCards = function( data ) {
 
-    var key = data.user_id;
+    var key = deepGet(data,'user_id');
     var deferred = $q.defer();
 
     $http({
       method: 'GET',
-      url: '/index.cfm/cards/' + key,
+      url: '/index.cfm/deck/list/user_id/' + key,
     })
     .then( function onSuccess( response ) {
 
@@ -373,12 +388,12 @@ services
 
   service.pGetCard = function( data ) {
 
-    var key = data.card_id;
+    var key = deepGet(data,'card_id');
     var deferred = $q.defer();
 
     $http({
       method: 'GET',
-      url: '/index.cfm/card/' + key,
+      url: '/index.cfm/deck/detail/id/' + key,
     })
     .then( function onSuccess( response ) {
 
@@ -414,11 +429,11 @@ services
 
     $http({
       method: 'POST',
-      url: '/index.cfm/card/',
+      url: '/index.cfm/deck/save',
       data: $.param( data ),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
-      } // set the headers so angular passing info as form data (not request payload)
+      }
     })
     .then( function onSuccess( response ) {
 
@@ -451,12 +466,12 @@ services
 
   service.pDeleteCard = function( data ) {
 
-    var key = data.card.card_id;
+    var key = deepGet(data,'card_id');
     var deferred = $q.defer();
 
     $http({
       method: 'DELETE',
-      url: 'index.cfm/card/' + key
+      url: 'index.cfm/deck/delete/id/' + key
     })
     .then( function onSuccess( response ) {
 
@@ -490,12 +505,12 @@ services
   /* PLAN */
   service.pGetPlan = function( data ) {
 
-    var key = data.user_id;
+    var key = deepGet(data,'user_id');
     var deferred = $q.defer();
 
     $http({
       method: 'GET',
-      url: '/index.cfm/plan/list/user_id/' + key,
+      url: '/index.cfm/plans/first/user_id/' + key,
     })
     .then( function onSuccess( response ) {
 
@@ -533,7 +548,7 @@ services
 
     $http({
       method: 'GET',
-      url: '/index.cfm/debt/list/'
+      url: '/index.cfm/main/list/'
     })
     .then( function onSuccess( response ) {
 
@@ -564,14 +579,14 @@ services
 
   };
 
-  service.pDeletePlan = function( data ) {
+  service.pDeletePlans = function( data ) {
 
     var key = deepGet(data, 'user_id');
     var deferred = $q.defer();
 
     $http({
       method: 'DELETE',
-      url: '/index.cfm/plan/' + key,
+      url: '/index.cfm/plans/purge/user_id/' + key,
     })
     .then( function onSuccess( response ) {
 
@@ -605,12 +620,12 @@ services
   /* EVENT */
   service.pGetEvents = function( data ) {
 
-    var key = data.user_id;
+    var key = deepGet(data,'user_id');
     var deferred = $q.defer();
 
     $http({
       method: 'GET',
-      url: '/index.cfm/plan/events/user_id/' + key
+      url: '/index.cfm/events/list/user_id/' + key
     })
     .then( function onSuccess( response ) {
 
@@ -640,12 +655,12 @@ services
 
   service.pGetEvent = function( data ) {
 
-    var key = data.user_id;
+    var key = deepGet(data,'user_id');
     var deferred = $q.defer();
 
     $http({
       method: 'GET',
-      url: '/index.cfm/plan/event/user_id/' + key
+      url: '/index.cfm/events/first/user_id/' + key
     })
     .then( function onSuccess( response ) {
 
@@ -679,12 +694,12 @@ services
 
   service.pGetSchedule = function ( data ) {
 
-    var key = data.user_id;
+    var key = deepGet(data,'user_id');
     var deferred = $q.defer();
 
     $http({
       method: 'GET',
-      url: '/index.cfm/plan/schedule/user_id/' + key
+      url: '/index.cfm/events/schedule/user_id/' + key
     })
     .then( function onSuccess( response ) {
 
@@ -722,7 +737,7 @@ services
 
     $http({
       method: 'GET',
-      url: '/index.cfm/debt/miles/'
+      url: '/index.cfm/main/journey/'
     })
     .then( function onSuccess( response ) {
 
@@ -755,13 +770,13 @@ services
 
   service.pGetJourney = function( data ) {
 
-    var key = data.user_id;
+    var key = deepGet(data,'user_id');
     var deferred = $q.defer();
 
     // FIXME: this should be $http.jsonp(), whitelist the URL: https://docs.angularjs.org/api/ng/service/$http#jsonp
     $http({
       method: 'GET',
-      url: '/index.cfm/plan/miles/' + key
+      url: '/index.cfm/events/journey/user_id/' + key
     })
     .then( function onSuccess( response ) {
 
@@ -795,12 +810,12 @@ services
 
   service.pDeleteJourney = function( data ) {
 
-    var key = data.user_id;
+    var key = deepGet(data,'user_id');
     var deferred = $q.defer();
 
     $http({
       method: 'DELETE',
-      url: '/index.cfm/journey/' + key,
+      url: '/index.cfm/events/purge/user_id/' + key,
     })
     .then( function( response ) {
 
@@ -835,13 +850,12 @@ services
   /* PREFERENCES */
   service.pSetEmergency = function( data ) {
 
-    var e_id = data.card_id;
-    var u_id = data.user_id;
     var deferred = $q.defer();
 
     $http({
       method: 'POST',
-      url: 'index.cfm/card/eid/' + e_id + '/uid/' + u_id,
+      url: 'index.cfm/deck/emergency',
+      data: $.param( data ),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       } // set the headers so angular passing info as form data (not request payload)
@@ -857,7 +871,7 @@ services
       }
 
       deferred.resolve({
-        user_id: u_id,
+        user_id: data.user_id,
         chain: data,
         data: response.data
       });
@@ -878,12 +892,12 @@ services
 
   service.pGetPreferences = function( data ) {
 
-    var key = data.user_id;
+    var key = deepGet(data,'user_id');
     var deferred = $q.defer();
 
     $http({
         method: 'GET',
-        url: '/index.cfm/prefs/uid/' + key
+        url: '/index.cfm/preferences/get/user_id/' + key
     })
     .then( function onSuccess( response ) {
 
@@ -960,7 +974,7 @@ services
 
     $http({
       method: 'POST',
-      url: '/index.cfm/prefs/',
+      url: '/index.cfm/preferences/save/',
       data: $.param( data ),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -1038,12 +1052,12 @@ services
 
 /***************
 
-controller/main
+controller/cards
 
 ***************/
 //cardSorter:orderByField:reverseSort
 //$scope, $http, $q, DDService ) {
-.controller( 'ddMain' , ['$http','$q','$scope','$filter','DDService', function($http, $q, $scope, $filter, DDService) {
+.controller( 'ddDeck' , ['$http','$q','$scope','$filter','DDService', function($http, $q, $scope, $filter, DDService) {
 
   $scope.orderByField = 'label';
   $scope.reverseSort = false;
@@ -1129,7 +1143,7 @@ controller/main
     // https://stackoverflow.com/questions/28250680/how-do-i-access-previous-promise-results-in-a-then-chain
     var one = DDService.pSaveCard( data );
     var two = one.then( function( resultOne ) {
-      DDService.pDeletePlan( data );
+      DDService.pDeletePlans( data );
     });
 
     $q.all([one, two])
@@ -1155,7 +1169,7 @@ controller/main
   $scope.setAsEmergency = function( data ) {
 
     DDService.pSetEmergency( data )
-    .then( DDService.pDeletePlan )
+    .then( DDService.pDeletePlans )
     .then( DDService.pDeleteJourney )
     .then( function onSuccess( response ) {
 
@@ -1190,7 +1204,7 @@ controller/main
 
     DDService.pValidatePreferences( data )
     .then( DDService.pSetPreferences )
-    .then( DDService.pDeletePlan )
+    .then( DDService.pDeletePlans )
     .then( DDService.pDeleteJourney )
     .then( function onSuccess( response ) {
 
@@ -1227,7 +1241,7 @@ controller/main
     };
 
     DDService.pSetPreferences( data )
-    .then( DDService.pDeletePlan )
+    .then( DDService.pDeletePlans )
     .then( DDService.pDeleteJourney )
     .then( function onSuccess( response ) {
 
@@ -1290,7 +1304,7 @@ controller/main
               action: function( dialogItself ) {
 
                 DDService.pDeleteCard ( in_data )
-                .then( DDService.pDeletePlan )
+                .then( DDService.pDeletePlans )
                 .then( DDService.pDeleteJourney )
                 .then( function onSuccess( response ) {
 
@@ -1358,14 +1372,14 @@ controller/main
 
   };
 
-}]) // controller-main
+}]) // controller-cards
 
 /***************
 
-controller/plan
+controller/calculate
 
 ***************/
-.controller( 'ddPlan' , function ( $scope , $http, $timeout, DDService ) {
+.controller( 'ddCalculate' , function ( $scope , $http, $timeout, DDService ) {
 
   /********/
   /* init */
@@ -1393,7 +1407,7 @@ controller/plan
     $scope.plan = response.plan;
     //$scope.keylist = Object.keys($scope.plan).sort(function(a, b){return b-a;});
 
-    $scope.selected = Object.keys($scope.plan).find(thisCard => thisCard.is_emergency == 1);
+    //$scope.selected = Object.keys($scope.plan).find(thisCard => thisCard.is_emergency == 1);
 
     /*
     for (var card in $scope.plan) {
@@ -1636,14 +1650,14 @@ controller/plan
     }
   };
 
-}) // controller/plan
+}) // controller/calculate
 
 /******************
 
 controller/pay
 
 ******************/
-.controller( 'ddPay' , function ( $scope, $http, $q, $location, DDService ) {
+.controller( 'ddPay' , function ( $scope, $http, $q, $location, $filter, DDService ) {
 
   $scope.orderByField = 'pay_date';
   $scope.reverseSort = false;
@@ -1656,24 +1670,28 @@ controller/pay
   .then( function onSuccess( response ) {
 
     //success
-    $scope.cards = response.event;
-    //$scope.keylist = Object.keys($scope.cards).sort( function(a, b){return b-a;});
+    $scope.all_cards = response.event.plan.plan_deck.deck_cards;
+    $scope.event_cards = response.event.event_cards;
 
-    /*
-    for (var key in $scope.keylist) {
-      if ( $scope.cards[$scope.keylist[key]].is_emergency ) {
-        $scope.selected = $scope.keylist[key];
-      }
+    $scope.cards = $filter('cardSorter')($scope.all_cards, $scope.orderByField, $scope.reverseSort);
+
+    //$scope.keylist = Object.keys($scope.all_cards).sort(function(a, b){return b-a;});
+    $scope.pay_dates = {};
+
+    for (i = 0; i < Object.keys($scope.event_cards).length; i++ ) {
+      var index =  Object.keys($scope.event_cards)[i];
+      $scope.pay_dates[index] = $scope.event_cards[index].pay_date;
     }
-    */
 
-    $scope.selected = Object.keys($scope.cards).find(thisCard => thisCard.is_emergency == 1);
+    $scope.cards = $filter('noPaymentFilter')($scope.all_cards, $scope.pay_dates, $scope.showAllCards);
+
+    $scope.selected = $scope.cards[Object.keys($scope.cards)[0]]; // by default, just pick the first one.
 
     // chain into the preferences load
     DDService.pGetPreferences({user_id:CF_getUserID()})
     .then( function onSuccess( response ) {
 
-      $scope.preferences = response.data;
+      //$scope.preferences = response.preferences;
 
     })
     .catch( function onError( result ) {
@@ -1692,6 +1710,21 @@ controller/pay
   /***********
     METHODS
   ***********/
+
+  $scope.sortBy = function(propertyName, initReverse) {
+    if (propertyName != $scope.orderByField) {
+      $scope.reverseSort = initReverse;
+    } else {
+      $scope.reverseSort = !($scope.reverseSort);
+    }
+    $scope.orderByField = propertyName;
+    $scope.cards = $filter('cardSorter')($scope.cards, $scope.orderByField, $scope.reverseSort);
+  }
+
+  $scope.filterBy = function() {
+      $scope.cards = $filter('noPaymentFilter')($scope.all_cards, $scope.pay_dates, $scope.showAllCards);
+  }
+
 
   /*
   $scope.reset = function( form ) {
@@ -1751,6 +1784,9 @@ controller/pay
 
   $scope.selectCard = function( card, destIndex ) {
 
+    $scope.selected = card;
+
+/*
     var user_id = card.user_id;
 
     DDService.pGetPlan( { user_id: user_id } )
@@ -1760,12 +1796,12 @@ controller/pay
       $scope.card = $scope.plan[card.card_id];
 
       console.log( $scope.card );
-
+*/
       AnimatePage.panForward( destIndex );
       addHistory('AnimatePage.panBack(' + (destIndex-1).toString() + ');','#!/nb'+(destIndex-1).toString());
-
+/*
     });
-
+*/
   };
 
   $scope.returnToList = function( destIndex ) {
@@ -1777,18 +1813,19 @@ controller/pay
 
   $scope.recalculateCard = function( card ) {
 
-    var key = card.card_id;
+    var key = Object.keys($scope.cards).find(thisIndex => $scope.cards[thisIndex].card_id == card.card_id);
 
-    $scope.card.calculated_payment = 'Thinking...'; // setting this to a non-number will trigger the || output filter on the display, which is 'Recalculating...'
+    $scope.selected.calculated_payment = 'Thinking...'; // setting this to a non-number will trigger the || output filter on the display, which is 'Recalculating...'
 
     DDService.pSaveCard( card )
     .then( DDService.pGetCard )
-    .then( DDService.pDeletePlan )
+    .then( DDService.pDeletePlans )
     .then( DDService.pDeleteJourney )
     .then( DDService.pGetPlan )
-    .then( function( result ) {
-      $scope.plan = result.plan;
-      $scope.card = $scope.plan[key];
+    .then( function( response ) {
+      // just update the 1  card
+      $scope.cards[key].calculated_payment = response.plan[$scope.selected.card_id].calculated_payment;
+      $scope.selected.calculated_payment = $scope.cards[key].calculated_payment;
     });
 
   };
@@ -1797,10 +1834,10 @@ controller/pay
 
 /*****************
 
-controller/debt
+controller/main
 
 *****************/
-.controller( 'ddDebt' , function ( $scope, $http, $q, $location, $compile, DDService ) {
+.controller( 'ddMain' , function ( $scope, $http, $q, $location, $compile, DDService ) {
 
   $scope.cardTotal = 1;
 
@@ -1843,7 +1880,6 @@ controller/debt
       }
 
     }
-
 
     if (index > ($scope.cardTotal-1)) {
 
@@ -1928,7 +1964,7 @@ controller/debt
       var result = response.schedule;
       var wins = [];
 
-      for (var i=0; i<result.length;i++) {
+      for ( var i = 0; i < result.length; i++ ) {
 
         // inject id
         result[i].id = 'id_' + i;
@@ -1975,8 +2011,8 @@ controller/debt
       }
 
       // cat the two arrays together
-      if (result.length)
-        result = result.concat(wins);
+      if ( result.length )
+        result = result.concat( wins );
 
       Highcharts.stockChart('milestones', {
 
@@ -2024,7 +2060,7 @@ controller/debt
 
         plotOptions: {
           series: {
-            pointStart: Date.UTC(y,m,1), // we begin plotting on the 1st of the current month
+            pointStart: Date.UTC( y, m, 1 ), // we begin plotting on the 1st of the current month
             pointIntervalUnit: 'month',  // every point along the x axis represents 1 month
             tooltip: {
               pointFormatter: function() {
@@ -2069,7 +2105,7 @@ controller/debt
       }
       */
 
-      $scope.selected = Object.keys($scope.plan).find(thisCard => thisCard.is_emergency == 1);
+      //$scope.selected = Object.keys($scope.plan).find(thisCard => thisCard.is_emergency == 1);
 
     })
     .catch( function onError( result ) {
@@ -2080,14 +2116,16 @@ controller/debt
 
   };
 
-}) // controller/debt
+}) // controller/main
 
 /*****************
 
 controller/profile
 
 *****************/
-.controller( 'ddProfile' , function ( $scope, $http, $q, DDService ) {
+.controller( 'ddProfile' , function ( $scope, $http, $q, $cookies, DDService ) {
+
+  $scope.skin = $cookies.get( 'DD-SKIN' );
 
   DDService.pGetPreferences({user_id:CF_getUserID()})
   .then( function onSuccess( result ) {
@@ -2129,6 +2167,27 @@ controller/profile
     });
 
     console.log( $scope.preferences );
+
+  };
+
+  $scope.updateSkin = function( sIndex ) {
+
+    var oldlink = document.getElementsByTagName( 'link' ).item( document.getElementsByTagName( 'link' ).length-1 );
+
+    var newPath = CF_getTheme(sIndex);
+
+    var newlink = document.createElement( 'link' );
+    newlink.setAttribute( 'rel', 'stylesheet' );
+    newlink.setAttribute( 'type', 'text/css' );
+    newlink.setAttribute( 'href', newPath );
+
+    document.getElementsByTagName( 'head' ).item( 0 ).replaceChild( newlink, oldlink );
+
+    var prefs = $cookies.get( 'DD-SKIN' );
+
+    prefs = sIndex;
+
+    $cookies.put( 'DD-SKIN', prefs );
 
   };
 

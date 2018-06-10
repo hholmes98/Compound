@@ -1,11 +1,9 @@
-// model/services/card
-component accessors = true {
-
-  property userservice;
+//model/services/card
+component accessors=true {
 
   public any function init( beanFactory ) {
 
-    variables.beanFactory = beanFactory;
+    variables.beanFactory = arguments.beanFactory;
 
     variables.defaultOptions = {
       datasource = application.datasource
@@ -15,7 +13,15 @@ component accessors = true {
 
   }
 
-  public any function list( string id ) {
+  /******
+    CRUD
+  ******/
+
+  /*
+  list() = get all cards for a user
+  */
+
+  public any function list( string user_id ) {
 
     var sql = '
       SELECT c.*
@@ -26,38 +32,45 @@ component accessors = true {
 
     var params = {
       uid = {
-        value = arguments.id, sqltype = 'integer' 
+        value = arguments.user_id, sqltype = 'integer' 
       }
     };
 
-    var card = {};
-    var cards = {}; // do not change to an array! json populates gaps in the ids, which dumps a bunch of routines!!
+    var cards = {}
 
     var result = QueryExecute(sql, params, variables.defaultOptions);
 
     for ( var i = 1; i <= result.recordcount; i++ ) {
       var card = variables.beanFactory.getBean('cardBean');
-      
-      card.setCard_Id(result.card_id[i]);
-      card.setUser_Id(result.user_id[i]);
-      card.setLabel(result.card_label[i]);
-      card.setMin_Payment(result.min_payment[i]);
-      card.setIs_Emergency(result.is_emergency[i]);
-      card.setBalance(result.balance[i]);
-      card.setInterest_Rate(result.interest_rate[i]);
 
-      cards[card.getCard_id()] = card;
+      card.setCard_Id( result.card_id[i] );
+      card.setCredit_Limit( result.credit_limit[i] );
+      card.setDue_On_Day( result.due_on_day[i] );
+      card.setUser_Id( result.user_id[i] );
+      card.setLabel( result.card_label[i] );
+      card.setMin_Payment( result.min_payment[i] );
+      card.setIs_Emergency( result.is_emergency[i] );
+      card.setBalance( result.balance[i] );
+      card.setInterest_Rate( result.interest_rate[i] );
+      card.setZero_APR_End_Date( result.zero_apr_end_date[i] );
+
+      cards[card.getCard_Id()] = card;
+
     }
 
     return cards;
 
   }
 
+  /*
+  get() = get a specific card by its primary key
+  */
+
   public any function get( string id ) {
-    
+
     var sql = '
       SELECT c.*
-      FROM "pCards" c     
+      FROM "pCards" c
       WHERE c.card_id = :cid
     ';
 
@@ -67,83 +80,66 @@ component accessors = true {
       }
     };
 
-    var result = queryExecute(sql, params, variables.defaultOptions);
-
+    var result = QueryExecute(sql, params, variables.defaultOptions);
     var card = variables.beanFactory.getBean('cardBean');
 
-    if (result.recordcount) {
-    
-      card.setCard_Id(result.card_id[1]);
-      card.setUser_Id(result.user_id[1]);
-      card.setLabel(result.card_label[1]);
-      card.setMin_Payment(result.min_payment[1]);
-      card.setIs_Emergency(result.is_emergency[1]);
-      card.setBalance(result.balance[1]);
-      card.setInterest_Rate(result.interest_rate[1]);
-    
+    if ( result.RecordCount ) {
+
+      card.setCard_Id( result.card_id[1] );
+      card.setCredit_Limit( result.credit_limit[1] );
+      card.setDue_On_Day( result.due_on_day[1] );
+      card.setUser_Id( result.user_id[1] );
+      card.setLabel( result.card_label[1] );
+      card.setMin_Payment( result.min_payment[1] );
+      card.setIs_Emergency( result.is_emergency[1] );
+      card.setBalance( result.balance[1] );
+      card.setInterest_Rate( result.interest_rate[1] );
+      card.setZero_APR_End_Date( result.zero_apr_end_date[1] );
+
     }
 
     return card;
 
   }
 
-  /* convenience: struct->bean */
-  public any function toBean( struct in_card ) {
+  /*
+  save() = save the contents of a single card
+  */
 
-    return variables.beanFactory.getBean( 'cardBean', in_card );
+  public any function save( any card ) {
+    param name="card.credit_limit" default=-1;
+    param name="card.due_on_day" default=0;
+    param name="card.zero_apr_end_date" default="1900-01-01";
 
-  }
-
-  /* convenience: bean->struct, there's something wrong with invokeImplicitAccessor */
-  public struct function flatten( any card ) {
-
-    var c_data = StructNew();
-
-    c_data.card_id = card.getCard_Id();
-    c_data.user_id = card.getUser_Id();
-    c_data.label = card.getLabel();
-    c_data.min_payment = card.getMin_Payment();
-    c_data.is_emergency = card.getIs_Emergency();
-    c_data.balance = card.getBalance();
-    c_data.interest_rate = card.getInterest_Rate();
-
-    return c_data;
-
-  }
-
-  public any function save( struct card ) {
-
-    param name="card.card_id" default=0;
-    param name="card.user_id" default=0;
-    param name="card.label" default="";
-    param name="card.balance" default=0;
-    param name="card.interest_rate" default=0;
-    param name="card.min_payment" default=0;
-    param name="card.is_emergency" default=0;
-
-    if ( card.card_id <= 0 ) {
+    if ( arguments.card.card_id <= 0 ) {
 
       var sql = '
         INSERT INTO "pCards" (
+          credit_limit,
+          due_on_day,
           user_id,
           card_label,
           min_payment,
           is_emergency,
           balance,
-          interest_rate
+          interest_rate,
+          zero_apr_end_date
         ) VALUES (
-          #card.user_id#,
+          #arguments.card.credit_limit#,
+          #arguments.card.due_on_day#,
+          #arguments.card.user_id#,
           :label,
-          #card.min_payment#,
-          #card.is_emergency#,
-          #card.balance#,
-          #card.interest_rate#
+          #arguments.card.min_payment#,
+          #arguments.card.is_emergency#,
+          #arguments.card.balance#,
+          #arguments.card.interest_rate#,
+          #CreateODBCDate(arguments.card.zero_apr_end_date)#
         ) RETURNING card_id AS card_id_out;
       ';
 
       var params = {
         label = {
-          value = card.label, sqltype = 'varchar'
+          value = arguments.card.label, sqltype = 'varchar'
         },
         psq = true
       };
@@ -154,20 +150,25 @@ component accessors = true {
 
     } else {
 
+      // we'll skip user_id because a card will NEVER change to a diff owner. Ever.
       var sql = '
         UPDATE "pCards"
-        SET 
+        SET
+          credit_limit = #arguments.card.credit_limit#,
+          due_on_day = #arguments.card.due_on_day#,
           card_label = :label,
-          min_payment = #card.min_payment#,
-          balance = #card.balance#,
-          interest_rate = #card.interest_rate#
+          min_payment = #arguments.card.min_payment#,
+          is_emergency = #arguments.card.is_emergency#,
+          balance = #arguments.card.balance#,
+          interest_rate = #arguments.card.interest_rate#,
+          zero_apr_end_date = #CreateODBCDate(arguments.card.zero_apr_end_date)#
         WHERE
           card_id = :cid;
       ';
 
       var params = {
         label = {
-          value = card.label, sqltype = 'varchar'
+          value = arguments.card.label, sqltype = 'varchar'
         },
         cid = {
           value = card.card_id, sqltype = 'integer'
@@ -183,40 +184,11 @@ component accessors = true {
 
   }
 
-  public any function setAsEmergency( required string card_id, required string user_id ) {
+  /*
+  delete() = delete a specfic card
+  */
 
-    // blank out all the cards' emergency
-    // then set the new one
-
-    var sql = '
-      UPDATE "pCards"
-      SET
-        is_emergency = 0
-      WHERE
-        user_id = :uid;
-      UPDATE "pCards"
-      SET
-        is_emergency = 1
-      WHERE 
-        card_id = :cid;
-    ';
-
-    var params = {
-      uid = {
-        value = arguments.user_id, sqltype = 'integer'
-      },
-      cid = {
-        value = arguments.card_id, sqltype = 'integer'
-      }
-    };
-
-    var result = QueryExecute( sql, params, variables.defaultOptions );
-
-    return arguments.card_id;
-
-  }
-
-  public any function delete( required string card_id ) {
+  public any function delete( string id ) {
 
     var sql = '
       DELETE FROM "pCards" c
@@ -225,102 +197,65 @@ component accessors = true {
 
     var params = {
       cid = {
-        value = arguments.card_id, sqltype = 'integer'
+        value = arguments.id, sqltype = 'integer'
       }
     };
 
     var result = QueryExecute( sql, params, variables.defaultOptions );
 
-    return 0;
+    return 0; // -1 if it is an error
 
   }
 
-  public query function qryGetOffendingCardsByUser( string user_id, string include_list='', boolean prioritize_emergency=false ) {
+  /*
+  purge() = delete all cards for a user
+  */
+
+  public any function purge( string user_id ) {
 
     var sql = '
-      SELECT c.*
-      FROM "pCards" c
+      DELETE FROM "pCards" c
       WHERE c.user_id = :uid
-      AND c.balance > 0
     ';
-
-    if ( Len( arguments.include_list ) ) {
-      sql = sql & '
-        AND c.card_id IN ( #arguments.include_list# )
-      ';
-    }
-
-    if ( arguments.prioritize_emergency ) {
-
-      sql = sql & '
-        ORDER BY c.is_emergency DESC, c.min_payment DESC, c.balance DESC, c.interest_rate DESC
-      ';
-
-    } else {
-
-      sql = sql & '
-        ORDER BY c.min_payment DESC, c.balance DESC, c.interest_rate DESC
-      ';
-
-    }
 
     var params = {
       uid = {
-        value = arguments.user_id, sqltype = 'integer' 
+        value = arguments.user_id, sqltype = 'integer'
       }
     };
 
     var result = QueryExecute( sql, params, variables.defaultOptions );
 
-    return result;
+    return 0; // -1 if it is an error
 
   }
 
-  public query function qryGetNonZeroCardsByUser( string user_id, string include_list='', boolean prioritize_emergency=false ) {
+  /*
+  create() = create a new user
+  */
 
-    var sql = '
-      SELECT c.*
-      FROM "pCards" c
-      WHERE c.user_id = :uid
-      AND c.balance > 0
-    ';
+  /*************
+  Card Functions
+  *************/
 
-    if ( Len( arguments.include_list ) ) {
-      sql = sql & '
-        AND c.card_id IN ( #arguments.include_list# )
-      ';
+  /* return a user's deck as a true deck object, rather than an arbitrary list of cards */
+  public any function deck( string user_id ) {
+
+    var deck = variables.beanFactory.getBean('deckBean'); // do not change to an array! json populates gaps in the ids, which dumps a bunch of routines!!
+
+    var cards = list( arguments.user_id );
+
+    for ( var card_id in cards ) {
+      deck.addCard( cards[card_id] );
     }
 
-    if ( arguments.prioritize_emergency ) {
-
-      sql = sql & '
-        ORDER BY c.is_emergency DESC, c.balance ASC, c.interest_rate DESC
-      ';
-
-    } else {
-
-      sql = sql & '
-        ORDER BY c.balance ASC, c.interest_rate DESC
-      ';
-
-    }
-
-    var params = {
-      uid = {
-        value = arguments.user_id, sqltype = 'integer' 
-      }
-    };
-
-    var result = QueryExecute( sql, params, variables.defaultOptions );
-
-    return result;
-
+    return deck;
   }
 
-  public any function getEmergencyCardByUser( string user_id ) {
+  public any function getEmergencyCard( string user_id ) {  // was getEmergencyCardByUser
 
     var sql = '
-      SELECT c.*
+      SELECT c.card_id
       FROM "pCards" c
       WHERE c.user_id = :uid
       AND c.is_emergency = 1
@@ -336,15 +271,9 @@ component accessors = true {
 
     var card = variables.beanFactory.getBean('cardBean');
 
-    if ( result.recordcount ) {
+    if ( result.RecordCount ) {
 
-      card.setCard_Id(result.card_id[1]);
-      card.setUser_Id(result.user_id[1]);
-      card.setLabel(result.card_label[1]);
-      card.setMin_Payment(result.min_payment[1]);
-      card.setIs_Emergency(result.is_emergency[1]);
-      card.setBalance(result.balance[1]);
-      card.setInterest_Rate(result.interest_rate[1]);
+      card = get( result.card_id );
 
     }
 
@@ -352,104 +281,41 @@ component accessors = true {
 
   }
 
-  public string function dbGetCardIDs( struct cards, require_nonzero_balance=false, require_nonzero_min_payment=false ) {
+  public any function setEmergencyCard( string e_card_id ) {  // was: setAsEmergency()
 
-    var res = '';
-    var card = 0;
+    // get the card itself
+    var e_card = get( arguments.e_card_id );
 
-    for ( card in arguments.cards ) {
+    // get the user_id
+    var user_id = e_card.getUser_Id();
 
-      if ( !arguments.require_nonzero_balance ) {
-        res = ListAppend( res, arguments.cards[card].getCard_Id() );
-      } else {
-        if ( arguments.cards[card].getBalance() > 0 ) {
-          if ( !arguments.require_nonzero_min_payment ) {
-            res = ListAppend( res, arguments.cards[card].getCard_Id() );
-          } else {
-            if ( arguments.cards[card].getMin_Payment() > 0 )
-              res = ListAppend( res, arguments.cards[card].getCard_Id() );
-          }
-        }
+    // blank out all the cards' emergency
+    // then set the new one
+    var sql = '
+      UPDATE "pCards"
+      SET
+        is_emergency = 0
+      WHERE
+        user_id = :uid;
+      UPDATE "pCards"
+      SET
+        is_emergency = 1
+      WHERE 
+        card_id = :cid;
+    ';
+
+    var params = {
+      uid = {
+        value = user_id, sqltype = 'integer'
+      },
+      cid = {
+        value = arguments.e_card_id, sqltype = 'integer'
       }
+    };
 
-    }
+    var result = QueryExecute( sql, params, variables.defaultOptions );
 
-    return res;
-
-  }
-
-  public string function dbGetNonZeroCardIDs( struct cards ) {
-
-    var res = dbGetCardIDs( arguments.cards, true );
-
-    return res;
-
-  }
-
-  public string function dbGetNonZeroCardIDsWithMinPayment( struct cards ) {
-
-    var res = dbGetCardIDs( arguments.cards, true, true );
-
-    return res;
-
-  }
-
-  public numeric function dbCalculateTotalBalance( struct cards ) {
-
-    var tot = 0;
-    var card = 0;
-
-    for ( card in arguments.cards ) {
-      tot += arguments.cards[card].getBalance();
-    }
-
-    return tot;
-
-  }
-
-  public numeric function dbCalculateTotalRemainingBalance( struct cards ) {
-
-    var rtot = 0;
-    var card = 0;
-
-    for ( card in arguments.cards ) {
-      //if ( arguments.cards[card].getCalculated_Payment() > 0 )
-        rtot += arguments.cards[card].getRemaining_Balance();
-    }
-
-    return rtot;
-
-  }
-
-  public numeric function dbCalculateTotalCalculatedPayments( struct cards ) {
-
-    var tot = 0;
-    var card = 0;
-
-    for ( card in arguments.cards ) {
-      if ( arguments.cards[card].getCalculated_Payment() > 0 )
-        tot += arguments.cards[card].getCalculated_Payment();
-    }
-
-    return tot;
-
-  }
-
-  public numeric function dbCalculateTotalMinPayments( struct cards, boolean consider_balance=false ) {
-
-    var tot = 0;
-    var card = 0;
-
-    for ( card in arguments.cards ) {
-      if ( !arguments.consider_balance )
-        tot += arguments.cards[card].getMin_Payment();
-      else {
-        if ( arguments.cards[card].getBalance() > 0 )
-          tot += arguments.cards[card].getMin_Payment();
-      }
-    }
-
-    return tot;
+    return 0; // -1 if error
 
   }
 

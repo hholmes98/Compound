@@ -1,8 +1,8 @@
-// model/services/mail
-component accessors = true {
+//model/services/mail
+component accessors=true {
 
-  property eventservice;
-  property planservice;
+  property eventService;
+  property planService;
 
   public any function init( beanFactory ) {
 

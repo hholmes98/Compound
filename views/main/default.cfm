@@ -1,193 +1,212 @@
 <!-- views/main/default -->
-<div class="page-header">
-  <h1>Update Your Budget</h1>
-  <h3>This is where you decimate your debt.</h3>
-</div>
+<form class="form-horizontal" name="entry" id="entry" method="post" action="<cfoutput>#buildUrl('main.calculate')#</cfoutput>">
 
-<p>
-  Configure and customize your plan below. Click each tab to reveal the details you can personalize.
-</p>
+<div id="page1" class="pan-page pan-page-1">
 
-<br/>
+  <div class="container">
 
-<div class="panel panel-default form-horizontal">
+    <cfoutput>
 
-  <ul class="nav nav-tabs">
-    <li ng-class="{'active': cardManagerTab==true}"><a ng-click="cardManagerTab=true;emergencyTab=false;budgetTab=false;paycheckFrequencyTab=false" href="javascript:void(0)" aria-controls="card-manager"><i class="far fa-credit-card"></i> Manage Credit Cards</a></li>
-    <li ng-class="{'active': emergencyTab==true}"><a ng-click="cardManagerTab=false;emergencyTab=true;budgetTab=false;paycheckFrequencyTab=false" href="javascript:void(0)" aria-controls="emergency"><i class="fas fa-exclamation-triangle"></i> Select Emergency Card</a></li>
-    <li ng-class="{'active': budgetTab==true}"><a ng-click="cardManagerTab=false;emergencyTab=false;budgetTab=true;paycheckFrequencyTab=false" href="javascript:void(0)" aria-controls="budget"><i class="fas fa-money-bill-alt"></i> Set Budget</a></li>
-    <li ng-class="{'active': paycheckFrequencyTab==true}"><a ng-click="cardManagerTab=false;emergencyTab=false;budgetTab=false;paycheckFrequencyTab=true" href="javascript:void(0)" aria-controls="paycheck-frequency"><i class="fas fa-redo-alt"></i> Specify Paycheck Frequency</a></li>
-  </ul>
+    <div class="col-md-12" align="center">
 
-  <div class="tab-content">
+      <div class="panel-heading">
+        <div class="panel-title">
+          <h1>#application.locale[session.auth.locale]['name']#</h1>
+          <h3>The Credit Card Calculator</h3>
+        </div>
+      </div>
+      <font style="font-size: 30px; font-weight: 700;">
+        <div class="header">
+          <span>Tell us your debt.</span> <span>We'll tell you the rest.</span>
+        </div>
+        <div>
+          Every payment.
+        </div>
+        <div>
+          Every date.
+        </div>
+        <div>
+          Until you're free.
+        </div>
+      </font>
 
-    <!-- tab 1 -->
-    <div ng-show="cardManagerTab" id="card-manager" class="panel-body">
-      <div><!--- class="table table-striped table-bordered table-valign-middle" --->
+      <div class="col-md-2"></div>
+      <div class="col-md-8">
 
-        <div class="row panel-header">
-          <div class="col-md-12">
-            <h3>These are your cards. There are many like them. But these ones are yours.</h3>
-            <p>
-              Update your entire budget here. Change any card's name, balance, interest rate or minimum payment.
-              Click 'Add a new card' to for more debt. Click 'Delete' to remove the entire card from your profile.
-              While changing info, click 'Reset' if you need to start over.
-            </p>
+        <hr>
+
+        <span class="help-block" id="budget-help-block"><strong>First:</strong> How much can you <b>afford</b>, each month, to apply towards <em>all</em> of your outstanding debt?</span>
+        <div class="form-group form-group-lg">
+          <label class="sr-only" for="budget">Monthly budget allocated to debt payoff (in dollars)</label>
+          <div class="input-group">
+            <div class="input-group-addon">$</div>
+            <input class="form-control" type="text" id="budget" placeholder="(eg. 250.00)" name="budget" />
+            <div class="input-group-addon"> per month.</div>
           </div>
         </div>
+        <span>
+          <button type="button" class="btn button btn-primary btn-more" ng-click="buildAndPan(1)"><span class="glyphicon glyphicon-circle-arrow-right"></span> Next: Enter Some Debt</button>
+        </span>
+        <span>
+          <br/>
+          <br/>
+          <br/>
+          <button type="button" class="btn button btn-default btn-sm btn-login" ng-click="navigateTo('#buildUrl('login.default')#')"><span class="glyphicon glyphicon-exclamation-sign"></span> I already have an account</button>
+        </span>
 
-        <div class="row panel-header">
-          <div class="col-md-2"><button uib-tooltip="Cards can also be loans!" type="button" class="btn button btn-default" ng-click="newCard(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>)"><span class="glyphicon glyphicon-plus"></span> Add a new card</button></div>
-          <div class="col-md-4 col-md-offset-2"><strong>Debt Load:</strong> <font style="color:red">{{totalDebtLoad | currency}}</font></div>
-          <div class="col-md-4"><strong>Monthly Payments:</strong> {{totalMinPayment | currency}}</div>
-        </div>
+      </div>
+      <div class="col-md-2"></div>
 
-        <div class="row panel-header col-names">
-          <div class="col-md-4"><a href="javascript:void(0)" ng-click="sortBy('label', false)">Card <span ng-show="orderByField=='label'"><span ng-show="!reverseSort"><i class="fas fa-angle-up"></i></span><span ng-show="reverseSort"><i class="fas fa-angle-down"></i></span></span></a></div>
-          <div class="col-md-2"><a href="javascript:void(0)" ng-click="sortBy('balance', true)">Balance <span ng-show="orderByField=='balance'"><span ng-show="!reverseSort"><i class="fas fa-angle-up"></i></span><span ng-show="reverseSort"><i class="fas fa-angle-down"></i></span></span></a></div>
-          <div class="col-md-2"><a href="javascript:void(0)" ng-click="sortBy('interest_rate', true)">Interest Rate <span ng-show="orderByField=='interest_rate'"><span ng-show="!reverseSort"><i class="fas fa-angle-up"></i></span><span ng-show="reverseSort"><i class="fas fa-angle-down"></i></span></span></a></div>
-          <div class="col-md-2"><a href="javascript:void(0)" ng-click="sortBy('min_payment', true)">Min. Payment <span ng-show="orderByField=='min_payment'"><span ng-show="!reverseSort"><i class="fas fa-angle-up"></i></span><span ng-show="reverseSort"><i class="fas fa-angle-down"></i></span></span></a></div>
-          <div class="col-md-2"></div>
-        </div>
-
-        <div class="row align-top panel-body" ng-form name="cardsForm" ng-repeat="card in cards track by $index"><!--- we take [| cardSorter:orderByField:reverseSort] off this so that it doesn't hop around while editing --->
-          <ng-form name="innerForm">
-            <input type="hidden" ng-model="card.id">
-            <input type="hidden" ng-model="card.is_emergency">
-            <div class="col-md-4" ng-class="{'has-error': innerForm.label.$invalid }">
-              <input type="text" name="label" class="form-control" ng-model="card.label" ng-required="true">
-              <span ng-show="innerForm.label.$invalid" class="help-block">Must name this card.</span>
-            </div>
-            <div class="col-md-2">
-              <div class="input-group" ng-class="{'has-error': innerForm.balance.$invalid }">
-                <span class="input-group-addon">$</span>
-                <input type="text" name="balance" class="form-control" ng-model="card.balance" dollar-input>
-              </div>
-              <span ng-show="innerForm.balance.$invalid" class="help-block">Must be a valid dollar amount.</span>
-            </div>
-            <div class="col-md-2">
-              <div class="input-group" ng-class="{'has-error': innerForm.interest_rate.$invalid }">
-                <input type="text" name="interest_rate" class="form-control" ng-model="card.interest_rate" interest-rate-input>
-                <span class="input-group-addon">%</span>
-              </div>
-              <span ng-show="innerForm.interest_rate.$invalid" class="help-block">Must be a valid interest rate.</span>
-            </div>
-            <div class="col-md-2">
-              <div class="input-group" ng-class="{'has-error': innerForm.min_payment.$invalid }">
-                <span class="input-group-addon">$</span>
-                <input type="text" name="min_payment" class="form-control" ng-model="card.min_payment" dollar-input>
-              </div>
-              <span ng-show="innerForm.min_payment.$invalid" class="help-block">Must be a valid dollar amount.</span>
-            </div>
-            <div class="col-md-2">
-              <button class="btn button btn-default" ng-class="{'btn-success': !cardsForm.$pristine }" ng-disabled="cardsForm.$pristine || cardsForm.$invalid" ng-click="saveCard(card);calculateAll();cardsForm.$setPristine(true)" ><span class="glyphicon glyphicon-ok"></span> Save Changes</button>
-              <button class="btn button btn-default" ng-class="{'btn-warning': !cardsForm.$pristine }" ng-disabled="cardsForm.$pristine" ng-click="resetCard(card);cardsForm.$setPristine(true)" ><span class="glyphicon glyphicon-refresh"></span> Reset</button>
-              <button class="btn button btn-default" ng-click="deleteCard($index);cardsForm.$setPristine(true)"><span class="glyphicon glyphicon-remove"></span> Delete</button>
-            </div>
-          </ng-form>
-        </div><!--- //row --->
-
-      </div><!--- // table --->
-    </div><!--- // tab1 --->
-
-    <!-- tab 2 -->
-    <div ng-show="emergencyTab" id="emergency" class="panel-body">
-      <div><!--- // class="table table-striped table-bordered table-valign-middle" --->
-
-        <div class="row panel-header">
-          <div class="col-md-12"><h3>Money's Too Tight to Mention</h3>
-            <p>Your emergency card is the one card that you'll lean on when you have an unexpected medical bill, car trouble, etc.
-              - It must be usable anywhere (so don't pick a Gas card!)</br>
-              - Casual shopping is not an emergency! (think: food, shelter, safety)</br>
-            </p>
-          </div>
-        </div>
-
-
-        <div class="row panel-body align-top form-inline" ng-form name="cardsForm2">
-          <div class="form-group col-md-4">
-            <label for="emergency_card" class="control-label">I'll select:</label>
-            <select type="select" name="emergency_card" class="form-control" ng-model="selected" ng-options="card as card.label for card in cards track by card.card_id"></select>
-          </div>
-          <div class="col-md-6">
-            for emergencies.
-          </div>
-          <div class="col-md-2">
-            <button class="btn button btn-default" ng-class="{'btn-success': !cardsForm2.$pristine }" ng-disabled="cardsForm2.$pristine" ng-click="setAsEmergency(selected);cardsForm2.$setPristine(true)"><span class="glyphicon glyphicon-ok"></span> Save Changes</button>
-          </div>
-        </div>
-
-      </div><!--- // table --->
-    </div><!--- // tab2 --->
-
-
-    <!-- tab 3 -->
-    <div ng-show="budgetTab" id="budget" class="panel-body">
-      <div><!---  class="table table-striped table-bordered table-valign-middle" --->
-
-        <div class="row panel-header">
-          <div class="col-md-12"><h3>Everything Counts in Large Amounts</h3>
-            <p>
-              How much have you budgeted to pay off debt each month? Enter the dollar and cent value below.<br/>
-              <br/>
-              Make it count! The more, the better...but make sure <i>you continue to live within your means!</i>
-            </p>
-          </div>
-        </div>
-
-        <div class="row panel-body align-top form-inline" ng-form name="cardsForm3">
-          <div class="form-group col-md-4">
-            <label for="budget" class="control-label">I'll commit</label>
-            <div class="input-group">
-              <div class="input-group-addon">$</div>
-              <input type="text" class="form-control" name="budget" ng-model="preferences.budget" dollar-input />
-            </div>
-          </div>
-          <div class="col-md-6">
-            a month to decimating my debt.
-          </div>
-          <div class="col-md-2">
-            <button class="btn button btn-default" ng-class="{'btn-success': !cardsForm3.$pristine }" ng-disabled="cardsForm3.$pristine" ng-click="setBudget(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>, preferences.budget);cardsForm3.$setPristine(true)"><span class="glyphicon glyphicon-ok"></span> Save Changes</button>
-          </div>
-        </div>
-
-      </div><!--- // table --->
     </div>
 
-    <!-- tab 4 -->
-    <div ng-show="paycheckFrequencyTab" id="paycheck-frequency" class="panel-body">
-      <div><!--- class="table table-striped table-bordered table-valign-middle" --->
+    </cfoutput>
 
-        <div class="row panel-header">
-          <div class="col-md-12"><h3>What's The Frequency, <cfoutput>#session.auth.user.getName()#</cfoutput>?</h3>
-            <p>
-              In order to determine what you'll pay and when, the frequency of your income is key. It's not ok to pay off 
-              debt <i>but also go hungry at the same time</i>. Based on what you tell us here, we'll calculate the smartest
-              pay schedule that doesn't cripple your day-to-day life.
-            </p>
-          </div>
-        </div>
+  </div>
 
-        <div class="row panel-body align-top form-inline" ng-form name="frequencyForm">
-          <div class="form-group col-md-7">
-            <label for="pay_frequency" class="control-label">My income arrives:</label>
+</div>
+
+<!-- the template for each card uses the 2nd page -->
+<div id="page2" class="pan-page page-page-2">
+
+  <div class="container">
+
+    <cfoutput>
+
+    <div class="card-content col-sm-12" align="center">
+
+      <h3>Debt.</h3>
+
+      <p>
+        A loan you owe the bank. A balance lingering on a credit card.<br/>
+        We call them <font style="color:##D2691E;"><strong>cards</strong></font>, but it's all the same to the calculator.<br/>
+        Just tell us how much you owe. We'll take it from here.
+      </p>
+
+      <div class="col-sm-2"></div>
+      <div class="col-sm-8">
+
+        <hr>
+
+        <span class="help-block" id="credit-card-balance-help1"><b>Next:</b> Enter the remaining balance on one of your <font style="color:##D2691E;"><strong>cards</strong></font>.<br/><br/></span>
+        <div class="form-group" align="left">
+          <label for="credit-card-balance1" class="col-sm-3 control-label">Balance:</label>
+          <div class="col-sm-7">
             <div class="input-group">
-              <select class="form-control" name="pay_frequency" ng-model="preferences.pay_frequency" convert-to-number>
-                <option value="1">Once a month (12 paychecks per year)
-                <option value="2">Twice a month (24 paychecks per year)
-                <option value="3">Every two weeks (26 paychecks per year)
-                <option value="0">It's complicated (can't or don't want to say)
-              </select>
+              <span class="input-group-addon">$</span>
+              <input class="form-control credit-card-balance" type="text" placeholder="(eg. 3,275.22)" name="credit-card-balance1">
             </div>
           </div>
-          <div class="col-md-2 col-md-offset-3">
-            <button class="btn button btn-default" ng-class="{'btn-success': !frequencyForm.$pristine }" ng-disabled="frequencyForm.$pristine" ng-click="setPayFrequency(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>,preferences.pay_frequency);frequencyForm.$setPristine(true)"><span class="glyphicon glyphicon-ok"></span> Save Changes</button>
+        </div>
+        <div class="form-group" align="left">
+          <label for="credit-card-label1" class="col-sm-3 control-label">Give it a name:</label>
+          <div class="col-sm-7">
+            <input class="form-control credit-card-label" type="text" placeholder="(eg. WF checking atm card)" name="credit-card-label1">
           </div>
         </div>
+        <div class="form-group" align="left">
+          <div class="col-sm-offset-3 col-sm-7">
+            <button type="button" class="btn button btn-default btn-sm btn-more" ng-click="buildAndPan(2)"><span class="glyphicon glyphicon-plus"></span> Enter More Debt</button>
+          </div>
+        </div>
+        <br/>
+        <div align="center">
+          <button type="button" class="btn button btn-primary btn-submit" form="entry"><i class="fas fa-calculator"></i> Show Me The Plan</button>
+        </div>
 
-      </div> <!--- //table --->
-    </div><!--- //tab4 --->
+      </div>
+      <div class="col-sm-2"></div>
 
-  </div><!-- /tab-content -->
+    </div>
 
-</div><!-- /panel -->
+    </cfoutput>
+
+  </div>
+
+</div>
+
+</form>
+
+<div class="about">
+
+  <section dir="ltr" class="focus">
+    <div class="section-inner">
+      <div class="text">
+        <h3>Keepin' it real (simple).</h3>
+        <p>Financial applications love throwing the kitchen sink at you. You have one problem, we have one solution: <b>take your debt and calculate the fastest payoff</b>. That's
+  all you need! Why complicate things?</p>
+      </div>
+      <span class="splash-icon focus-icon"></span>
+    </div>
+  </section>
+  <section dir="ltr" class="security">
+    <div class="section-inner">
+      <span class="splash-icon security-icon"></span>
+      <div class="text-other">
+        <h3>We're on a need-to-know basis.</h3>
+        <p>Other systems often require a connection to all of your banking institutions (and in some cases, those banks
+  ask for additional fees...<em>just to connect!</em> ) With us, <b>no bank connections are required,</b> and <b>no credit card numbers stored</b>.
+  Under the hood, it's just a list of balances...we don't ask for your personal financial information, and we don't believe
+  you should have to fork it over.</p>
+      </div>
+    </div>
+  </section>
+  <section dir="ltr" class="fear">
+    <div class="section-inner">
+      <div class="text">
+        <h3>Doing what's <strike>good for business</strike> right for you.</h3>
+        <p>No machine learning. No AI. No blockchain. No bitcoin. No hooking up to your bank and charging you hidden fees.
+  No smartphone GPS tracking your location. <b>We're a calculator that does the math for you...<em>and that's it.</em></b> There won't be any rise of the
+  machines on our watch! We believe in ethical technology, so to those buzzwords we say...no thanks!</p>
+      </div>
+      <span class="splash-icon fear-icon"></span>
+    </div>
+  </section>
+  <section dir="ltr" class="privacy">
+    <div class="section-inner">
+      <span class="splash-icon privacy-icon"></span>
+      <div class="text-other">
+        <h3>Your data is yours and nobody else's.</h3>
+        <p>We value your freedom to choose a competitor. If you don't like us or find something better, we give you a
+  single button to access all your data. That's it! It's yours!...<em>as it should be</em>. We'd be sorry to lose
+  you, but <b>we care more about <em>your</em> success than our own.</b></p>
+      </div>
+    </div>
+  </section>
+  <section dir="ltr" class="support">
+    <div class="section-inner">
+      <div class="text">
+        <h3>We're built by people like you.</h3>
+        <p>Paying off debt <em>is hard</em>. It requires discipline over a long period of time. It's tough to ask for help.<br/><br/>We know.<br/><br/>
+        No one should be excluded because of shame or a lack of funds. This is why <b>our base functionality is 100% free</b>, <b>support is one click away</b>, and we provide the means for
+  <b>others to donate/gift subscriptions to our users</b>.</p>
+      </div>
+      <span class="splash-icon support-icon"></span>
+    </div>
+  </section>
+  <section dir="ltr" class="footer">
+    <div class="section-inner">
+      <cfoutput>
+      <h3>#application.locale[session.auth.locale]['name']#</h3>
+      <h3>#application.locale[session.auth.locale]['motto']#</h3>
+      </cfoutput>
+      <button class="btn btn-default" id="returnTop"> Get Started</button>
+      <footer id="footer-sitemap">
+        <div class="footer-container">
+          <div class="sitemap">
+            <div class="footer-column"></div>
+            <div class="footer-column"></div>
+            <div class="footer-column"></div>
+          </div>
+          <div class="footer-language-options">
+            <h3>Site Language</h3>
+            <ul>
+              <li>English</li>
+              <li>Spanish</li>
+            </ul>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </section>
+
+</div>

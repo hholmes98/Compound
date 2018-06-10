@@ -14,16 +14,16 @@
 }
 
 Whites
-#ffffff - main background color
+#222222 - main bg color
 
 Greens
-#171717 - near black - default font color, horizontal rules, button borders, some icons
+#49bfb1 - ATM Green - default font color, horizontal rules, button borders, some icons (was 171717)
 #42493C - dark forest - starting to approach black - only used in the bg of the master .panel class
-#19482c - forest - default HYPERLINK color - default icons color - some font - all upper case (button labels?) - ID numbers, could be good for anything fixed width (dollar values)
-#1c6a3a - go signal - few icons
+#2d7f75 - Darker ATM Green (was 19482c)- default HYPERLINK color - default icons color - some font - all upper case (button labels?) - ID numbers, could be good for anything fixed width (dollar values)
+#111111 - Darkest (was: 1c6a3a)  few icons
 #839178 - dulled gray-green
 #acc3a2 - washed out green (gray)
-#333333   (was e0e9dd) -lightest of grays. button bg colors. panel bg colors. to give the sense of hollowness
+#333333 - super pale green - . button bg colors. panel bg colors. to give the sense of hollowness
 
 Peach
 #dcc9b6 - alt bg color? maybe gradient from washed out green?
@@ -31,8 +31,8 @@ Peach
 Ultra Light Blue 
 #bbd1ea - perhaps some bg icongraphy?
 
-Chocolate
-#D2691E - link hover/focus states, button hover/focus states, icons that accompany links.
+ATM Bright Green
+#88fef0 - link hover/focus states, button hover/focus states, icons that accompany links.
 
 
 */
@@ -79,14 +79,14 @@ Chocolate
 /* others */
 
 .main-login {
-  background-color: #fff;
+  background-color: #000;
   /* shadows and rounded borders */
   -moz-border-radius: 2px;
   -webkit-border-radius: 2px;
   border-radius: 2px;
-  -moz-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
-  -webkit-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
-  box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: 0px 2px 2px rgba(250, 250, 250, 0.2);
+  -webkit-box-shadow: 0px 2px 2px rgba(250, 250, 250, 0.2);
+  box-shadow: 2px 2px 2px rgba(250, 250, 250, 0.2);
 }
 
 .main-center {
@@ -117,30 +117,28 @@ Chocolate
   padding-top:  7px;
 }
 
-/* toggle used in profile */
-/*.toggle-on.btn {
-  padding-right: 24px;
-  padding-top: 7px;
-}
 
-.toggle-off.btn {
+
+
+
+/*.toggle-off.btn {
   padding-left: 14px;
   padding-top: 7px;
 }*/
 
 /* toggle on the pay screen */
 .toggle.btn {
-/*  min-width: 155px;*/
+  /*min-width: 155px;*/
 }
-
-/*.toggle.btn-xs {
+/*
+.toggle.btn-xs {
   min-height: 40px;
 }
 
 .btn.toggle-off.btn-sm {
   padding: 8px 0px 8px 8px;
-}*/
-
+}
+*/
 /* glyphs */
 .glyphicon-large {
   font-size: 42px;
@@ -170,7 +168,7 @@ Chocolate
 
 /* glyphs */
 .glyphicon, .fas, {
-  color: #19482c;
+  color: #2d7f75;
   top: 2px;
 }
 
@@ -184,34 +182,34 @@ Chocolate
 }
 
 .navbar-nav > .active > a > .glyphicon, .navbar-nav > .active > a > .svg-inline--fa {
-  color: #D2691E;;
+  color: #88fef0;;
 }
 
 .dropdown-menu > li > a:hover > .svg-inline--fa {
-  color: #171717;
+  color: #49bfb1;
 }
 
 html, body { 
   height: 100%;
   padding-top: 25px;  /* to consider for the fixed nav */
-  background-color: #fff;
-  color: #171717; /* dd-black */
+  background-color: #222222; /* ATM Black */
+  color: #49BFB1; /* ATM green */
   font-family: 'Nunito', sans-serif;
   font-size: 21px;
   font-weight: 400;
 }
 
 a {
-  color: #19842c; /* bright green */
+  color: #fff; /* white */
 }
 
 /* glyphs that accompany links are chocolate */
 a .svg-inline--fa {
-  color: #D2691E;
+  color: #88fef0;
 }
 
 a:focus, a:hover {
-  color: #D2691E; /* chocolate */
+  color: #88fef0; /* chocolate */
 }
 
 .nav-tabs > .active > a > .svg-inline--fa {
@@ -230,11 +228,11 @@ a:focus, a:hover {
 
 /* glyphs in links that are being hovered over (chocolate) will themselves flip black */
 a:focus .svg-inline--fa, a:hover .svg-inline--fa {
-  color: #171717;
+  color: #49bfb1;
 }
 
 hr {
-  border-top: 1px solid #D2691E;
+  border-top: 1px solid #88fef0;
 }
 
 p {
@@ -266,17 +264,17 @@ h1, h2, h3, .navbar-brand, .navbar-brand a, .navbar-inverse .navbar-brand a {
 h1 {
   font-size: 62px;
   
-  -webkit-text-fill-color: #e0e9dd;
+  -webkit-text-fill-color: #333333;
   -webkit-text-stroke-width: 2px;
-  -webkit-text-stroke-color: #171717;
+  -webkit-text-stroke-color: #49bfb1;
   
   
   text-shadow:
-    3px 3px 0 #000,
-    -1px -1px 0 #000,
-    1px -1px 0 #000,
-    -1px 1px 0 #000,
-    1px 1px 0 #000
+    3px 3px 0 #555555,
+    -1px -1px 0 #555555,
+    1px -1px 0 #555555,
+    -1px 1px 0 #555555,
+    1px 1px 0 #555555
 }
 
 /* H2: like H1, but with a horizontal line fill */
@@ -288,19 +286,20 @@ h2 {
     50% 0%,
     50% 100%,
     color-stop(0%, #ffffff),
-    color-stop(100%, #171717)
+    color-stop(100%, #49bfb1)
   );
   background-image: repeating-linear-gradient(
     to bottom,
     #ffffff,
-    #171717 2px,
-    #ffffff 2px);
+    #49bfb1 2px,
+    #ffffff 2px
+  );
   line-height: 1.2;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   -webkit-text-stroke-width: 2px;
-  -webkit-text-stroke-color: #171717;
-  color: #171717;
+  -webkit-text-stroke-color: #49bfb1;
+  color: #49bfb1;
   position: relative;
 }
 
@@ -311,7 +310,7 @@ h2:after {
   display: inline-block;
   content: attr(shadow-text);
   position: absolute; /* FIXME: this aligns to the parent element, not the *actual text*, so center alignments break! */
-  text-shadow: 5px 5px 0 rgba(0,0,0,1);
+  text-shadow: 5px 5px 0 rgba(70,70,70,1);
   top: 0px;
   left: 0px;
   right: -2px;
@@ -330,19 +329,20 @@ label {
 
 /* restyling bootstrap */
 .page-header {
-  border-bottom: 1px solid #171717;
+  border-bottom: 1px solid #49bfb1;
 }
 
 /* help-block */
 .help-block {
-  color: #19482c;
+  color: #2d7f75;
 }
 
 /* input */
 .input-group-addon {
-  background-color: #acc3a2;
-  border: 1px solid #839178;
+  background-color: #222222;
+  border: 1px solid #333333;
   font-size: 17px;
+  color: #88fef0;
 }
 
 .input-group {
@@ -364,14 +364,14 @@ label {
 }
 
 .btn-default {
-  color: #19842c; /* bright green */
-  /*background-color: #e0e9dd;*/ /* pale green */
+  color: #88fef0; /* bright green */
+  /*background-color: #333333;*/ /* pale green */
   background: linear-gradient(
     to bottom,
-    hsl(105, 21%, 89%),
-    hsl(105, 21%, 79%)
+    hsl(0, 0%, 20%),
+    hsl(0, 0%, 10%)
   );
-  border: 2px solid #19482c; /* deep forest green */
+  border: 2px solid #2d7f75; /* deep forest green */
   border-radius: 8px;
   text-transform: uppercase;
   font-weight: 900;
@@ -379,37 +379,37 @@ label {
 }
 
 .btn-default:hover, .btn-default:focus, .btn-primary:hover, .btn-primary:focus, .btn-primary.active:hover, .btn-primary.active:focus {
-  color: #D2691E;
-  background-color: #F9Ece3;
-  border-color: #4F270B;
+  color: #fff;
+  background-color: #333333;
+  border-color: #fff;
 }
 
 /* glyphs that specifically show up on buttons */
-.btn > .glyphicon, .btn > .fas-large {
-  color: #D2691E;
+.btn > .glyphicon, .btn > .fas-large, .btn > .svg-inline--fa {
+  color: #88fef0;
   top: 2px;
 }
 
 /* glyphs on buttons that are being hovered or focused (orange) will flip to black */
 .btn:hover .glyphicon, .btn:focus .glyphicon {
-  color: #171717;
+  color: #ffffff;
 }
 
 .btn:hover .fas, .btn:focus .fas {
-  color: #171717;
+  color: #49bfb1;
 }
 
 /* button-primary */
 .btn-primary, .btn-primary.active {
   color: #fff;
-  /*background-color: #1c6a3a;*/
+  /*background-color: #111111;*/
   background: linear-gradient(
     to bottom,
-    hsl(143, 58%, 26%),
-    hsl(143, 58%, 16%)
-  ); 
-  /* border-color: #cccccc; */
-  border: 2px solid #171717;
+    hsl(0, 0%, 14%),
+    hsl(0, 0%, 4%)
+  );
+  /*border-color: #cccccc;*/
+  border: 2px solid #49bfb1;
   border-radius: 8px;
   text-transform: uppercase;
   font-weight: 900;
@@ -432,24 +432,24 @@ label {
 .btn-default[disabled] {
   background-color: #ffffff; /* bootstrap default */
   border-color: #cccccc; /* boostrap default */
-  color: #839178;
+  color: #555555;
 }
 
 .navbar-fixed-top {
   top: 0;
-  border-top-color: #D2691E;
+  border-top-color: #49bfb1;
   border-top-style: solid;
   border-top-width: 6px;
-  border-bottom-color: #171717;
+  border-bottom-color: #fff;
   z-index: 1030;
-  /* box-shadow: 0 1px 11px 1px rgba(0,0,0,0.7); */
+  /*box-shadow: 0 1px 11px 1px rgba(0,0,0,0.7);*/
 }
 
 /* nav */
 .navbar-inverse {
-  background-color: #1c6a3a;
+  background-color: #111111;
   font-size: 17px;
-  /* border-color: #000; */
+  /*border-color: #000;*/
   /* border-top: 2px; */
 }
 
@@ -458,8 +458,8 @@ label {
 }
 
 .navbar-inverse .navbar-nav > .active > a {
-  color: #D2691E;
-  background-color: #e0e9dd;
+  color: #88fef0;
+  background-color: #333333;
 }
 
 .navbar-inverse .navbar-nav > li > a {
@@ -468,15 +468,15 @@ label {
 
 .navbar-inverse .navbar-nav > li > a:hover {
   background-color: #fff;
-  color: #171717;
+  color: #49bfb1;
 }
 
 .navbar-inverse .navbar-nav > li > a:hover > .svg-inline--fa {
-  color: #171717;
+  color: #49bfb1;
 }
 
 .navbar-inverse .navbar-nav > li.dropdown > a:hover > .svg-inline--fa {
-  color: #171717;
+  color: #49bfb1;
 }
 
 .navbar-inverse .navbar-nav > li.dropdown.open > a:hover > .svg-inline--fa {
@@ -489,7 +489,7 @@ label {
 }
 
 .navbar-inverse .navbar-nav > .active > a > .glyphicon {
-  color: #171717;
+  color: #49bfb1;
 }
 
 .navbar-inverse .navbar-toggle {
@@ -497,7 +497,7 @@ label {
 }
 
 .navbar-inverse .navbar-toggle .icon-bar {
-  background-color: #e0e9dd;
+  background-color: #333333;
 }
 
 /* nav tabs */
@@ -506,26 +506,26 @@ label {
 }
 
 .nav-tabs > li > a {
-  color: #000;
+  color: #555555;
   font-weight: 700;
 }
 
 .btn[disabled] > .glyphicon {
-  color: #dcc9b6;
+  color: #333333;
 }
 
 /* tables with alternating rows */
 .table-striped > tbody > tr:nth-child(odd) > td,
 .table-striped > tbody > tr:nth-child(odd) > th {
-  background-color: #acc3a2;
+  background-color: #111111;
 }
 
 /* panels */
 .panel
 {
-  background: #42493C;
+  background: #444444;
   border-radius: 8px;
-  border: 2px solid #171717;
+  border: 2px solid #49bfb1;
 }
 
 .panel .row {
@@ -537,7 +537,7 @@ label {
 }
 
 .panel .tab-content {
-  background: #839178;
+  background: #333333;
   border-radius: 8px;
 }
 
@@ -546,7 +546,7 @@ label {
 }
 
 .panel-header {
-  background-color: #fff;
+  background-color: #000;
 }
 
 .panel-header.col-names {
@@ -573,64 +573,64 @@ label {
 
 .panel-body {
   width: 100%;
-  background-color: #839178;
+  background-color: #333333;
 }
 
 .row.panel-body:nth-child(odd) {
-  background-color: #bcc3a2;
+  background-color: #111111;
   border-top: 1px;
   border-top-style: solid;
-  border-top-color: #171717;
+  border-top-color: #49bfb1;
 }
 
 .row.panel-body:nth-child(even) {
-  background-color: #acc3a2;
+  background-color: #222222;
   border-top-width: 1px;
   border-top-style: solid;
-  border-top-color: #171717;
+  border-top-color: #49bfb1;
 }
 
 .panel-default
 {
-  border-color: #171717;
+  border-color: #49bfb1;
 }
 
 .nav-tabs {
-  border-bottom: 1px solid #171717;
+  border-bottom: 1px solid #49bfb1;
 }
 
 /* all tabs (front or back) */
 .panel > .nav-tabs > li > a {
-  background-color: #acc3a2;
+  background-color: #222222;
   margin-top: 3px;
   margin-right: 5px;
   margin-left: 5px;
-  border-top-color: #19482c;
-  border-right-color: #19482c;
-  border-bottom-color: #171717; /* same as the nav-tabs bottom border. also a cheat */
-  border-left-color: #19482c;
+  border-top-color: #2d7f75;
+  border-right-color: #2d7f75;
+  border-bottom-color: #49bfb1; /* same as the nav-tabs bottom border. also a cheat */
+  border-left-color: #2d7f75;
 }
 
 /* tabs in the front */
 .panel > .nav-tabs > li.active > a {
-  background-color: #839178;
+  background-color: #333333;
   color: #fff;
-  border-top-color: #171717;
-  border-right-color: #171717;
-  border-bottom-color: #839178; /* same as the bg color. i get it. we're cheating */
-  border-left-color: #171717;
+  border-top-color: #49bfb1;
+  border-right-color: #49bfb1;
+  border-bottom-color: #333333; /* same as the bg color. i get it. we're cheating */
+  border-left-color: #49bfb1;
   
 }
 
 /* tabs being hovered over */
 .panel > .nav-tabs > li > a:hover {
-  background-color: #e0e9dd;
-  color: #D2691E;
+  background-color: #333333;
+  color: #88fef0;
 }
 
 /* active tab panels that are hovered over get a black glyph */
 .panel > .nav-tabs > .active > a:hover > .svg-inline--fa {
-  color: #171717;
+  color: #49bfb1;
 }
 
 /* form fields */
@@ -641,7 +641,7 @@ label {
 */
 
 .form-control {
-  color: #1c6a3a;
+  color: #111111;
   font-weight: 700;
   height: 38px;
 }
@@ -677,7 +677,7 @@ label {
     top: 50%;
     width: 9999px;
     height: 1px;
-    background: #171717;  /* dd-black */
+    background: #49bfb1;  /* dd-black */
 }
 
 .strike > span:before {
@@ -791,7 +791,7 @@ label {
 .focus, .fear, .support {
   position: relative;
   top: 0;
-  background-color: #e0e9dd;
+  background-color: #333333;
 }
 
 /* the tiles themselves */
@@ -832,11 +832,11 @@ label {
   top: 0;
   bottom: 0;
   color: #fff;
-  background-color: #1c6a3a;
+  background-color: #111111;
 }
 
 .dropdown-menu {
-  background-color: #1c6a3a;
+  background-color: #111111;
 }
 
 .dropdown-menu > li > a {
@@ -1190,7 +1190,7 @@ label {
 @media (max-width: 992px) {
 
   label {
-/*    width: 240px;*/
+    /*width: 240px;*/
   }
 
 }
@@ -1213,7 +1213,7 @@ label {
     height: 98px;
     padding-top: 4px;
     padding-bottom: 4px;
-    /* background-color: #1c6a3a; */
+    /* background-color: #111111; */
     color: #fff;
     margin-top: 10px;
   }

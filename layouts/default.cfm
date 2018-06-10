@@ -12,18 +12,18 @@
   new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
   j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','GTM-W3L6CM2');</script>
+  })(window,document,'script','dataLayer','GTM-KQKHT7L');</script>
   <!-- End Google Tag Manager -->
 
   <!-- Global site tag (gtag.js) - Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-112744491-1"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-120544683-1"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'UA-112744491-1');
-    <cfif StructKeyExists( SESSION, 'auth' ) && SESSION.auth.isLoggedIn>
-    gtag('set', {'user_id': '<cfoutput>#SESSION.auth.user.getUser_Id()#</cfoutput>'}); // Set the user ID using signed-in user_id.
+    gtag('config', 'UA-120544683-1');
+    <cfif StructKeyExists( session, 'auth' ) && session.auth.isLoggedIn>
+    gtag('set', {'user_id': '<cfoutput>#session.auth.user.getUser_Id()#</cfoutput>'}); // Set the user ID using signed-in user_id.
     </cfif>
   </script>
 
@@ -34,7 +34,7 @@
   <cfinclude template="/includes/scripts/scripts.cfm">
 
   <script>
-  var ddApp = angular.module('ddApp', ['ngSanitize', 'ui.calendar', 'ui.bootstrap', '720kb.tooltips', 'ui.toggle']);
+  var ddApp = angular.module('ddApp', ['ngSanitize', 'ngCookies', 'ui.calendar', 'ui.bootstrap', '720kb.tooltips', 'ui.toggle']);
   </script>
 
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0" />
@@ -58,6 +58,17 @@
     // by default, we throw the user back to the login page.
     window.location.href = '/index.cfm/login.oops';
     </cfif>
+  }
+
+  function CF_getTheme( i ) {
+    switch(i) {
+      case "1":
+        return '<cfoutput>#REQUEST.abs_url#/assets/css/#application.skins[1].path#</cfoutput>';
+        break;
+      case "2":
+        return '<cfoutput>#REQUEST.abs_url#/assets/css/#application.skins[2].path#</cfoutput>';
+        break;
+    }
   }
   </script>
 

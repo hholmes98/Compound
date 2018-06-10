@@ -12,10 +12,10 @@
         <button class="btn button btn-default btn-tile" ng-click="panTo(2)"><i class="fas fas-large fa-dollar-sign"></i></span><br/><br/> PAY my<br/>bills</button>
       </span>
       <span align="center">
-        <button class="btn button btn-default btn-tile" ng-click="navigateTo('#buildUrl('main')#')"><i class="fas fas-large fa-chart-pie"></i><br/><br/> UPDATE my<br/>budget</button>
+        <button class="btn button btn-default btn-tile" ng-click="navigateTo('#buildUrl('manage.budget')#')"><i class="fas fas-large fa-chart-pie"></i><br/><br/> UPDATE my<br/>budget</button>
       </span>
       <span align="right">
-        <button class="btn button btn-default btn-tile" ng-click="navigateTo('#buildUrl('plan')#')"><i class="fas fas-large fa-calculator"></i><br/><br/> CALCULATE my<br/>payoff</button>
+        <button class="btn button btn-default btn-tile" ng-click="navigateTo('#buildUrl('calculate.future')#')"><i class="fas fas-large fa-calculator"></i><br/><br/> CALCULATE my<br/>payoff</button>
       </span>
     </div>
     </cfoutput>

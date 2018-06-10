@@ -9,6 +9,29 @@
   </cfoutput>
 </div>
 
+<!-- User Information -->
+<div class="strike">
+  <span><h3>User Information</h3></span>
+</div>
+
+<div class="row">
+  <div class="col-xs-6">Username</div>
+  <div class="col-xs-6">
+    <span class="pull-right">
+      <strong><cfoutput>#session.auth.user.getName()#</cfoutput></strong>
+    </span>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xs-6">E-mail address</div>
+  <div class="col-xs-6">
+    <span class="pull-right">
+      <strong><cfoutput>#session.auth.user.getEmail()#</cfoutput></strong>
+    </span>
+  </div>
+</div>
+
 <!-- Billing -->
 <div class="strike">
   <span><h3>Billing</h3></span>

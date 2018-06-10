@@ -1,5 +1,5 @@
 // model/beans/role
-component accessors = true {
+component accessors=true {
 
   property role_id;
   property name;

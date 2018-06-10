@@ -1,5 +1,5 @@
 // model/beans/user
-component accessors = true {
+component accessors=true {
 
   property user_id;
   property name;
@@ -15,7 +15,9 @@ component accessors = true {
   property password_hash;
   property password_salt;
 
-  function init( string user_id = 0, string name = "", string email = "", any role = "", any account_type = "", string passwordHash = "", string passwordSalt = "" ) {
+  property preferences;
+
+  function init( string user_id = 0, string name = "", string email = "", any role = "", any account_type = "", string passwordHash = "", string passwordSalt = "", any preferences="" ) {
 
     variables.user_id = user_id;
     variables.name = name;
@@ -42,7 +44,18 @@ component accessors = true {
     variables.password_hash = passwordHash;
     variables.password_salt = passwordSalt;
 
+    // new, let's attach the pref bean
+    variables.preferences = preferences;
+
     return this;
+
+  }
+
+  function flatten() {
+
+    var u_data = Duplicate(variables);
+
+    return u_data;
 
   }
 

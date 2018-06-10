@@ -1,4 +1,4 @@
-<!-- views/main/oops -->
+<!-- views/budget/oops -->
 <cfheader statuscode="500" />
 
 <h3>Ouch!</h3>

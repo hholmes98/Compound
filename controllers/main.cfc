@@ -1,68 +1,145 @@
-component accessors = true {
+// controllers/main
+component accessors = true { 
 
-  property cardservice;
-  property mailservice;
+  property tempService;
+  property planService;
+  property eventService;
 
-  function init( fw ) {
+  function init( fw, beanFactory ) {
 
-    variables.fw = fw;
+    variables.fw = arguments.fw;
+    variables.beanFactory = arguments.beanFactory;
 
   }
 
+  private void function populate( struct rc ) {
+
+    // get al levents for this user
+    var plan = tempService.createPlan( session.auth.user.getUser_Id() );
+    var events = tempService.fillEvents( plan );
+
+    arguments.rc.events = events;
+
+  }
+
+  /* default (always at the top) */
+  public void function default( struct rc ) {
+
+    // detect if the user is logged in, and if so, just take them directly to auth_start_page
+    if ( StructKeyExists(session, 'auth') && session.auth.isLoggedIn ) {
+      variables.fw.redirect( application.auth_start_page );
+    }
+
+  }
+
+  /* raw json methods */
   public void function list( struct rc ) {
 
-    var cards = cardservice.list( arguments.rc.id );
-
-    variables.fw.renderdata( 'JSON', cards );
-
-  }
-
-  public void function get( struct rc ) {
-
-    var cardbean = cardservice.get( arguments.rc.id );
-
-    /* consider:
-
-    https://docs.angularjs.org/api/ng/service/$http#jsonp
-
-    A JSON vulnerability allows third party website to turn your JSON resource URL into JSONP request under some conditions. To counter this your server can prefix all JSON requests with following string ")]}',\n". AngularJS will automatically strip the prefix before processing it as JSON.
-
-    For example if your server needs to return:
-
-    ['one','two']
-    which is vulnerable to attack, your server can return:
-
-    )]}',
-    ['one','two']
-    AngularJS will strip the prefix, before processing the JSON.
-    */
-
-    variables.fw.renderdata( 'JSON', cardbean );
+    var plan = tempService.createPlan( session.auth.user.getUser_Id() );
+    variables.fw.renderdata( 'JSON', plan.getPlan_Deck().getDeck_Cards() );
 
   }
 
-  public void function delete( struct rc ) {
+  public void function journey( struct rc ) {
 
-    var ret = cardservice.delete( arguments.rc.card_id );
+    populate( arguments.rc );
+    var events = arguments.rc.events;
+    var milestones = ArrayNew(1);
+    var cards = events[1].getPlan().getPlan_Deck().getDeck_Cards(); // this is convenience, just a full list of the user's card's.
 
-    variables.fw.renderdata( 'JSON', ret );
+    // cards is an object(struct)!
+    for ( var card_id in cards ) {
+
+      var milestone = StructNew();
+
+      milestone["name"] = cards[card_id].getLabel();
+      milestone["data"] = ArrayNew(1);
+
+      // events is an array of structs!
+      for ( var event in events ) {
+
+        for ( var e_card_id in event.getEvent_Cards() ) {
+
+          if ( e_card_id == card_id && event.getCard(e_card_id).getRemaining_Balance() > 0 ) {
+
+            // append the remainig balance as a plottable point along the 
+            ArrayAppend( milestone["data"], event.getCard(e_card_id).getRemaining_Balance() );
+
+          }
+
+        }
+
+      }
+
+      // add new milestones for this card
+      ArrayAppend( milestones, milestone );
+
+    }
+
+    variables.fw.renderdata( 'JSON', milestones );
 
   }
 
+  /* back-end actions */
+  public void function calculate( struct rc ) {
 
-  public void function save( struct rc ) {
+    var cardcount = 0;
 
-    var ret = cardservice.save( arguments.rc );
+    // reset the tmp cards session
+    session.tmp.cards = StructNew();
 
-    variables.fw.renderdata( 'JSON', ret );
+    // store the temp. budget
+    session.tmp.preferences.budget = Trim(rc.budget);
+
+    // count the number of cards submitted by enumerating fieldlist via 'credit-card'
+    for ( field in rc.fieldnames ) {
+
+      if ( field CONTAINS 'credit-card-label' ) {
+
+        cardcount++;
+
+      }
+
+    }
+
+    // store the counted temp. cards
+    for ( var a=1; a <= cardcount; a++ ) {
+
+      var card = StructNew();
+      var capture = false;
+
+      if ( Len( rc['credit-card-balance' & a] ) ) {
+
+        card.balance = Val(Trim(rc['credit-card-balance' & a]));
+        capture = true;
+
+      }
+
+      if ( capture ) {
+
+        card.card_id = CreateUUID();
+        card.user_id = session.auth.user.getUser_Id();
+        card.label = Trim(rc['credit-card-label' & a]);
+
+        var card_o = variables.beanFactory.getBean('plan_cardBean').init( argumentCollection=card );
+
+        StructInsert( session.tmp.cards, card.card_id, card_o );
+
+      }
+
+    }
+
+    // redirect to the plan
+    variables.fw.redirect( 'main.plan' );
 
   }
 
-  public void function setAsEmergency( struct rc ) {
+  public void function create( struct rc ) {
 
-    var ret = cardservice.setAsEmergency( arguments.rc.eid, arguments.rc.uid );
+    // store just redirects to the login.create method, but appends a message telling the user we're going to save their work
+    rc.message = ["Let's save your progress by creating an account. Pick a Nickname for your account and give us your email address."];
 
-    variables.fw.renderdata( 'JSON', ret );
+    variables.fw.redirect( 'login.create', 'message' );
 
   }
 
@@ -85,4 +162,5 @@ component accessors = true {
 
   }
 
+/* front-end methods */
 }

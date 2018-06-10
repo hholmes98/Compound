@@ -12,7 +12,7 @@ component extends = "framework.one" {
 
     generateSES = 'true',
 
-    home = 'debt',
+    home = 'main',
 
     environments = {
 
@@ -31,18 +31,35 @@ component extends = "framework.one" {
     },
 
     routes = [
-      { "$GET/cards/:user_id" = "/main/list/id/:user_id" },
-      { "$GET/card/:card_id" = "/main/get/id/:card_id" },
-      { "$DELETE/card/:card_id" = "/main/delete/card_id/:card_id" },
-      { "$POST/card/eid/:eid/uid/:uid" = "/main/setAsEmergency/eid/:eid/uid/:uid" },
-      { "$POST/card/" = "/main/save" },
+
+      // top/main nav
+      { "$GET/pay/bills" = "/pay/cards" },
+      { "$GET/manage/budget" = "/deck/manage" },
+      { "$GET/calculate/future" = "/calculate/default" },
+      { "$GET/pay/reg/" = "/pay" }
+
+      // manage is an alias for controller.cards
+      /*
+      { "$GET/manage/list" = "/cards/list" },
+      { "$GET/manage/detail" = "/cards/detail" },
+      { "$GET/manage/delete" = "/cards/delete" },
+      { "$GET/manage/save" = "/cards/save" },
+      { "$GET/manage/setAsEmergency" = "/cards/setAsEmergency" },
+      */
+
+
+      /*{ "$GET/cards/:user_id" = "/budget/list/id/:user_id" },
+      { "$GET/card/:card_id" = "/budget/get/id/:card_id" },
+      { "$DELETE/card/:card_id" = "/budget/delete/card_id/:card_id" },
+      { "$POST/card/eid/:eid/uid/:uid" = "/budget/setAsEmergency/eid/:eid/uid/:uid" },
+      { "$POST/card/" = "/budget/save" },
       { "$GET/prefs/uid/:uid" = "/prefs/get/uid/:uid" },
       { "$POST/prefs/" = "/prefs/save" },
       { "$GET/plan/miles/:user_id" = "/plan/journey/user_id/:user_id" },
       { "$DELETE/plan/:user_id" = "/plan/delete/user_id/:user_id" },
-      { "$GET/debt/miles/" = "/debt/journey/" },
-      { "$GET/pay/reg/" = "/pay" },
-      { "$DELETE/journey/:user_id" = "/plan/deleteEvents/user_id/:user_id" }
+      { "$GET/main/miles/" = "/main/journey/" },
+
+      { "$DELETE/journey/:user_id" = "/plan/deleteEvents/user_id/:user_id" }*/
     ],
 
   };
@@ -77,8 +94,19 @@ component extends = "framework.one" {
 
     }
 
-    // locale
+    // default locale
     application.default_locale = XmlSearch( conf, '//app/locale' )[1].XmlText;
+
+    // skins
+    application.skins = ArrayNew(1);
+    application.skins[1] = {
+      name: 'Jackson (Light)',
+      path: 'dd.css'
+    };
+    application.skins[2] = {
+      name: '80s ATM (Dark)',
+      path: 'dd-dark.css'
+    };
 
     // datasource
     application.datasource = XmlSearch( conf, '//app/datasource' )[1].XmlText;
@@ -133,7 +161,7 @@ component extends = "framework.one" {
 
   function setupRequest() {
 
-    if ( NOT StructKeyExists( SESSION, 'auth') ) {
+    if ( NOT StructKeyExists( session, 'auth') ) {
       lock scope="session" type="exclusive" timeout="30" {
         setupSession();
       }
@@ -202,6 +230,30 @@ component extends = "framework.one" {
 
     return abs_url;
 
+  }
+
+  /*
+  https://docs.angularjs.org/api/ng/service/$http#jsonp
+
+  A JSON vulnerability allows third party website to turn your JSON resource URL into JSONP request under some conditions. 
+  To counter this your server can prefix all JSON requests with following string ")]}',\n". AngularJS will automatically strip
+  the prefix before processing it as JSON.
+
+  For example if your server needs to return:
+
+  ['one','two']
+  which is vulnerable to attack, your server can return:
+
+  )]}',
+  ['one','two']
+  AngularJS will strip the prefix, before processing the JSON.
+  */
+  private struct function render_json( struct renderData ) {
+    var protected_output = ")]}'," & Chr(10) & SerializeJSON( renderData.data );
+    return {
+        contentType = 'application/json; charset=utf-8',
+        output = protected_output
+    };
   }
 
 }

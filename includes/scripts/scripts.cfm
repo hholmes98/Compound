@@ -21,6 +21,7 @@
   <script src="/node_modules/angular-route/angular-route.js"></script>
   <script src="/node_modules/angular-tooltips/lib/angular-tooltips.js"></script>
   <script src="/node_modules/angular-sanitize/angular-sanitize.js"></script>
+  <script src="/node_modules/angular-cookies/angular-cookies.js"></script>
 
   <!-- date handling -->
   <script src="/node_modules/moment/min/moment.min.js" type="text/javascript"></script>

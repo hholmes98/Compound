@@ -1,5 +1,5 @@
 // controllers/mail
-component accessors = true {
+component accessors=true {
 
   property mailService;
 
@@ -17,7 +17,7 @@ component accessors = true {
       i_date = arguments.rc.reminder_date;
     }
 
-    if ( StructKeyExists( arguments.rc, 'today') ) {
+    if ( StructKeyExists( arguments.rc, 'today' ) ) {
       var results = mailService.processReminders( i_date, arguments.rc.today );
     } else {
       var results = mailService.processReminders( i_date );
