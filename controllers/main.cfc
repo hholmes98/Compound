@@ -4,6 +4,7 @@ component accessors = true {
   property tempService;
   property planService;
   property eventService;
+  property mailService;
 
   function init( fw, beanFactory ) {
 
