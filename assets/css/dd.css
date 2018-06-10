@@ -294,7 +294,7 @@ h2 {
     to bottom,
     #ffffff,
     #171717 2px,
-    #ffffff 2px);
+    #ffffff 1px);
   line-height: 1.2;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -307,6 +307,7 @@ h2 {
 /* place a solid (screen) copy of the text behind the gradient text; use *that* text as the drop-shadow */
 h2:after {
   mix-blend-mode: screen;
+  transform: translateZ(0); /* fix for Firefox mix-blend-mode: screen, per https://stackoverflow.com/questions/30614329/firefox-mix-blend-mode-bug */
   background: none;
   display: inline-block;
   content: attr(shadow-text);

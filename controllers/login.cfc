@@ -213,7 +213,7 @@ component accessors = true {
   function updateConfirm( struct rc ) {
 
     rc.user = session.auth.user;
-    rc.message = variables.userService.checkPassword( argumentCollection = rc );
+    rc.message = variables.userService.checkPassword( rc.user.flatten(), rc.new_password );
 
     if ( !ArrayIsEmpty( rc.message ) ) {
       variables.fw.redirect( 'profile.basic', 'message' );

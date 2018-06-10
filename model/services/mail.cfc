@@ -2,7 +2,7 @@
 component accessors=true {
 
   property eventService;
-  property planService;
+  property pay_periodService;
 
   public any function init( beanFactory ) {
 
@@ -260,7 +260,7 @@ Your friends at ' & application.locale[session.auth.locale]['name'];
     trace( var=GetTickCount(), text="qGetPayPeriodsInMonthOfDate", type="Information", category="processReminders", inline=false, abort=false );
 
     // 3. if (today == one of the calculated pay dates)
-    var qryPayDatesInThisMonth = eventservice.qGetPayPeriodsInMonthOfDate( arguments.today );
+    var qryPayDatesInThisMonth = pay_periodService.qGetPayPeriodsInMonthOfDate( arguments.today );
 
     trace( var=GetTickCount(), text="qGetPayPeriodsInMonthOfDate:loop:outer", type="Information", category="processReminders", inline=false, abort=false );
 
@@ -343,9 +343,9 @@ Your friends at ' & application.locale[session.auth.locale]['name'];
       var id = thisUser;
       var email = arguments.users[thisUser];
 
-      trace( var=GetTickCount(), text="dbCalculateSchedule:" & id, type="Information", category="emailReminders", inline=false, abort=false );
+      trace( var=GetTickCount(), text="eventService.list:" & id, type="Information", category="emailReminders", inline=false, abort=false );
 
-      var events = planservice.dbCalculateSchedule( id );
+      var events = eventService.list( id );
 
       trace( var=GetTickCount(), text="sendReminderEmail:" & StructKeyList(events[1]), type="Information", category="emailReminders", inline=false, abort=false );
 
@@ -398,7 +398,7 @@ Your friends at ' & application.locale[session.auth.locale]['name'];
   */
   function qryGetLastDayUsers( query qUserSet, date for_date, date today=Now() ) {
 
-    var matchedPayDates = eventservice.qGetPayPeriodsInMonthOfDate( arguments.for_date );
+    var matchedPayDates = pay_periodService.qGetPayPeriodsInMonthOfDate( arguments.for_date );
     var date_list = '';
 
     cfloop( query=matchedPayDates ) {
@@ -448,7 +448,7 @@ Your friends at ' & application.locale[session.auth.locale]['name'];
   */
   function qryGetFifteenthDayUsers( query qUserSet, date for_date, date today=Now() ) {
 
-    var matchedPayDates = eventservice.qGetPayPeriodsInMonthOfDate( arguments.for_date );
+    var matchedPayDates = pay_periodService.qGetPayPeriodsInMonthOfDate( arguments.for_date );
     var date_list = '';
 
     cfloop( query=matchedPayDates ) {
@@ -494,7 +494,7 @@ Your friends at ' & application.locale[session.auth.locale]['name'];
   */
   function qryGetEveryTwoWeekUsers( query qUserSet, date for_date, date today=Now() ) {
 
-    var matchedPayDates = eventservice.qGetPayPeriodsInMonthOfDate( arguments.for_date );
+    var matchedPayDates = pay_periodService.qGetPayPeriodsInMonthOfDate( arguments.for_date );
     var date_list = '';
 
     cfloop( query=matchedPayDates ) {

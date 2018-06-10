@@ -1,13 +1,14 @@
 //model/services/event
 component accessors=true {
 
-  public any function init( beanFactory, planService, cardService, preferenceService, knapsackService ) {
+  public any function init( beanFactory, planService, cardService, preferenceService, knapsackService, pay_periodService ) {
 
     variables.beanFactory = arguments.beanFactory;
     variables.planService = arguments.planService;
     variables.cardService = arguments.cardService;
     variables.preferenceService = arguments.preferenceService;
     variables.knapsackService = arguments.knapsackService;
+    variables.pay_periodService = arguments.pay_periodService;
 
     variables.defaultOptions = {
       datasource = application.datasource
@@ -415,7 +416,7 @@ component accessors=true {
 
     } else if ( pay_freq == 3 ) {
 
-      var qMonthPayPeriods = eventService.qGetPayPeriodsInMonthOfDate( calculated_for );
+      var qMonthPayPeriods = pay_periodService.qGetPayPeriodsInMonthOfDate( calculated_for );
 
       for ( var m=qMonthPayPeriods.RecordCount; m > 0; m-- ) { // walk backwards
 
