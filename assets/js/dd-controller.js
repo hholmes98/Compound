@@ -2174,7 +2174,7 @@ controller/profile
 
     var oldlink = document.getElementsByTagName( 'link' ).item( document.getElementsByTagName( 'link' ).length-1 );
 
-    var newPath = CF_getTheme(sIndex);
+    var newPath = CF_getTheme(sIndex).replace(/https?\:/,"");
 
     var newlink = document.createElement( 'link' );
     newlink.setAttribute( 'rel', 'stylesheet' );
