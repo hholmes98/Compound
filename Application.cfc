@@ -72,8 +72,10 @@ component extends = "framework.one" {
     application.admin_email = XmlSearch( conf, '//admin/email' )[1].XmlText;
     application.site_domain = XmlSearch( conf, '//app/domain' )[1].XmlText;
 
-    application.app_name = XmlSearch( conf, '//app/name' )[1].XmlText & ' (' & XmlSearch( conf, '//app/version' )[1].XmlText & ')';
-    application.show_app_name = XmlSearch( conf, '//app/show' )[1].XmlText;
+    application.app_name = XmlSearch( conf, '//app/name' )[1].XmlText;
+    application.app_short_description = XmlSearch( conf, '//app/shortDescription' )[1].XmlText;
+    application.app_version = XmlSearch( conf, '//app/version' )[1].XmlText;
+    application.app_show_version = XmlSearch( conf, '//app/show-version' )[1].XmlText;
 
     // locales
     application.locale = StructNew();
@@ -89,8 +91,22 @@ component extends = "framework.one" {
       locale.code = locales[1].XmlChildren[i].XmlAttributes.language & '-' & locales[1].XmlChildren[i].XmlAttributes.country;
       locale.name = locales[1].XmlChildren[i].name.XmlText;
       locale.motto = locales[1].XmlChildren[i].motto.XmlText;
+      locale.description = locales[1].XmlChildren[i].description.XmlText;
 
       StructInsert( application.locale, locale.code, locale, true );
+
+    }
+
+    // same-as
+    application.sameas = ArrayNew(1);
+
+    var same = XmlSearch( conf, '//same-as/url' );
+
+    for (var j=1; j <= ArrayLen( same ); j++ ) {
+
+      var this_url = same[j].XmlText;
+
+      ArrayAppend( application.sameas, this_url );
 
     }
 
@@ -101,11 +117,15 @@ component extends = "framework.one" {
     application.skins = ArrayNew(1);
     application.skins[1] = {
       name: 'Jackson (Light)',
-      path: 'dd.css'
+      path: 'dd.css',
+      favicon: 'dd-logo-light.png',
+      themeColor: '##1c6a3a'
     };
     application.skins[2] = {
       name: '80s ATM (Dark)',
-      path: 'dd-dark.css'
+      path: 'dd-dark.css',
+      favicon: 'dd-logo-dark.png',
+      themeColor: '##000000'
     };
 
     // datasource
@@ -125,8 +145,27 @@ component extends = "framework.one" {
     application.start_page = variables.framework.home; // if you're anonymous/non-authorized, this is where you start
     application.auth_start_page = 'pay'; // if you're logged-in/authorized, this is where you start
 
+    // *** TWITTER ***
+    application.twitter = StructNew();
+    application.twitter.nick = XmlSearch( conf, '//twitter/nick' )[1].XmlText;
+    application.twitter.image = XmlSearch( conf, '//twitter/image' )[1].XmlText;
+
     // *** DISCOURSE SSO ***
     application.sso_secret = XmlSearch( conf, '//discourse/sso-secret' )[1].XmlText;
+
+    // *** STRIPE API ***
+    application.stripe_public_key = XmlSearch( conf, '//stripe/public-key')[1].XmlText;
+    application.stripe_secret_key = XmlSearch( conf, '//stripe/secret-key')[1].XmlText;
+    application.stripe_plans = StructNew();
+
+    var plan_list = XmlSearch( conf, '//stripe/plans/plan' );
+    for (var plan in plan_list ) {
+      var planObj = StructNew();
+      for ( var field in plan.XmlChildren ) {
+        planObj["#field.xmlName#"] = field.XmlText;
+      }
+      application.stripe_plans[plan.XmlAttributes.account_type_id] = planObj;
+    }
 
     // **** SITE VARS ****
 
@@ -170,6 +209,8 @@ component extends = "framework.one" {
     controller( 'security.authorize' );
 
     request.abs_url = buildAbsoluteUrl();
+
+    //cfcontent( type="text/html; charset=UTF-8" );
 
   }
 

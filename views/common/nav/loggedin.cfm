@@ -10,15 +10,17 @@
         <span class="icon-bar"></span>
       </button>
       <span class="navbar-brand">
-        <i class="fas fa-band-aid"></i>
-        <cfoutput><a href="#buildUrl(application.auth_start_page)#">#application.app_name#</a></cfoutput>
+        <img style="display:inline-block;margin-right:4px;position:relative;top:-2px;" src="assets/img/dd-logo-white-trans-24x24.png" width="24" height="24">
+        <cfoutput>
+          <a href="#buildUrl(application.auth_start_page)#">#application.app_name#<cfif application.app_show_version> (#application.app_version#)</cfif></a>
+        </cfoutput>
       </span>
     </div>
 
     <div class="collapse navbar-collapse">
       <ul class="nav navbar-nav">
         <li<cfif REQUEST.section is 'pay'> class="active"</cfif>><cfoutput><a href="#buildUrl('pay.bills')#"><i class="fas fa-dollar-sign"></i> <span class="nav-label">Pay Bills</span><cfif REQUEST.section is 'pay'> <span class="sr-only">(current)</span></cfif></a></cfoutput></li>
-        <li<cfif REQUEST.section is 'main'> class="active"</cfif>><cfoutput><a href="#buildUrl('manage.budget')#"><i class="fas fa-chart-pie"></i> <span class="nav-label">Update Budget</span><cfif REQUEST.section is 'main'> <span class="sr-only">(current)</span></cfif></a></cfoutput></li>
+        <li<cfif REQUEST.section is 'deck'> class="active"</cfif>><cfoutput><a href="#buildUrl('manage.budget')#"><i class="fas fa-chart-pie"></i> <span class="nav-label">Update Budget</span><cfif REQUEST.section is 'main'> <span class="sr-only">(current)</span></cfif></a></cfoutput></li>
         <li<cfif REQUEST.section is 'calculate'> class="active"</cfif>><cfoutput><a href="#buildUrl('calculate.future')#"></cfoutput><i class="fas fa-calculator"></i> <span class="nav-label">Calculate Payoff</span><cfif REQUEST.section is 'plan'> <span class="sr-only">(current)</span></cfif></a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -34,7 +36,7 @@
           <ul class="dropdown-menu">
             <cfoutput>
             <li><a href="#buildUrl('profile.basic')#"><i class="fas fa-cog"></i> <span class="nav-label">User Settings</span></a></li>
-            <li><a href="#buildUrl('profile.advanced')#"><span class="glyphicon glyphicon-credit-card"></span> <span class="nav-label">Account Info</span></a></li>
+            <li><a href="#buildUrl('profile.advanced')#"><i class="fas fa-credit-card"></i> <span class="nav-label">Account Info</span></a></li>
             <li><a href="#buildUrl('login.logout')#"><i class="fas fa-sign-out-alt"></i> <span class="nav-label">Sign out</span></a></li>
             </cfoutput>
           </ul>

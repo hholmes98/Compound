@@ -12,7 +12,7 @@ component accessors=true {
 
   private void function populate( struct rc ) {
 
-    // get al levents for this user
+    // get all events for this user
     var events = eventService.list( arguments.rc.user_id );
 
     // if none, create 1

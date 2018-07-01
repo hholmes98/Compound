@@ -8,7 +8,7 @@ component accessors=true {
   property role;
   property role_id;
 
-  property account_type; 
+  property account_type;
   property account_type_id;
   property account_type_name;
 
@@ -17,35 +17,47 @@ component accessors=true {
 
   property preferences;
 
-  function init( string user_id = 0, string name = "", string email = "", any role = "", any account_type = "", string passwordHash = "", string passwordSalt = "", any preferences="" ) {
+  property stripe_customer_id;
+  property stripe_subscription_id;
 
-    variables.user_id = user_id;
-    variables.name = name;
-    variables.email = email;
+  function init( string user_id = 0, string name = "", string email = "", any role = "", any account_type = "", string passwordHash = "", string passwordSalt = "", any preferences="", string stripe_customer_id = "", string stripe_subscription_id = "" ) {
 
-    variables.role = role;
+    variables.user_id = arguments.user_id;
+    variables.name = arguments.name;
+    variables.email = arguments.email;
+
+    variables.role = arguments.role;
 
     if ( isObject( role ) ) {
-        variables.role_id = role.getRole_Id();
+        variables.role_id = arguments.role.getRole_Id();
     } else {
         variables.role_id = 3; // default role id is user (3 = user, 2 = mod, 1 = admin)
     }
 
-    variables.account_type = account_type;
+    variables.account_type = arguments.account_type;
 
-    if ( isObject( account_type ) ) {
-      variables.account_type_id = account_type.getAccount_Type_Id();
-      variables.account_type_name = account_type.getName()
+    // id:1 = Penny-Pincher (Free) - default
+    // id:2 = Ad Blocker (2.99/mo)
+    // id:3 = Budgeter (5.99/mo)
+    // id:4 = Life Hacker (14.99/mo)
+
+    if ( isObject( arguments.account_type ) ) {
+      variables.account_type_id = arguments.account_type.getAccount_Type_Id();
+      variables.account_type_name = arguments.account_type.getName()
     } else {
-      variables.account_type_id = 1; // default account_type is free (1=free, 2=basic, 3=advanced)
-      variables.account_type_name = "Free";
+      variables.account_type_id = 1;
+      variables.account_type_name = "Penny-Pincher (Free)";
     }
 
-    variables.password_hash = passwordHash;
-    variables.password_salt = passwordSalt;
+    variables.password_hash = arguments.passwordHash;
+    variables.password_salt = arguments.passwordSalt;
 
     // new, let's attach the pref bean
-    variables.preferences = preferences;
+    variables.preferences = arguments.preferences;
+
+    // stripe
+    variables.stripe_customer_id = arguments.stripe_customer_id;
+    variables.stripe_subscription_id = arguments.stripe_subscription_id;
 
     return this;
 

@@ -14,7 +14,6 @@
   <script defer src="//use.fontawesome.com/releases/v5.0.8/js/all.js"></script>
 
   <!-- dialogs -->
-  <!--- https://nakupanda.github.io/bootstrap3-dialog/ --->
   <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.7/js/bootstrap-dialog.min.js"></script>
 
   <!-- Locals -->
@@ -36,3 +35,6 @@
 
   <!-- feature detection -->
   <script src="/assets/js/modernizr.js"></script>
+
+  <!-- payment gateway/fraud detection -->
+  <script src="https://js.stripe.com/v3/"></script>

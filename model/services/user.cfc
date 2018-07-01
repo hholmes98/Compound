@@ -57,6 +57,9 @@ component accessors=true {
       user.setPassword_Hash(result.password_hash[i]);
       user.setPassword_Salt(result.password_salt[i]);
 
+      user.setStripe_Customer_Id( result.stripe_customer_id[i] );
+      user.setStripe_Subscription_Id( result.stripe_subscription_id[i] );
+
       users[user.getUser_id()] = user;
 
     } // for
@@ -104,6 +107,9 @@ component accessors=true {
       user.setPassword_Hash(result.password_hash[1]);
       user.setPassword_Salt(result.password_salt[1]);
 
+      user.setStripe_Customer_Id( result.stripe_customer_id[1] );
+      user.setStripe_Subscription_Id( result.stripe_subscription_id[1] );
+
       user.setPreferences(variables.preferenceService.get(user.getUser_Id()));
 
     }
@@ -130,7 +136,9 @@ component accessors=true {
           name = ''#arguments.user.name#'',
           email = ''#arguments.user.email#'',
           password_hash = ''#arguments.user.password_hash#'',
-          password_salt = ''#arguments.user.password_salt#''
+          password_salt = ''#arguments.user.password_salt#'',
+          stripe_customer_id = ''#arguments.user.stripe_customer_id#'',
+          stripe_subscription_id = ''#arguments.user.stripe_subscription_id#''
         WHERE 
           user_id = :uid
       ';
@@ -178,14 +186,17 @@ component accessors=true {
           name,
           email,
           password_hash,
-          password_salt
+          password_salt,
+          stripe_customer_id
         )
         VALUES
         (
           ''#arguments.user.name#'',
           ''#arguments.user.email#'',
           ''#arguments.user.password_hash#'',
-          ''#arguments.user.password_salt#''
+          ''#arguments.user.password_salt#'',
+          ''#arguments.user.stripe_customer_id#'',
+          ''#arguments.user.stripe_subscription_id#''
         )
         RETURNING
           user_id AS pkey;

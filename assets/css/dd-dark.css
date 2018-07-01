@@ -647,6 +647,10 @@ label {
   height: 38px;
 }
 
+.form-control[disabled] {
+  color: #c6c6c6;
+}
+
 .form-control input[type="text"] {
   width: 400px;
 }

@@ -5,6 +5,7 @@ component accessors = true {
   property mailService;
   property preferenceService;
   property cardService;
+  property paymentService;
 
   function init( fw ) {
 
@@ -47,12 +48,22 @@ component accessors = true {
 
   }
 
+  function create( struct rc ) {
+    param name="rc.at_id" default="1";
+
+    if ( IsNumeric(rc.at_id) && (rc.at_id < 1 || rc.at_id > 4) )
+      rc.at_id = 3;
+
+    rc.account_type_id = rc.at_id;
+  }
+
   function new( struct rc ) {
 
     // create a new account
+    var endString = '';
 
     // if the form variables do not exist, redirect to the create form
-    if ( !structKeyExists( rc, 'name' ) || !structKeyExists( rc, 'email' ) ) {
+    if ( !StructKeyExists( rc, 'name' ) || !StructKeyExists( rc, 'email' ) ) {
 
       variables.fw.redirect( 'login.create' );
 
@@ -73,7 +84,7 @@ component accessors = true {
 
     }
 
-    // if you're here, create checks pass, create the user...
+    // if you're here, create checks have passed, so create the user...
     user = variables.userService.create( rc.name, rc.email );
 
     // ...if they came via the onboarding process:
@@ -108,8 +119,56 @@ component accessors = true {
     session.auth.fullname = user.getName();
     session.auth.user = user;
 
+    // if they are creating a paid account, create a Stripe Customer and Sub
+    var createObj = rc.stripe.customers.create({
+      email: '#session.auth.user.getEmail()#',
+      source: '#rc.stripeToken#' // this is a payment object, via Billing
+    });
+
+    var customer = createObj.content;
+
+    if ( !StructKeyExists(customer,'error') ) {
+
+      // update bean
+      session.auth.user.setStripe_Customer_Id( customer.id );
+
+      // save to db
+      userService.save( session.auth.user.flatten() );
+
+      // then subscribe them to the selected plan
+      var subObj = rc.stripe.subscriptions.create({
+        customer: '#session.auth.user.getStripe_Customer_Id()#',
+        items: [{plan: '#rc.stripe_plan_id#'}]
+      });
+
+      var subscription = subObj.content;
+
+      if ( !StructKeyExists(subscription,'error') ) {
+
+        // if successful, update
+        session.auth.user.setStripe_Subscription_Id( subscription.id );
+        session.auth.user.setAccount_Type_Id( variables.paymentService.getAccountTypeFromPlan( subscription.items.data[1].plan.id ) );
+
+        // save to db
+        userService.save( session.auth.user.flatten() );
+
+        // prep the end string
+        endString = '/c/' & variables.paymentService.getAccountTypeFromPlan( subscription.items.data[1].plan.id );
+
+      } else {
+
+        rc.message = ["There was a problem with your payment information. Your account will behave as a free one until you fix your payment information in the Profile -> Account Information."];
+
+      }
+
+    } else {
+
+      rc.message = ["There was a problem with your payment information, so we've granted you free access. You can fix your payment information in the Profile -> Account Information."];
+
+    }
+
     // off to the default authenticated start page
-    variables.fw.redirect( application.auth_start_page & '/reg' );
+    variables.fw.redirect( application.auth_start_page & '/reg' & endString );
 
   }
 
@@ -353,6 +412,13 @@ component accessors = true {
 
     if ( arguments.user.getRole_Id() == 1) {
       payload_o["admin"] = true;
+    }
+
+    // paid access
+    if ( arguments.user.getAccount_Type_Id() == 4 ) {  // 4 is the one with special access to premiere support + beta
+      payload_o["add_groups"] = "Paid";
+    } else {
+      payload_o["remove_groups"] = "Paid";
     }
 
     var payload_url = structToUrl(payload_o);

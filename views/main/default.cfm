@@ -1,4 +1,7 @@
 <!-- views/main/default -->
+<cfsilent>
+  <cfset get_started = 'home' />
+</cfsilent>
 <form class="form-horizontal" name="entry" id="entry" method="post" action="<cfoutput>#buildUrl('main.calculate')#</cfoutput>">
 
 <div id="page1" class="pan-page pan-page-1">
@@ -183,30 +186,7 @@
       <span class="splash-icon support-icon"></span>
     </div>
   </section>
-  <section dir="ltr" class="footer">
-    <div class="section-inner">
-      <cfoutput>
-      <h3>#application.locale[session.auth.locale]['name']#</h3>
-      <h3>#application.locale[session.auth.locale]['motto']#</h3>
-      </cfoutput>
-      <button class="btn btn-default" id="returnTop"> Get Started</button>
-      <footer id="footer-sitemap">
-        <div class="footer-container">
-          <div class="sitemap">
-            <div class="footer-column"></div>
-            <div class="footer-column"></div>
-            <div class="footer-column"></div>
-          </div>
-          <div class="footer-language-options">
-            <h3>Site Language</h3>
-            <ul>
-              <li>English</li>
-              <li>Spanish</li>
-            </ul>
-          </div>
-        </div>
-      </footer>
-    </div>
-  </section>
+
+  <cfoutput>#view('common/nav/footer')#</cfoutput>
 
 </div>

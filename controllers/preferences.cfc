@@ -28,6 +28,8 @@ component accessors=true {
     // flatten bean to struct, pass to save service
     ret = preferenceService.save( rc.preferences.flatten() );
 
+    session.auth.user.setPreferences( preferenceService.get( session.auth.user.getUser_Id() ) );
+
     variables.fw.renderdata( "JSON", ret );
 
   }

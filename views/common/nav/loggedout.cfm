@@ -10,7 +10,10 @@
         <span class="icon-bar"></span>
       </button>
       <span class="navbar-brand">
-       <cfoutput><a href="#buildUrl(application.start_page)#">#application.app_name#</a></cfoutput>
+        <img style="display:inline-block;margin-right:4px;position:relative;top:-2px;" src="assets/img/dd-logo-white-trans-24x24.png" width="24" height="24">
+        <cfoutput>
+          <a href="#buildUrl(application.start_page)#">#application.app_name#<cfif application.app_show_version> (#application.app_version#)</cfif></a>
+        </cfoutput>
       </span>
     </div>
 
@@ -18,7 +21,12 @@
       <ul class="nav navbar-nav">
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li><cfoutput><a href="#buildUrl('login')#"> Sign In</a></cfoutput></li>
+        <cfoutput>
+          <li<cfif REQUEST.item is 'about'> class="active"</cfif>><a href="#buildUrl('main.about')#"><i class="fas fa-question-circle"></i> About</a></li>
+          <li<cfif REQUEST.item is 'features'> class="active"</cfif>><a href="#buildUrl('main.features')#"><i class="fas fa-sliders-h"></i> Features</a></li>
+          <li<cfif REQUEST.item is 'pricing'> class="active"</cfif>><a href="#buildUrl('main.pricing')#"><i class="fas fa-dollar-sign"></i> Pricing</a></li>
+          <li<cfif REQUEST.section is 'login'> class="active"</cfif>><a href="#buildUrl('login')#"><i class="fas fa-lock"></i> Sign In</a></li>
+        </cfoutput>
       </ul>
     </div>
   </div>

@@ -151,7 +151,7 @@ Your friends at ' & application.locale[session.auth.locale]['name'];
 
     cfmail(
         to = dest_email,
-        from = application.admin_email,
+        from = application.locale[session.auth.locale]['name'] & " <" & application.admin_email & ">",
         subject = "[" & application.locale[session.auth.locale]['name'] & "] ERROR: " & msg ) {
       WriteOutput(errorBody);
     }
@@ -347,15 +347,21 @@ Your friends at ' & application.locale[session.auth.locale]['name'];
 
       var events = eventService.list( id );
 
-      trace( var=GetTickCount(), text="sendReminderEmail:" & StructKeyList(events[1]), type="Information", category="emailReminders", inline=false, abort=false );
+      if ( ArrayLen(events) ) {
+        var event = events[1]; // you only ever want the 1st event: this month's event
+        var cards = event.getEvent_Cards();
 
-      // email it
-      var bodyCopy = sendReminderEmail( email, events[1] );
+        trace( var=GetTickCount(), text="sendReminderEmail:" & StructKeyList(cards), type="Information", category="emailReminders", inline=false, abort=false );
 
-      trace( var=GetTickCount(), text="logReminderEmail:" & email, type="Information", category="emailReminders", inline=false, abort=false );
+        // email it
+        var bodyCopy = sendReminderEmail( email, cards );
 
-      // log it
-      var email_id = logReminderEmail( id, email, bodyCopy );
+        trace( var=GetTickCount(), text="logReminderEmail:" & email, type="Information", category="emailReminders", inline=false, abort=false );
+
+        // log it
+        var email_id = logReminderEmail( id, email, bodyCopy );
+
+      }
 
     }
 

@@ -67,6 +67,12 @@ component accessors=true {
 
     var f_bud = Replace( arguments.preference.getBudget(), ",","","ALL" );
 
+    // setting your payment frequency to 'it's complicated' forces the email_frequency to once a month (1)
+    if ( arguments.preference.getPay_Frequency() == 0 ) {
+      if ( arguments.preference.getEmail_Frequency() > 1 ) // we'll leave 0 and 1 alone.
+        arguments.preference.setEmail_Frequency(1);
+    }
+
     var sql = '
       UPDATE "pUserPreferences"
       SET

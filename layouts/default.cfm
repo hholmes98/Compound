@@ -1,11 +1,59 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html ng-app="ddApp" xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html ng-app="ddApp" lang="<cfoutput>#ListFirst(session.auth.locale,"-")#</cfoutput>">
 <head>
+  <cfsilent>
+    <cfparam name="rc.title" default="#application.app_name# - #application.app_short_description#" />
+    <cfparam name="rc.pageTitle" default="" />
+    <cfparam name="rc.pageDescription" default="#application.locale[session.auth.locale]['description']#" />
+    <cfparam name="rc.robots" default="noarchive" />
+  </cfsilent>
   <!-- layouts/default -->
   <base href="/">
+  <cfoutput>
+    <meta charset="utf-8" />
 
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <title><cfoutput>#application.app_name#</cfoutput></title>
+    <title><cfif Len(rc.pageTitle)>#rc.pageTitle# | </cfif>#rc.title#</title>
+
+    <link rel="shortcut icon" href="#request.abs_url#/favicon.ico" />
+    <link rel="icon" href="#request.abs_url#/assets/img/#application.skins[COOKIE["dd-skin"]].favicon#" /><!--- TODO: make sure this is 192x192 --->
+    <link rel="apple-touch-icon" href="#request.abs_url#/assets/img/#application.skins[COOKIE["dd-skin"]].favicon#" />
+    <link rel="canonical" href="#request.abs_url##request._fw1.CgiPathInfo#" />
+
+    <meta name="language" content="#ListFirst(session.auth.locale,"-")#">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="#rc.robots#" />
+    <meta name="description" content="#rc.pageDescription#" />
+    <meta name="theme-color" content="#application.skins[COOKIE["dd-skin"]].themeColor#" />
+
+    <meta property="og:title" content="<cfif len(rc.pageTitle)>#rc.pageTitle#<cfelse>#rc.title#</cfif>" />
+    <meta property="og:locale" content="#session.auth.locale#" />
+    <meta property="og:description" content="#rc.pageDescription#" />
+    <meta property="og:url" content="#request.abs_url##request._fw1.CgiPathInfo#" />
+    <meta property="og:site_name" content="#rc.title#" />
+    <meta property="og:image" content="#request.abs_url#/assets/img/#application.skins[COOKIE["dd-skin"]].favicon#" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "http://schema.org",
+      "@type": "Organization",
+      "name": "#application.app_name#",
+      "url": "#request.abs_url#",
+      "logo": "<cfoutput>#request.abs_url#/assets/img/#application.skins[COOKIE["dd-skin"]].favicon#</cfoutput>",
+      "sameAs": [
+        #ListQualify(ArrayToList(application.sameas),'"')#
+      ],
+      "contactPoint": [{
+        "@type": "ContactPoint",
+        "email": "#application.admin_email#",
+        "contactType": "sales & support",
+        "url": "#request.abs_url#"
+      }]
+    }
+    </script>
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="#application.twitter.nick#" />
+    <meta name="twitter:image" content="#request.abs_url#/assets/img/#application.twitter.image#" />
+  </cfoutput>
 
   <!-- Google Tag Manager -->
   <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -25,6 +73,15 @@
     <cfif StructKeyExists( session, 'auth' ) && session.auth.isLoggedIn>
     gtag('set', {'user_id': '<cfoutput>#session.auth.user.getUser_Id()#</cfoutput>'}); // Set the user ID using signed-in user_id.
     </cfif>
+  </script>
+
+  <!-- Adsense -->
+  <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+  <script>
+    (adsbygoogle = window.adsbygoogle || []).push({
+      google_ad_client: "ca-pub-6158111396863200",
+      enable_page_level_ads: true
+    });
   </script>
 
   <!-- styles -->

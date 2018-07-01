@@ -172,6 +172,57 @@ function payDateLink( scope, element, attr, ngModel ) {
 
 }
 
+function dateLink( scope, element, attr, ngModel ) {
+
+  ngModel.$parsers.push(parser);
+  ngModel.$formatters.push(formatter);
+
+  // in to model
+  function parser(val) {
+
+    // reset validity (really?)
+    ngModel.$setValidity('date', true);
+    ngModel.$setValidity('min', true);
+
+    if (val == null)
+      return null;
+
+    if (moment("1900-01-01","YYYY-MM-DD").isSame(val))
+      return null;
+
+    if (moment().isAfter(val)) {
+      ngModel.$setValidity('date', true);
+      ngModel.$setValidity('min', false);
+    }
+
+    return new Date(val);
+
+  }
+
+  // out to display
+  function formatter(val) {
+
+    // reset validity (really?)
+    ngModel.$setValidity('date', true);
+    ngModel.$setValidity('min', true);
+
+    if (val == null)
+      return null;
+
+    if (moment("1900-01-01","YYYY-MM-DD").isSame(val))
+      return null;
+
+    if (moment().isAfter(val)) {
+      ngModel.$setValidity('date', true);
+      ngModel.$setValidity('min', false);
+    }
+
+    return fixDate(val);
+
+  }
+
+}
+
 /*****************
 
 the App
@@ -221,6 +272,93 @@ directives
     require: 'ngModel',
     link: dollarLink
   };
+})
+.directive('dateInput', function() {
+  return {
+    require: 'ngModel',
+    link: dateLink
+  }
+})
+.directive('stripeForm', function() {
+
+  stripe = Stripe('pk_test_YL12v8tiVU7x8o4Jcauc3lxl');
+
+  function stripeLink(scope, element, attrs) {
+
+      scope.submitCard = submitCard;
+
+      var elements = stripe.elements();
+
+      var style = {
+        base: {
+          fontSize: '16px',
+          color: "#32325d"
+        }
+      };
+
+      //var card = elements.create('card', style);
+      var card = elements.create('card', {style: style});
+      card.mount('#card-element');
+
+      // Handle real-time validation errors from the card Element.
+      card.on('change', function(event) {
+          setOutcome(event);
+      });
+
+      // Form Submit Button Click
+      function submitCard() {
+        var errorElement = document.getElementById('card-errors');
+        createToken();
+      }
+
+      // Send data directly to stripe server to create a token (uses stripe.js)
+      function createToken() {
+        stripe.createToken(card)
+        .then(setOutcome);
+      }
+
+      // Common SetOutcome Function
+      function setOutcome(result) {
+        var errorElement = document.getElementById('card-errors');
+        if (result.token) {
+          // Use the token to create a charge or a customer
+          stripeTokenHandler(result.token);
+        } else if (result.error) {
+          errorElement.textContent = result.error.message;
+        } else {
+          errorElement.textContent = '';
+        }
+      }
+
+      // Response Handler callback to handle the response from Stripe server
+      function stripeTokenHandler(token) {
+
+        //var form = document.getElementById('paymentInfoForm');
+        //var hiddenInput = document.createElement('input');
+
+        //hiddenInput.setAttribute('type','hidden');
+        //hiddenInput.setAttribute('name','stripeToken');
+        //hiddenInput.setAttribute('value', token.id);
+
+        //form.appendChild(hiddenInput);
+
+        var data = {
+          stripeToken: token.id
+        };
+        scope.updatePayment(data);
+
+        // submit the form
+        //form.submit();
+      }
+  }
+
+  // DIRECTIVE
+  return {
+      restrict: 'A',
+      replace: true,
+      /*templateUrl: 'payment/PaymentForm.html',*/
+      link: stripeLink
+  }
 })
 
 /***************
@@ -1010,6 +1148,48 @@ services
 
   };
 
+  service.pSavePaymentInfo = function( data ) {
+
+    var deferred = $q.defer();
+
+    $http({
+      method: 'POST',
+      url: '/index.cfm/profile/savePaymentInfo',
+      data: $.param( data ),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    })
+    .then( function(response) {
+
+      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
+        throw new Error( 'REST Error' );
+      }
+
+      if ( response.data == -1 ) {
+        throw new Error( 'REST POST Error' );
+      }
+
+      deferred.resolve({
+        data: response.data,
+        user_id: CF_getUserID(), // don't do this, please. for the love of god.
+        chain: data
+      });
+
+    })
+    .catch( function( e ) {
+
+      deferred.reject({
+        error: e.data,
+        chain: data
+      });
+
+    });
+
+    return deferred.promise;
+
+  }
+
   // I dunno how i feel about this
   function deepGet(source, key) {
 
@@ -1145,9 +1325,12 @@ controller/cards
     var two = one.then( function( resultOne ) {
       DDService.pDeletePlans( data );
     });
+    var three = two.then( function( resultTwo ) {
+      DDService.pDeleteJourney( data );
+    });
 
-    $q.all([one, two])
-    .then( function( [resultOne, resultTwo] ) {
+    $q.all([one, two, three])
+    .then( function( [resultOne, resultTwo, resultThree] ) {
 
       // really only needs to update when it is a brand new card; safe to update on key otherwise
       data.card_id = resultOne.card_id;
@@ -2126,6 +2309,40 @@ controller/profile
 .controller( 'ddProfile' , function ( $scope, $http, $q, $cookies, DDService ) {
 
   $scope.skin = $cookies.get( 'DD-SKIN' );
+  $scope.editingCard = false;
+
+  // setup stripe
+  /*
+  var elements = stripe.elements();
+  var style = {
+    base: {
+      // add your base input styles here. eg.
+      fontSize: '16px',
+      color: "#32325d",
+    }
+  };
+
+  var paymentInfo = elements.create('card', {style: style});
+
+  // add an instance of the card Element into the 'card-element' div.
+  paymentInfo.mount('#card-element');
+  */
+
+  // listen for the change event to alert user to errors
+  /*
+  paymentInfo.addEventListener('change', function(event){
+    var displayError = document.getElementById('card-errors');
+    if (event.error) {
+      displayError.textContent = event.error.message;
+    } else {
+      displayError.textContent = '';
+    }
+  });
+  */
+
+
+
+
 
   DDService.pGetPreferences({user_id:CF_getUserID()})
   .then( function onSuccess( result ) {
@@ -2190,5 +2407,82 @@ controller/profile
     $cookies.put( 'DD-SKIN', prefs );
 
   };
+
+  $scope.cancelConfirm = function( cancel_url ) {
+
+    BootstrapDialog.show({
+        size: BootstrapDialog.SIZE_LARGE,
+        type: BootstrapDialog.TYPE_DANGER,
+        closable: false,
+        closeByBackdrop: false,
+        closeByKeyboard: false,
+        title: 'YIKES!! YOU\'RE ABOUT TO LOSE FUNCTIONALITY!!',
+        message: 'You\'re about to cancel your <b>paid subscription</b>. You can continue to use the site for free, but the following changes will occur:<\/br><\/br><ul><li>Ads return!<li>No 0% APR calculation support!<li>No customizable card priorities!</ul><br>Are you <b>sure</b> you want to do this?',
+        buttons: [{
+            id: 'btn-confirm',
+            label: 'Yes, cancel my paid subscription.',
+            cssClass: 'btn-success pull-left',
+            action: function( dialogItself ) {
+
+              var $this_button = this;
+              $this_button.disable();
+
+              var $other_button = dialogItself.getButton('btn-goback');
+              $other_button.disable();
+
+              dialogItself.setClosable(false);
+
+              location.href = cancel_url;
+
+            }
+        }, {
+
+            id: 'btn-goback',
+            label: 'Stop! I changed my mind!',
+            cssClass: 'btn-danger',
+            action: function( dialogItself ) {
+              dialogItself.close();
+            }
+
+        }]
+    });
+
+  }
+
+  $scope.updatePayment = function( card ) {
+
+    DDService.pSavePaymentInfo( card )
+    .then( function onSuccess( result ) {
+
+    //$scope.preferences = result.preferences;
+
+      BootstrapDialog.show({
+        size: BootstrapDialog.SIZE_LARGE,
+        type: BootstrapDialog.TYPE_INFO,
+        closable: false,
+        closeByBackdrop: false,
+        closeByKeyboard: false,
+        title: 'CARD UPDATED',
+        message: 'You\'ve successfully updated your payment information.',
+        buttons: [{
+            id: 'btn-close',
+            label: 'Thanks!',
+            cssClass: 'btn-success pull-left',
+            action: function( dialogItself ) {
+              dialogItself.close();
+            }
+        }]
+      });
+
+      $scope.editingCard = false; // I'd prefer this happen on the action method above, but need to pass scope in somehow.
+
+    })
+    .catch( function onError( e ) {
+
+      CF_restErrorHandler( e );
+
+    });
+
+  }
 
 }); // controller/profile

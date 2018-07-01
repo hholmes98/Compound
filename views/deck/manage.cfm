@@ -1,3 +1,31 @@
+<cfsilent>
+<cfscript>
+function dayOfMonthFormat(day) {
+  var tested = Right(arguments.day,1);
+  switch(tested) {
+    case "1":
+      return arguments.day & "st";
+      break;
+    case "2":
+      return arguments.day & "nd";
+      break;
+    case "3":
+      return arguments.day & "rd";
+      break;
+    case "4":
+    case "5":
+    case "6":
+    case "7":
+    case "8":
+    case "9":
+    case "0":
+      return arguments.day & "th";
+      break;
+  }
+}
+</cfscript>
+</cfsilent>
+
 <!-- views/cards/manage -->
 <div class="page-header">
   <h1>Update Your Budget</h1>
@@ -23,8 +51,7 @@
 
     <!-- tab 1 -->
     <div ng-show="cardManagerTab" id="card-manager" class="panel-body">
-      <div><!--- class="table table-striped table-bordered table-valign-middle" --->
-
+      <div>
         <div class="row panel-header">
           <div class="col-md-12">
             <h3>These are your cards. There are many like them. But these ones are yours.</h3>
@@ -51,12 +78,54 @@
         </div>
 
         <div class="row align-top panel-body" ng-form name="cardsForm" ng-repeat="card in cards track by $index"><!--- we take [| cardSorter:orderByField:reverseSort] off this so that it doesn't hop around while editing --->
+
           <ng-form name="innerForm">
             <input type="hidden" ng-model="card.id">
             <input type="hidden" ng-model="card.is_emergency">
-            <div class="col-md-4" ng-class="{'has-error': innerForm.label.$invalid }">
-              <input type="text" name="label" class="form-control" ng-model="card.label" ng-required="true">
-              <span ng-show="innerForm.label.$invalid" class="help-block">Must name this card.</span>
+
+            <div class="col-md-4">
+              <div ng-class="{'has-error': innerForm.label.$invalid }">
+                <input type="text" name="label" class="form-control" ng-model="card.label" ng-required="true">
+                <span ng-show="innerForm.label.$invalid" class="help-block">Must name this card.</span>
+              </div>
+
+              <!--- LIFE HACKER (PAID) --->
+              <cfif session.auth.user.getAccount_Type_Id() == 4>
+
+                <br/>
+                <div class="row">
+                  <div class="col-md-8">
+                    <div ng-class="{'has-error': innerForm.zero_apr_end_date.$invalid }">
+                      <font size="-1" tooltip="This is the date that interest will start accruing on any balance that remains">0% APR Expires</font>
+                      <div class="input-group">
+                        <input type="date" name="zero_apr_end_date" placeholder="yyyy-MM-dd" class="form-control" ng-model="card.zero_apr_end_date" date-input>
+                        <span class="input-group-addon"><i class="fas fa-calendar-alt"></i></span>
+                      </div>
+                      <span ng-show="innerForm.zero_apr_end_date.$error.min" class="help-block">Date must be some date in the future.</span>
+                      <span ng-show="innerForm.zero_apr_end_date.$error.date" class="help-block">Date must be valid.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <br/>
+                <div class="row">
+                  <div class="col-md-8">
+                    <div ng-class="{'has-error': innerForm.due_on_day.$invalid }">
+                      <font size="-1">Payment is due on<span ng-show="card.due_on_day > 0"> the</span></font>
+                      <select name="due_on_day" class="form-control" ng-model="card.due_on_day" convert-to-number>
+                        <option value="0">(Not set)</option>
+                        <cfloop from="1" to="31" index="day">
+                          <cfoutput><option value="#day#">#dayOfMonthFormat(day)#</option></cfoutput>
+                        </cfloop>
+                      </select>
+                      <span ng-show="card.due_on_day > 0"><font size="-1">of the month</font></span>
+                      <span ng-show="innerForm.due_on_day.$invalid" class="help-block">Must choose a valid day of the month (1-31)</span>
+                    </div>
+                  </div>
+                </div>
+
+              </cfif>
+
             </div>
             <div class="col-md-2">
               <div class="input-group" ng-class="{'has-error': innerForm.balance.$invalid }">
@@ -82,9 +151,11 @@
             <div class="col-md-2">
               <button class="btn button btn-default" ng-class="{'btn-success': !cardsForm.$pristine }" ng-disabled="cardsForm.$pristine || cardsForm.$invalid" ng-click="saveCard(card);calculateAll();cardsForm.$setPristine(true)" ><span class="glyphicon glyphicon-ok"></span> Save Changes</button>
               <button class="btn button btn-default" ng-class="{'btn-warning': !cardsForm.$pristine }" ng-disabled="cardsForm.$pristine" ng-click="resetCard(card);cardsForm.$setPristine(true)" ><span class="glyphicon glyphicon-refresh"></span> Reset</button>
-              <button class="btn button btn-default" ng-click="deleteCard($index);cardsForm.$setPristine(true)"><span class="glyphicon glyphicon-remove"></span> Delete</button>
+              <button class="btn button btn-link" ng-click="deleteCard($index);cardsForm.$setPristine(true)"><span class="glyphicon glyphicon-remove"></span> Delete</button>
             </div>
+
           </ng-form>
+
         </div><!--- //row --->
 
       </div><!--- // table --->
@@ -163,7 +234,7 @@
           <div class="col-md-12"><h3>What's The Frequency, <cfoutput>#session.auth.user.getName()#</cfoutput>?</h3>
             <p>
               In order to determine what you'll pay and when, the frequency of your income is key. It's not ok to pay off 
-              debt <i>but also go hungry at the same time</i>. Based on what you tell us here, we'll calculate the smartest
+              debt <i>and also go hungry at the same time</i>. Based on what you tell us here, we'll calculate the smartest
               pay schedule that doesn't cripple your day-to-day life.
             </p>
           </div>

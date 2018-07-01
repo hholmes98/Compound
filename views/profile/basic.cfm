@@ -9,7 +9,7 @@
 </div>
 
 <div class="row">
-  <div class="col-xs-6">Skin</div>
+  <div class="col-xs-6">Theme</div>
   <div class="col-xs-6">
     <span class="pull-right">
       <select class="form-control" name="skin" ng-model="skin" ng-change="updateSkin(skin)">
@@ -18,19 +18,6 @@
         </cfloop>
       </select>
     </span>
-  </div>
-</div>
-
-<!-- Account Status -->
-<div class="strike">
-  <span><h3>Account Status</h3></span>
-</div>
-
-<div class="row">
-  <div class="col-xs-6">Account type</div>
-  <div class="col-xs-6">
-    <span class="pull-right">
-      <cfoutput><strong>#session.auth.user.getAccount_Type().getName()#</strong></cfoutput></span>
   </div>
 </div>
 
@@ -96,14 +83,14 @@
 </div>
 
 <div class="row">
-  <div class="col-xs-6">Bill reminders</div>
+  <div class="col-xs-6">Bill reminder frequency</div>
   <div class="col-xs-6">
     <span class="pull-right">
-      <select class="form-control" name="email_frequency" ng-model="preferences.email_frequency" ng-change="savePreferences(preferences);" convert-to-number>
+      <select<cfif session.auth.user.getAccount_Type_Id() LT 2> disabled tooltip="Upgrade to customize when you receive reminders!"</cfif> class="form-control" name="email_frequency" ng-model="preferences.email_frequency" ng-change="savePreferences(preferences);" convert-to-number>
         <option value="0">None</option>
-        <option value="1">1 a month</option><!-- this is the default -->
-        <option value="2">On pay schedule</option><!-- don't show this option if "its complicated" -->
-        <option value="3">Card due dates</option><!-- gray this option until the user fills out due dates -->
+        <option value="1"<cfif session.auth.user.getAccount_Type_Id() LT 2> selected</cfif>>1 a month</option><!-- this is the default -->
+        <cfif session.auth.user.getPreferences().getPay_Frequency() > 0><option value="2">On pay schedule</option><!-- don't show this option if "its complicated" --></cfif>
+        <cfif session.auth.user.getAccount_Type_Id() == 4><option value="3">Card due dates</option><!-- gray this option until the user fills out due dates --></cfif>
       </select>
     </span>
   </div>

@@ -1,13 +1,27 @@
+<cfsilent>
+  <cfscript>
+  function isCanceled( struct o ) {
+    
+    if ( StructKeyExists( arguments.o.subscription, 'status' ) ) {
+
+      if (o.subscription.status == 'canceled' || o.subscription.status == 'past_due' || (o.subscription.cancel_at_period_end)) {
+        return true;
+      } else {
+        return false;
+      }
+
+    } else {
+
+      // this should never happen
+      Throw( message="Missing Stripe Data", detail="The currently logged-in user (#session.auth.user.getUser_Id()#) is set as a paid account, but is missing their stripe_subscription_id information in the user bean." );
+
+    }
+  }
+  </cfscript>
+</cfsilent>
+
 <!-- views/profile/advanced -->
 <h2 shadow-text="Account Information">Account Information</h2>
-<div role="form">
-  <cfoutput>
-  <!--- <span>
-    <button class="btn button btn-default" onClick="location.href='#buildUrl('profile.basic')#';"><i class="fas fa-cog"></i> User Settings</button>
-    <button class="btn button btn-default pull-right" onClick="location.href='#buildUrl('login.logout')#';"> Logout</button>
-  </span> --->
-  </cfoutput>
-</div>
 
 <!-- User Information -->
 <div class="strike">
@@ -32,32 +46,149 @@
   </div>
 </div>
 
-<!-- Billing -->
+<!-- Account Status -->
 <div class="strike">
-  <span><h3>Billing</h3></span>
+  <span><h3>Account Status</h3></span>
 </div>
 
-Coming Soon (NYI)
+<div class="row">
+  <div class="col-xs-6">Account type</div>
+  <div class="col-xs-6">
+    <span class="pull-right">
+      <cfoutput>
+        <cfif session.auth.user.getAccount_Type_Id() == 1>
+          <strong>Free</strong> <button class="btn button btn-default" onClick="location.href='#buildUrl('profile.upgradeSub')#';"> <i class="fas fa-shopping-cart"></i> Upgrade to paid</button>
+        <cfelse>
+          <strong>Paid</strong> 
+          <cfif !isCanceled( rc )>
+            <button class="btn button btn-link" ng-click="cancelConfirm('#buildUrl('profile.cancelSub')#')"> <i class="fas fa-times-circle"></i> Cancel subscription</button>
+          </cfif>
+        </cfif>
+      </cfoutput>
+    </span>
+  </div>
+</div>
 
-<!---
-<div class="table"> 
-  <table class="table table-bordered">
-    <tbody>
-      <tr>
-        <td>Plan</td>
-        <td><cfoutput><strong>#session.auth.user.getAccount_Type().getName()#</strong></cfoutput></td>
-        <td></td>
-      </tr>
-      <tr>
-        <td>Payment</td>
-        <td><span class="glyphicon glyphicon-credit-card"></span> <strong>American Express 3*** ***** *2003</strong> Expiration: <strong>10/2021</strong></td>
-        <td><cfoutput><button class="btn button btn-default" onClick="location.href='#buildUrl('profile.payment')#';"><span class="glyphicon glyphicon-credit-card"></span> Update payment method</button></cfoutput></td>
-      </tr>
-      <tr>
+<div class="row">
+  <div class="col-xs-6">Plan</div>
+  <div class="col-xs-6">
+    <span class="pull-right">
+      <strong>
+        <cfif session.auth.user.getAccount_Type_Id() == 1>
+          ~
+        <cfelse>
+          <cfoutput>#application.stripe_plans[session.auth.user.getAccount_Type_Id()]["nickname"]#</cfoutput>
+        </cfif>
+      </strong>
+    </span>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xs-6">Payment status</div>
+  <div class="col-xs-6">
+    <span class="pull-right">
+      <strong>
+      <cfif session.auth.user.getAccount_Type_Id() == 1>
+        ~
+      <cfelse>
+        <cfoutput>#rc.payment_status#</cfoutput>
+        <cfif isCanceled( rc )>
+          <cfoutput><button class="btn button btn-default" onClick="location.href='#buildUrl('profile.resubscribe')#';"> <i class="fas fa-shopping-cart"></i> Resubscribe</button></cfoutput>
+        </cfif>
+      </cfif>
+      </strong>
+    </span>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xs-6">Paid features expire on</div>
+  <div class="col-xs-6">
+    <span class="pull-right">
+      <cfif session.auth.user.getAccount_Type_Id() == 1>
+        ~
+      <cfelse>
+        <cfif isCanceled( rc )>
+          <cfoutput>
+            <font color="red"><strong>#DateFormat(rc.subscription.current_period_end,"mm/dd/yyyy")#</strong></font>
+          </cfoutput>
+        <cfelse>
+          ~
+        </cfif>
+      </cfif>
+    </span>
+  </div>
+</div>
+
+<cfif session.auth.user.getAccount_Type_Id() EQ 1>
+  <!-- Upgrade to Paid -->
+  <div class="row">
+    <div class="col-xs-6"></div>
+    <div class="col-xs-6">
+      <span class="pull-right">
+        <input type="button" class="btn button btn-default btn-primary col-xs-12" value="Upgrade to paid" tooltip="Paid accounts disable advertisements!" />
+      </span>
+    </div>
+  </div>
+</cfif>
+
+<!-- Billing -->
+<div class="strike">
+  <span><h3>Billing Information</h3></span>
+</div>
+
+<div class="row">
+  <div class="col-xs-4">Card info</div>
+  <div class="col-xs-8">
+    <span>
+
+      <!-- read-only -->
+      <span ng-show="!editingCard">
+        <cfif NOT StructIsEmpty(rc.card)>
+          <i class="fas fa-credit-card"></i>
+          <cfoutput>
+            <strong>#rc.card.brand# #rc.asterisks##rc.card.last4#</strong>
+            Expiration: <strong>#rc.card.exp_month#/#rc.card.exp_year#</strong>
+          </cfoutput>
+          <button class="btn button btn-default" ng-click="editingCard=true;"><span class="glyphicon glyphicon-credit-card"></span> Update payment method</button>
+        <cfelse>
+          (no payment specified)
+          <button class="btn button btn-default" ng-click="editingCard=true;"><span class="glyphicon glyphicon-credit-card"></span> Add payment method</button>
+        </cfif>
+      </span>
+
+      <!-- editing -->
+      <span ng-show="editingCard">
+        <form name="paymentInfoForm" stripe-form>
+        <div>
+          <span>
+            <div id="card-element">
+            <!-- A Stripe Element will be inserted here. -->
+            </div>
+            <button class="btn button btn-link" type="button" ng-click="editingCard=false;"> <i class="fas fa-times-circle"></i> Cancel</button>
+            <button class="btn button btn-default" ng-click="submitCard()"> <i class="fas fa-check"></i> Save Payment Info</button>
+          </span>
+        </div>
+        <div>
+          <!-- used to display element errors. -->
+          <span id="card-errors" class="text-danger" role="alert"></span>
+        </div>
+        </form>
+      </span>
+
+    </span>
+  </div>
+</div>
+
+
+
+      <!---<tr>
         <td>Coupon</td>
         <td>You don't have an active coupon.</td>
         <td><cfoutput><button class="btn button btn-default" onClick="location.href='#buildUrl('profile.coupon')#';"><span class="glyphicon glyphicon-gift"></span> Redeem a coupon</button></cfoutput></td>
       </tr>
+      --->
       <!---
       <tr>
         <td>Extra Info (?)</td>
@@ -65,15 +196,13 @@ Coming Soon (NYI)
         <td><button class="btn button btn-default"><span class="glyphicon glyphicon-plus"></span> Add Information</button></td>
       </tr>
       --->
-    </tbody>
-  </table>
-</div>
 
 <!-- Payment History -->
 <div class="strike">
   <span><h3>Payment History</h3></span>
 </div>
 
+<cfif ArrayLen(rc.invoices)>
 <div class="table"> 
   <table class="table table-striped">
     <thead>
@@ -86,40 +215,30 @@ Coming Soon (NYI)
         <th>Receipt</th>
       </tr>
     </thead>
+    <cfloop array="#rc.invoices#" item="invoice">
     <tbody>
+      <cfoutput>
       <tr>
         <td><span class="glyphicon glyphicon-ok"></span></td>
-        <td>67118Z72</td>
-        <td>2017-12-24</td>
-        <td><span class="glyphicon glyphicon-credit-card"></span> American Express ending in 2003</td>
-        <td>$1.99</td>
-        <td><a href="#buildUrl('receipt.download')#"><span class="glyphicon glyphicon-floppy-save"></span></a></td>
+        <td>#invoice.number#</td>
+        <td>#DateFormat(invoice.date, "yyyy-mm-dd")#</td>
+        <td><i class="fas fa-credit-card"></i> #rc.card.brand# ending in #rc.card.last4#</td>
+        <td>$#Evaluate(invoice.total/100)#</td>
+        <td><a href="#invoice.invoice_pdf#"><span class="glyphicon glyphicon-floppy-save"></span></a></td>
       </tr>
-      <tr>
-        <td><span class="glyphicon glyphicon-ok"></span></td>
-        <td>67118Z71</td>
-        <td>2017-11-24</td>
-        <td><span class="glyphicon glyphicon-credit-card"></span> American Express ending in 2003</td>
-        <td>$1.99</td>
-        <td><a href="#buildUrl('receipt.download')#"><span class="glyphicon glyphicon-floppy-save"></span></a></td>
-      </tr>
-      <tr>
-        <td><span class="glyphicon glyphicon-ok"></span></td>
-        <td>67118Z70</td>
-        <td>2017-10-24</td>
-        <td><span class="glyphicon glyphicon-credit-card"></span> American Express ending in 2003</td>
-        <td>$1.99</td>
-        <td><a href="#buildUrl('receipt.download')#"><span class="glyphicon glyphicon-floppy-save"></span></a></td>
-      </tr>
-      <tr class="warning text-muted">
+      </cfoutput>
+
+      <!--- <tr class="warning text-muted">
         <td><span class="glyphicon glyphicon-remove"></span></td>
         <td>67118Z70</td>
         <td>2017-10-24</td>
         <td><span class="glyphicon glyphicon-credit-card"></span> American Express ending in 2003</td>
         <td>$1.99</td>
         <td>&nbsp;</td>
-      </tr>
+      </tr> --->
     </tbody>
+    </cfloop>
   </table>
 </div>
---->
+</cfif>
+

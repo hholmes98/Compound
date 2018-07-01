@@ -13,6 +13,28 @@ component accessors = true {
 
   }
 
+  function before( struct rc ) {
+
+    rc.robots = "index,follow,archive";
+  }
+
+  function about( struct rc ) {
+
+    rc.pageTitle = "What is " & application.app_name & "?";
+  }
+
+  function features( struct rc ) {
+
+    rc.pageTitle = application.app_name & " features";
+    rc.pageDescription = application.app_name & " features that make it the only credit card caluclator you'll ever need.";
+  }
+
+  function pricing( struct rc ) {
+
+    rc.pageTitle = application.app_name & " pricing";
+    rc.pageDescription = "Affordable pricing plans for eliminating credit card debt with " & application.app_name;
+  }
+
   private void function populate( struct rc ) {
 
     // get al levents for this user
