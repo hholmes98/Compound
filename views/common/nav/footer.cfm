@@ -9,7 +9,7 @@
     <h3>#application.locale[session.auth.locale]['motto']#</h3>
     </cfoutput>
     <cfif get_started is 'home'>
-      <button class="btn btn-default" id="returnTop"> Get started</button>
+      <button class="btn btn-default" onClick="location.hash='#try'"> Get started</button>
     <cfelse>
       <cfoutput><button class="btn btn-default" onClick="location.href='#buildUrl('main')#'"> Get started</button></cfoutput>
     </cfif>

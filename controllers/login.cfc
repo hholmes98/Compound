@@ -46,6 +46,11 @@ component accessors = true {
     }
     */
 
+    rc.stripe = new stripe_cfml.stripe(
+      apiKey = '#application.stripe_secret_key#',
+      config = {}
+    );
+
   }
 
   function create( struct rc ) {
@@ -58,6 +63,7 @@ component accessors = true {
   }
 
   function new( struct rc ) {
+    param name="rc.stripeToken" default="";
 
     // create a new account
     var endString = '';
@@ -110,7 +116,7 @@ component accessors = true {
       }
 
       // 3. wipe the tmp session clean
-      StructClear( session.tmp );
+      StructClear( session.tmp.cards );
 
     }
 
@@ -120,50 +126,54 @@ component accessors = true {
     session.auth.user = user;
 
     // if they are creating a paid account, create a Stripe Customer and Sub
-    var createObj = rc.stripe.customers.create({
-      email: '#session.auth.user.getEmail()#',
-      source: '#rc.stripeToken#' // this is a payment object, via Billing
-    });
+    if ( Len(rc.stripeToken) ) {
 
-    var customer = createObj.content;
-
-    if ( !StructKeyExists(customer,'error') ) {
-
-      // update bean
-      session.auth.user.setStripe_Customer_Id( customer.id );
-
-      // save to db
-      userService.save( session.auth.user.flatten() );
-
-      // then subscribe them to the selected plan
-      var subObj = rc.stripe.subscriptions.create({
-        customer: '#session.auth.user.getStripe_Customer_Id()#',
-        items: [{plan: '#rc.stripe_plan_id#'}]
+      var createObj = rc.stripe.customers.create({
+        email: '#session.auth.user.getEmail()#',
+        source: '#rc.stripeToken#' // this is a payment object, via Billing
       });
 
-      var subscription = subObj.content;
+      var customer = createObj.content;
 
-      if ( !StructKeyExists(subscription,'error') ) {
+      if ( !StructKeyExists( customer, 'error' ) ) {
 
-        // if successful, update
-        session.auth.user.setStripe_Subscription_Id( subscription.id );
-        session.auth.user.setAccount_Type_Id( variables.paymentService.getAccountTypeFromPlan( subscription.items.data[1].plan.id ) );
+        // update bean
+        session.auth.user.setStripe_Customer_Id( customer.id );
 
         // save to db
         userService.save( session.auth.user.flatten() );
 
-        // prep the end string
-        endString = '/c/' & variables.paymentService.getAccountTypeFromPlan( subscription.items.data[1].plan.id );
+        // then subscribe them to the selected plan
+        var subObj = rc.stripe.subscriptions.create({
+          customer: '#session.auth.user.getStripe_Customer_Id()#',
+          items: [{plan: '#rc.stripe_plan_id#'}]
+        });
+
+        var subscription = subObj.content;
+
+        if ( !StructKeyExists( subscription, 'error' ) ) {
+
+          // if successful, update
+          session.auth.user.setStripe_Subscription_Id( subscription.id );
+          session.auth.user.setAccount_Type_Id( variables.paymentService.getAccountTypeFromPlan( subscription.items.data[1].plan.id ) );
+
+          // save to db
+          userService.save( session.auth.user.flatten() );
+
+          // prep the end string
+          endString = '/c/' & variables.paymentService.getAccountTypeFromPlan( subscription.items.data[1].plan.id );
+
+        } else {
+
+          rc.message = ["There was a problem with your payment information. Your account will behave as a free one until you fix your payment information in the Profile -> Account Information."];
+
+        }
 
       } else {
 
-        rc.message = ["There was a problem with your payment information. Your account will behave as a free one until you fix your payment information in the Profile -> Account Information."];
+        rc.message = ["There was a problem with your payment information, so we've granted you free access. You can fix your payment information in the Profile -> Account Information."];
 
       }
-
-    } else {
-
-      rc.message = ["There was a problem with your payment information, so we've granted you free access. You can fix your payment information in the Profile -> Account Information."];
 
     }
 

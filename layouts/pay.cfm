@@ -9,16 +9,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <cfoutput>#view('common/banner')#</cfoutput>
 
 <div id="pan-main" class="pan-perspective">
+
+  <div class="section">
+
   <cfoutput>
     #view('common/func/msg')#
 
     #body#
   </cfoutput>
+
+  </div>
+
 </div>
 
 <!-- needs to run at </body> -->
 <script src="/assets/js/dd-animatePage.js"></script>
-<script src="/assets/js/dd-bb.js"></script>
+<!--- <script src="/assets/js/dd-bb.js"></script> --->
 <script src="/assets/js/dd-controller.js"></script>
 
 <!--- this remains in template to bridge cf/js --->

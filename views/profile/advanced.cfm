@@ -60,8 +60,10 @@
           <strong>Free</strong> <button class="btn button btn-default" onClick="location.href='#buildUrl('profile.upgradeSub')#';"> <i class="fas fa-shopping-cart"></i> Upgrade to paid</button>
         <cfelse>
           <strong>Paid</strong> 
-          <cfif !isCanceled( rc )>
-            <button class="btn button btn-link" ng-click="cancelConfirm('#buildUrl('profile.cancelSub')#')"> <i class="fas fa-times-circle"></i> Cancel subscription</button>
+          <cfif Len(rc.subscription)>
+            <cfif !isCanceled( rc )>
+              <button class="btn button btn-link" ng-click="cancelConfirm('#buildUrl('profile.cancelSub')#')"> <i class="fas fa-times-circle"></i> Cancel subscription</button>
+            </cfif>
           </cfif>
         </cfif>
       </cfoutput>
@@ -92,9 +94,13 @@
       <cfif session.auth.user.getAccount_Type_Id() == 1>
         ~
       <cfelse>
-        <cfoutput>#rc.payment_status#</cfoutput>
-        <cfif isCanceled( rc )>
-          <cfoutput><button class="btn button btn-default" onClick="location.href='#buildUrl('profile.resubscribe')#';"> <i class="fas fa-shopping-cart"></i> Resubscribe</button></cfoutput>
+        <cfif Len(rc.subscription)>
+          <cfoutput>#rc.payment_status#</cfoutput>
+          <cfif isCanceled( rc )>
+            <cfoutput><button class="btn button btn-default" onClick="location.href='#buildUrl('profile.resubscribe')#';"> <i class="fas fa-shopping-cart"></i> Resubscribe</button></cfoutput>
+          </cfif>
+        <cfelse>
+          Lifetime Sub
         </cfif>
       </cfif>
       </strong>
@@ -109,12 +115,16 @@
       <cfif session.auth.user.getAccount_Type_Id() == 1>
         ~
       <cfelse>
-        <cfif isCanceled( rc )>
-          <cfoutput>
-            <font color="red"><strong>#DateFormat(rc.subscription.current_period_end,"mm/dd/yyyy")#</strong></font>
-          </cfoutput>
+        <cfif Len(rc.subscription)>
+          <cfif isCanceled( rc )>
+            <cfoutput>
+              <font color="red"><strong>#DateFormat(rc.subscription.current_period_end,"mm/dd/yyyy")#</strong></font>
+            </cfoutput>
+          <cfelse>
+            ~
+          </cfif>
         <cfelse>
-          ~
+          <strong>Never</strong>
         </cfif>
       </cfif>
     </span>
@@ -138,10 +148,11 @@
   <span><h3>Billing Information</h3></span>
 </div>
 
+<form id="profileForm">
+
 <div class="row">
   <div class="col-xs-4">Card info</div>
   <div class="col-xs-8">
-    <span>
 
       <!-- read-only -->
       <span ng-show="!editingCard">
@@ -160,28 +171,27 @@
 
       <!-- editing -->
       <span ng-show="editingCard">
-        <form name="paymentInfoForm" stripe-form>
+        <ng-form name="paymentInfoForm" stripe-form>
         <div>
           <span>
             <div id="card-element">
             <!-- A Stripe Element will be inserted here. -->
             </div>
             <button class="btn button btn-link" type="button" ng-click="editingCard=false;"> <i class="fas fa-times-circle"></i> Cancel</button>
-            <button class="btn button btn-default" ng-click="submitCard()"> <i class="fas fa-check"></i> Save Payment Info</button>
+            <button class="btn button btn-default" type="button" ng-click="submitCard()"> <i class="fas fa-check"></i> Save Payment Info</button>
           </span>
         </div>
         <div>
           <!-- used to display element errors. -->
           <span id="card-errors" class="text-danger" role="alert"></span>
         </div>
-        </form>
+        </ng-form>
       </span>
 
-    </span>
   </div>
 </div>
 
-
+</form>
 
       <!---<tr>
         <td>Coupon</td>

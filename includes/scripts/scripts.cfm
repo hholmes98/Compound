@@ -17,13 +17,18 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.7/js/bootstrap-dialog.min.js"></script>
 
   <!-- Locals -->
-  <script src="/node_modules/angular-route/angular-route.js"></script>
+  <!--- <script src="/node_modules/angular-route/angular-route.js"></script> --->
   <script src="/node_modules/angular-tooltips/lib/angular-tooltips.js"></script>
   <script src="/node_modules/angular-sanitize/angular-sanitize.js"></script>
   <script src="/node_modules/angular-cookies/angular-cookies.js"></script>
 
   <!-- date handling -->
   <script src="/node_modules/moment/min/moment.min.js" type="text/javascript"></script>
+
+  <!-- fullpage animation -->
+  <script src="/node_modules/fullpage.js/vendors/scrolloverflow.js" type="text/javascript"></script>
+  <script src="/node_modules/fullpage.js/dist/fullpage.js" type="text/javascript"></script>
+  <script src="/node_modules/fullpage.js/dist/fullpage.extensions.min.js" type="text/javascript"></script>
 
   <!-- calendar --> 
   <script src="/node_modules/angular-ui-calendar/src/calendar.js" type="text/javascript"></script>

@@ -17,6 +17,12 @@
 (adsbygoogle = window.adsbygoogle || []).push({});
 </script>--->
 </div>
+<cfelse>
+<div id="top-banner-empty"></div>
 </cfif>
+
+<cfelse>
+
+  <div id="top-banner-empty"></div>
 
 </cfif>

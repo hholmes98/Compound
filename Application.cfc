@@ -77,6 +77,8 @@ component extends = "framework.one" {
     application.app_version = XmlSearch( conf, '//app/version' )[1].XmlText;
     application.app_show_version = XmlSearch( conf, '//app/show-version' )[1].XmlText;
 
+    application.secure = XmlSearch( conf, '//app/secure' )[1].XmlText;
+
     // locales
     application.locale = StructNew();
 
@@ -243,15 +245,7 @@ component extends = "framework.one" {
 
   boolean function isSSL() {
 
-    // standard test
-    if( IsBoolean( cgi.server_port_secure ) AND cgi.server_port_secure ){ return true; }
-
-    // Add typical proxy headers for SSL
-    if( getHTTPHeader( "x-forwarded-proto" ) eq "https" ){ return true; }
-
-    if( getHTTPHeader( "x-scheme" ) eq "https" ){ return true; }
-
-    return false;
+    return application.secure;
 
   }
 

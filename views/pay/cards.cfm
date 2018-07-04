@@ -1,8 +1,8 @@
 <!-- views/pay/cards -->
-<cfparam name="pageStart" default="1" />
 
-<div class="pan-page pan-page-<cfoutput>#pageStart#</cfoutput>">
+<div class="pan-page pan-page-2 slide" data-anchor="cards">
   <div class="container">
+
     <div class="page-header">
       <h1>Pay Your Bills</h1>
       <h3>Pick a card. Any card.</h3>
@@ -11,6 +11,7 @@
         on-the-fly and your recommended payment will be re-calculated instantly.
       </p>
     </div>
+
     <div class="form-horizontal">
       <div id="card-list">
         <table class="table table-striped table-bordered table-valign-middle">
@@ -29,7 +30,7 @@
           <tbody>
             <tr class="align-top" ng-form name="myForm" ng-repeat="card in cards track by $index"><!-- take this off so no jumpy  | cardSorter:orderByField:reverseSort | noPaymentFilter:pay_dates:showAllCards -->
               <td>
-                <cfoutput><button class="btn button btn-default btn-block" ng-click="selectCard(card,#Evaluate(pageStart+1)#);">{{card.label}}</button></cfoutput>
+                <cfoutput><button class="btn button btn-default btn-block" ng-click="selectCard(card)">{{card.label}}</button></cfoutput>
               </td>
               <td>{{card.pay_date | prettyPayDateFilter | date: 'MMM d' }}</td>
             </tr>
@@ -37,11 +38,12 @@
         </table>
       </div>
     </div>
+
   </div>
 </div>
 
-<div class="pan-page pan-page-<cfoutput>#Evaluate(pageStart+1)#</cfoutput>">
-  <div class="container"> 
+<div class="pan-page pan-page-3 slide" data-anchor="summary">
+  <div class="container">
 
     <div class="row">
       <div class="col-md-12">
@@ -109,7 +111,7 @@
     <div class="row">
       <div class="col-md-12" align="center">
         <span>
-          <cfoutput><button class="btn button btn-default" ng-disabled="selected.calculated_payment=='Thinking...'" ng-click="returnToList(#pageStart#);cardPaymentForm.$setPristine(true);cardBalanceForm.$setPristine(true)"><span class="glyphicon glyphicon-circle-arrow-left"></span> Done / Return to Cards</button></cfoutput>
+          <cfoutput><button class="btn button btn-default" ng-disabled="selected.calculated_payment=='Thinking...'" ng-click="returnToList(1);cardPaymentForm.$setPristine(true);cardBalanceForm.$setPristine(true)"><span class="glyphicon glyphicon-circle-arrow-left"></span> Done / Return to Cards</button></cfoutput>
         </span>
       </div>
     </div>

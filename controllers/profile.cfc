@@ -182,16 +182,16 @@ component accessors=true {
 
       /* use cases: paid(low)to-paid(high) only (eg "upgrade", "downgrade") */
 
-      var subObj = rc.stripe.subscriptions.retrieve({
-        subscription_id: '#session.auth.user.getStripe_Subscription_Id()#'
-      });
+      var subObj = rc.stripe.subscriptions.retrieve(
+        subscription_id = '#session.auth.user.getStripe_Subscription_Id()#'
+      );
 
       var subscription = subObj.content;
 
       //TODO: Trap errors here
 
       var subscriptionItems = subscription.items.data;
-      var currentItem = subscriptionItems[subscriptionItems.total_count];
+      var currentItem = subscriptionItems[subscription.items.total_count];
 
       /* if it is an upgrade (old_plan_id < new_plan_id) ("upgrade") */
       if ( variables.paymentService.getAccountTypeFromPlan( currentItem.plan.id ) < variables.paymentService.getAccountTypeFromPlan( rc.stripe_plan_id ) ) {
@@ -335,6 +335,8 @@ component accessors=true {
     rc.upgrade = "resub";
 
     upgradeSub( arguments.rc );
+
+    variables.fw.setView('profile.upgradeSub');
 
   }
 

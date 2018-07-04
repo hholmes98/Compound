@@ -1,4 +1,10 @@
 <!-- views/main/pricing -->
+<cfsilent>
+  <cfsavecontent variable="headContent">
+    <link href="/assets/css/pricing.css" type="text/css" rel="stylesheet" />
+  </cfsavecontent>
+  <cfhtmlhead text="#headContent#">
+</cfsilent>
 
 <div id="generic_price_table">
 

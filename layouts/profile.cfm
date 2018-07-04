@@ -28,6 +28,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   function CF_getUserID() {
     return <cfoutput>#session.auth.user.getUser_Id()#</cfoutput>;
   }
+
+  function CF_getPublicStripeKey() {
+    return <cfoutput>'#application.stripe_public_key#'</cfoutput>;
+  }
 </script>
 
 </body>

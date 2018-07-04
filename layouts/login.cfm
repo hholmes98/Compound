@@ -15,4 +15,5 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     #view('common/func/msg')#
   </cfoutput>
 </div>
+
 </body>

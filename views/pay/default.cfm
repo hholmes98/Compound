@@ -1,7 +1,6 @@
 <!-- views/pay/default -->
-<cfset pageStart = 2 />
 
-<div class="pan-page pan-page-1">
+<div class="pan-page pan-page-1 slide" data-anchor="choose">
   <div class="container">
     <div class="page-header">
       <h1><cfoutput>What shall we do, #session.auth.user.getName()#?</cfoutput></h1>
@@ -9,7 +8,7 @@
     <cfoutput>
     <div align="center">
       <span align="left">
-        <button class="btn button btn-default btn-tile" ng-click="panTo(2)"><i class="fas fas-large fa-dollar-sign"></i></span><br/><br/> PAY my<br/>bills</button>
+        <button class="btn button btn-default btn-tile" onClick="location.hash='##pay/cards'"><i class="fas fas-large fa-dollar-sign"></i></span><br/><br/> PAY my<br/>bills</button>
       </span>
       <span align="center">
         <button class="btn button btn-default btn-tile" ng-click="navigateTo('#buildUrl('manage.budget')#')"><i class="fas fas-large fa-chart-pie"></i><br/><br/> UPDATE my<br/>budget</button>

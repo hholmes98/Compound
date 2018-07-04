@@ -235,7 +235,7 @@ ddApp
 config
 
 ****************/
-.config(['$uibTooltipProvider', function($uibTooltipProvider){
+.config(['$uibTooltipProvider', function($uibTooltipProvider) {
 
   $uibTooltipProvider.setTriggers({
     'mouseenter': 'mouseleave',
@@ -281,83 +281,71 @@ directives
 })
 .directive('stripeForm', function() {
 
-  stripe = Stripe('pk_test_YL12v8tiVU7x8o4Jcauc3lxl');
+  stripe = Stripe(CF_getPublicStripeKey());
 
   function stripeLink(scope, element, attrs) {
 
-      scope.submitCard = submitCard;
+    scope.submitCard = submitCard;
 
-      var elements = stripe.elements();
+    var elements = stripe.elements();
 
-      var style = {
-        base: {
-          fontSize: '16px',
-          color: "#32325d"
-        }
+    var style = {
+      base: {
+        fontSize: '16px',
+        color: "#32325d"
+      }
+    };
+
+    var card = elements.create('card', {style: style});
+    card.mount('#card-element');
+
+    // Handle real-time validation errors from the card Element.
+    card.on('change', function(event) {
+      setOutcome(event);
+    });
+
+    // Form Submit Button Click
+    function submitCard() {
+      var errorElement = document.getElementById('card-errors');
+      createToken();
+    }
+
+    // Send data directly to stripe server to create a token (uses stripe.js)
+    function createToken() {
+      stripe.createToken(card)
+      .then(setOutcome);
+    }
+
+    // Common SetOutcome Function
+    function setOutcome(result) {
+      var errorElement = document.getElementById('card-errors');
+      if (result.token) {
+        // Use the token to create a charge or a customer
+        stripeTokenHandler(result.token);
+      } else if (result.error) {
+        errorElement.textContent = result.error.message;
+      } else {
+        errorElement.textContent = '';
+      }
+    }
+
+    // Response Handler callback to handle the response from Stripe server
+    function stripeTokenHandler(token) {
+
+      var data = {
+        stripeToken: token.id
       };
 
-      //var card = elements.create('card', style);
-      var card = elements.create('card', {style: style});
-      card.mount('#card-element');
+      scope.updatePayment(data);
 
-      // Handle real-time validation errors from the card Element.
-      card.on('change', function(event) {
-          setOutcome(event);
-      });
-
-      // Form Submit Button Click
-      function submitCard() {
-        var errorElement = document.getElementById('card-errors');
-        createToken();
-      }
-
-      // Send data directly to stripe server to create a token (uses stripe.js)
-      function createToken() {
-        stripe.createToken(card)
-        .then(setOutcome);
-      }
-
-      // Common SetOutcome Function
-      function setOutcome(result) {
-        var errorElement = document.getElementById('card-errors');
-        if (result.token) {
-          // Use the token to create a charge or a customer
-          stripeTokenHandler(result.token);
-        } else if (result.error) {
-          errorElement.textContent = result.error.message;
-        } else {
-          errorElement.textContent = '';
-        }
-      }
-
-      // Response Handler callback to handle the response from Stripe server
-      function stripeTokenHandler(token) {
-
-        //var form = document.getElementById('paymentInfoForm');
-        //var hiddenInput = document.createElement('input');
-
-        //hiddenInput.setAttribute('type','hidden');
-        //hiddenInput.setAttribute('name','stripeToken');
-        //hiddenInput.setAttribute('value', token.id);
-
-        //form.appendChild(hiddenInput);
-
-        var data = {
-          stripeToken: token.id
-        };
-        scope.updatePayment(data);
-
-        // submit the form
-        //form.submit();
-      }
+    }
   }
 
   // DIRECTIVE
   return {
-      restrict: 'A',
-      replace: true,
-      /*templateUrl: 'payment/PaymentForm.html',*/
-      link: stripeLink
+    restrict: 'A',
+    replace: true,
+    link: stripeLink
   }
 })
 
@@ -1840,11 +1828,30 @@ controller/calculate
 controller/pay
 
 ******************/
-.controller( 'ddPay' , function ( $scope, $http, $q, $location, $filter, DDService ) {
+.controller( 'ddPay' , function ( $scope, $http, $q, $filter, DDService ) {
 
   $scope.orderByField = 'pay_date';
   $scope.reverseSort = false;
   $scope.showAllCards = false;
+
+  angular.element(document).ready(function(){
+
+    $('#pan-main').fullpage({
+      licenseKey:'OPEN-SOURCE-GPLV3-LICENSE', //TODO: buy a license
+      autoScrolling:false,
+      scrollHorizontally: true,
+      verticalCentered: false,
+      fitToSection: false,
+      scrollOverflow: true,
+      keyboardScrolling: false,
+      anchors:['pay']
+    });
+
+    //methods
+    $.fn.fullpage.setAllowScrolling(false);
+
+
+  });
 
   /*********/
   /* main  */
@@ -1909,88 +1916,35 @@ controller/pay
   }
 
 
-  /*
-  $scope.reset = function( form ) {
-    if (form) {
-
-      for (var i=0; i < form.$$controls.length; i++) {
-        form.$$controls[i].$setViewValue(undefined);
-        form.$$controls[i].$render();
-      }
-
-      form.$setPristine();
-      form.$setUntouched();
-      //form.$render();
-    }
-  }
-  */
-
   $scope.resetForm = function( forms ) {
 
     $scope.card = {};
-
-    /*
-    for (var i=0; i < forms.length; i++ ) {
-      var form = forms[i];
-
-      var controlNames = Object.keys(form).filter(key => key.indexOf('$') !== 0);
-
-      // Set each control back to undefined. This is the only way to clear validation messages.
-      // Calling `form.$setPristine()` won't do it (even though you wish it would).
-      for (var name of controlNames) {
-          var control = form[name];
-          control.$setViewValue(undefined);
-          control.$render();
-      }
-
-      form.$setPristine();
-      form.$setUntouched();
-    }
-    */
 
   };
 
   // compatibility bridge between angular $location and fw/1 buildUrl()
   $scope.navigateTo = function( path ) {
 
-    //$location.url( path ); // FIXME:this is angular pro-hash navigation
     location.href = path;
 
   };
 
-  $scope.panTo = function( pageIndex ) {
+  $scope.panTo = function( url, pageIndex ) {
 
-    AnimatePage.panForward( pageIndex );
-    addHistory('AnimatePage.panBack(' + (pageIndex-1).toString() + ');','#!/nb'+(pageIndex-1).toString());
+    location.href = url + "#p1/" + pageIndex;
 
   };
 
-  $scope.selectCard = function( card, destIndex ) {
+  $scope.selectCard = function( card ) {
 
     $scope.selected = card;
+    location.hash = '#pay/summary';
 
-/*
-    var user_id = card.user_id;
-
-    DDService.pGetPlan( { user_id: user_id } )
-    .then( function( result ) {
-
-      $scope.plan = result.plan;
-      $scope.card = $scope.plan[card.card_id];
-
-      console.log( $scope.card );
-*/
-      AnimatePage.panForward( destIndex );
-      addHistory('AnimatePage.panBack(' + (destIndex-1).toString() + ');','#!/nb'+(destIndex-1).toString());
-/*
-    });
-*/
   };
 
   $scope.returnToList = function( destIndex ) {
 
-    AnimatePage.panBack( destIndex );
-    addHistory('AnimatePage.panForward(' + (destIndex-1).toString() + ');','#!/nb'+(destIndex-1).toString());
+    history.back();
 
   };
 
@@ -2020,28 +1974,100 @@ controller/pay
 controller/main
 
 *****************/
-.controller( 'ddMain' , function ( $scope, $http, $q, $location, $compile, DDService ) {
+.controller( 'ddMain' , function ( $scope, $http, $q, $compile, DDService ) {
 
-  $scope.cardTotal = 1;
+  angular.element(document).ready(function(){
 
-  /*
-  $('#pan-main').on('click', '.btn-more', function() {
-    $scope.buildAndPan(this);
-  });
-  */
+    $('#pan-main').fullpage({
+      licenseKey:'OPEN-SOURCE-GPLV3-LICENSE', //TODO: buy a license
+      autoScrolling:false,
+      scrollHorizontally: true,
+      verticalCentered: false,
+      fitToSection: false,
+      keyboardScrolling: false,
+      animateAnchor: false,
+      anchors:['try']
+    });
 
-  $('#pan-main').on('click', '.btn-submit', function() {
-    $('#entry').submit();
+    //methods
+    $.fn.fullpage.setAllowScrolling(true);
+
+    // setup the submit button
+    $('#pan-main').on('click', '.btn-submit', function() {
+      $('#entry').submit();
+    });
+
   });
 
   /***********
      METHODS
   ***********/
 
+  $scope.verifyBudget = function() {
+
+    if ($('#budget').val() == "") {
+
+      BootstrapDialog.show({
+          size: BootstrapDialog.SIZE_LARGE,
+          type: BootstrapDialog.TYPE_DANGER,
+          closable: false,
+          closeByBackdrop: false,
+          closeByKeyboard: false,
+          title: 'I NEED A BUDGET!',
+          message: 'Enter a budget before moving forward!<br><br> This is the amount that you\'ll dedicate to paying down your credit cards every month. Be sure to pick a number that allows you to safely <b>live within your means!</b><br><br>For example, if you have $200 a month to spend on paying off bills, enter \'200.00\' in the field below.',
+          buttons: [{
+              id: 'btn-confirm',
+              label: 'Got it',
+              cssClass: 'btn-success pull-left',
+              action: function( dialogItself ) {
+                dialogItself.close();
+              }
+          }]
+      });
+
+    } else {
+
+      location.hash = '#try/1';
+
+    }
+
+  }
+
+  $scope.verifyCard = function( cardNum ) {
+
+    var cc_balance = $('input[name=credit-card-balance' + (cardNum).toString() + ']');
+
+    if ( cc_balance.val() == "" ) {
+
+      BootstrapDialog.show({
+          size: BootstrapDialog.SIZE_LARGE,
+          type: BootstrapDialog.TYPE_DANGER,
+          closable: false,
+          closeByBackdrop: false,
+          closeByKeyboard: false,
+          title: 'THE UNIVERSE IS WITHOUT BALANCE!',
+          message: 'Enter a balance on one of your credit cards below.<br><br>Just tell us what remains to be paid, and nothing else!',
+          buttons: [{
+              id: 'btn-confirm',
+              label: 'I understand',
+              cssClass: 'btn-success pull-left',
+              action: function( dialogItself ) {
+                dialogItself.close();
+              }
+          }]
+      });
+
+    } else {
+
+      location.hash = '#try/' + (parseInt(cardNum)+1).toString();
+
+    }
+
+  }
+
   $scope.buildAndPan = function(index) {
 
     /* now smart enough to build a card in the future - but only if needed */
-    // add a history back to yourself
     // hack in field validation
     if (index == 1) {
       if ($('#budget').val() == "") {
@@ -2064,26 +2090,7 @@ controller/main
 
     }
 
-    if (index > ($scope.cardTotal-1)) {
-
-      $scope.cardTotal = AnimatePage.addAnother() - 1; // we ignore the home card.
-
-      // grab the .btn-more div
-      var $last_div = $('div[id^="page"]:last');
-      // figure out the true next number
-      var num = parseInt($last_div.prop('id').match(/\d+/g)[0]);
-      // set the true next number into its buildAndPan method
-      $last_div.find('.btn-more').attr('ng-click','buildAndPan('+num+')');
-      // recompile the div
-      $compile($last_div)($scope);
-
-    }
-
-    AnimatePage.panForward(index+1);
-    addHistory('AnimatePage.panBack(' + (index) + ');','#!/nb'+(index).toString());
-
-    // if you need to build a card into the future...
-
+    location.href='#p1/' + index;
 
   };
 
@@ -2094,9 +2101,74 @@ controller/main
   };
 
   $scope.panTo = function( pageIndex ) {
-    AnimatePage.panForward( pageIndex );
-    addHistory('AnimatePage.panBack(' + pageIndex + ');','#!/nb'+pageIndex.toString());
+    location.href="#p1/" + pageIndex;
+    //AnimatePage.panForward( pageIndex );
+    //addHistory('AnimatePage.panBack(' + pageIndex + ');','#!/nb'+pageIndex.toString());
   };
+
+  $scope.addAnother = function() {
+
+    var newHed = [
+      'Keep \'em coming!', 
+      'Need more debt!', 
+      'You\'re killing it! (and by "it" we mean "debt")', 
+      'Give us your cards!', 
+      'Somebody set you up the debt!'
+    ];
+    
+    var newMsg = [
+      'The average balance a person carries on a credit card is: $5,047. Let\'s get that down to $0.',
+      'Families with debt carry an average balance of: $15,654. It\'s time to chip that away.',
+      'People born between \'80-\'84 carry approx. $5,689 more credit card debt than their parents, and $8,156 more than their grandparents.',
+      'Credit card debt increased by nearly 8% in 2017. Let\'s reverse that trend. Now.',
+      'But starting today, you\'re paying it off. For great justice.'
+    ];
+
+    var $pan = $( '#pan-main > form' );
+
+    if (!$pan.length) {
+      $pan = $('#pan-main');
+    }
+
+    var $last_div = $('div[id^="page"]:last');
+    var num = parseInt( $last_div.prop('id').match(/\d+/g), 10 ) + 1;
+
+    var $div = $last_div.clone()
+    
+    // re-id it
+    $div.prop('id','page' + num);
+
+    // re-class it.
+    $div.prop('class','pan-page pan-page-' + num);
+
+    // attach data for panning
+    $div.data( 'originalClassList', $div.attr( 'class' ) );
+
+    // re-id the form fields
+    $div.find('input').each( function(index) {
+
+      var tClass = $(this).attr('class'); // the base field name is the class (the actual name already has a number)
+
+      var fieldName = tClass.substring(tClass.indexOf('credit-card'));
+
+      var newFieldId = fieldName + (num-1); // the fields are -1 of the page itself (eg. page-2 has fieldnames named credit-card-label1)
+
+      // re-id it
+      $(this).prop('id', newFieldId);
+
+      // and then re-name it
+      $(this).prop('name', newFieldId);
+
+    });
+
+    $div.find('.card-content h3').text(newHed[tRnd % newHed.length]);
+    $div.find('.card-content p').text(newMsg[tRnd % newHed.length]);
+    tRnd++;
+
+    $pan.append( $div );
+
+    return num;
+  }
 
   /* Chart */
 
@@ -2311,39 +2383,6 @@ controller/profile
   $scope.skin = $cookies.get( 'DD-SKIN' );
   $scope.editingCard = false;
 
-  // setup stripe
-  /*
-  var elements = stripe.elements();
-  var style = {
-    base: {
-      // add your base input styles here. eg.
-      fontSize: '16px',
-      color: "#32325d",
-    }
-  };
-
-  var paymentInfo = elements.create('card', {style: style});
-
-  // add an instance of the card Element into the 'card-element' div.
-  paymentInfo.mount('#card-element');
-  */
-
-  // listen for the change event to alert user to errors
-  /*
-  paymentInfo.addEventListener('change', function(event){
-    var displayError = document.getElementById('card-errors');
-    if (event.error) {
-      displayError.textContent = event.error.message;
-    } else {
-      displayError.textContent = '';
-    }
-  });
-  */
-
-
-
-
-
   DDService.pGetPreferences({user_id:CF_getUserID()})
   .then( function onSuccess( result ) {
 
@@ -2453,8 +2492,6 @@ controller/profile
 
     DDService.pSavePaymentInfo( card )
     .then( function onSuccess( result ) {
-
-    //$scope.preferences = result.preferences;
 
       BootstrapDialog.show({
         size: BootstrapDialog.SIZE_LARGE,

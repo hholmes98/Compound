@@ -20,17 +20,20 @@ component accessors = true {
 
   function about( struct rc ) {
 
+    variables.fw.setLayout('main.plan');
     rc.pageTitle = "What is " & application.app_name & "?";
   }
 
   function features( struct rc ) {
 
+    variables.fw.setLayout('main.plan');
     rc.pageTitle = application.app_name & " features";
     rc.pageDescription = application.app_name & " features that make it the only credit card caluclator you'll ever need.";
   }
 
   function pricing( struct rc ) {
 
+    variables.fw.setLayout('main.plan');
     rc.pageTitle = application.app_name & " pricing";
     rc.pageDescription = "Affordable pricing plans for eliminating credit card debt with " & application.app_name;
   }

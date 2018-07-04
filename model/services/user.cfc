@@ -27,12 +27,29 @@ component accessors=true {
   public any function list() {
 
     var sql = '
-      SELECT u.*, r.role_id, r.name AS role_name, at.account_type_id, at.name AS account_type_name
-      FROM "pUsers" u
+      SELECT 
+        u.*, up.stripe_subscription_id, r.role_id, r.name AS role_name, at.account_type_id, at.name AS account_type_name
+      FROM 
+        "pUsers" u
       INNER JOIN "pUserRoles" ur ON (u.user_id = ur.user_id)
         INNER JOIN "pRoles" r ON (ur.role_id = r.role_id)
       INNER JOIN "pUserAccountTypes" uat ON (u.user_id = uat.user_id)
         INNER JOIN "pAccountTypes" at ON (uat.account_type_id = at.account_type_id)
+      LEFT JOIN 
+        "pUserPurchases" up ON
+          u.user_id = up.user_id
+      LEFT JOIN (
+        SELECT
+          last_updated
+        FROM
+          "pUserPurchases"
+        GROUP BY
+          last_updated
+        ORDER BY
+          last_updated DESC
+        LIMIT 1
+      ) AS upp ON
+          upp.last_updated = up.last_updated
       ORDER BY u.user_id
     ';
 
@@ -74,12 +91,31 @@ component accessors=true {
   public any function get( string id ) {
 
     var sql = '
-      SELECT u.*, r.role_id, r.name AS role_name, at.account_type_id, at.name AS account_type_name
-      FROM "pUsers" u
+      SELECT 
+        u.*, up.stripe_subscription_id, r.role_id, r.name AS role_name, at.account_type_id, at.name AS account_type_name
+      FROM 
+        "pUsers" u
       INNER JOIN "pUserRoles" ur ON (u.user_id = ur.user_id)
         INNER JOIN "pRoles" r ON (ur.role_id = r.role_id)
       INNER JOIN "pUserAccountTypes" uat ON (u.user_id = uat.user_id)
         INNER JOIN "pAccountTypes" at ON (uat.account_type_id = at.account_type_id)
+      LEFT JOIN 
+        "pUserPurchases" up ON
+          u.user_id = up.user_id
+      LEFT JOIN (
+        SELECT
+          last_updated
+        FROM
+          "pUserPurchases"
+        WHERE 
+          user_id = :uid
+        GROUP BY
+          last_updated
+        ORDER BY
+          last_updated DESC
+        LIMIT 1
+      ) AS upp ON
+          upp.last_updated = up.last_updated
       WHERE u.user_id = :uid
     ';
 
@@ -137,8 +173,7 @@ component accessors=true {
           email = ''#arguments.user.email#'',
           password_hash = ''#arguments.user.password_hash#'',
           password_salt = ''#arguments.user.password_salt#'',
-          stripe_customer_id = ''#arguments.user.stripe_customer_id#'',
-          stripe_subscription_id = ''#arguments.user.stripe_subscription_id#''
+          stripe_customer_id = ''#arguments.user.stripe_customer_id#''
         WHERE 
           user_id = :uid
       ';
@@ -195,8 +230,7 @@ component accessors=true {
           ''#arguments.user.email#'',
           ''#arguments.user.password_hash#'',
           ''#arguments.user.password_salt#'',
-          ''#arguments.user.stripe_customer_id#'',
-          ''#arguments.user.stripe_subscription_id#''
+          ''#arguments.user.stripe_customer_id#''
         )
         RETURNING
           user_id AS pkey;

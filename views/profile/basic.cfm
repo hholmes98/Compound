@@ -1,4 +1,4 @@
-<cfparam name="COOKIE.skin" default="1" />
+<cfparam name="COOKIE['dd-skin']" default="1" />
 
 <!-- views/profile/basic -->
 <h2 shadow-text="User Settings">User Settings</h2>
@@ -14,7 +14,7 @@
     <span class="pull-right">
       <select class="form-control" name="skin" ng-model="skin" ng-change="updateSkin(skin)">
         <cfloop from="1" to="#ArrayLen(application.skins)#" index="s">
-          <cfoutput><option value="#s#"<cfif COOKIE.skin is s> selected</cfif>>#application.skins[s].name#</option></cfoutput>
+          <cfoutput><option value="#s#"<cfif COOKIE['dd-skin'] is s> selected</cfif>>#application.skins[s].name#</option></cfoutput>
         </cfloop>
       </select>
     </span>

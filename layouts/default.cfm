@@ -2,6 +2,7 @@
 <html ng-app="ddApp" lang="<cfoutput>#ListFirst(session.auth.locale,"-")#</cfoutput>">
 <head>
   <cfsilent>
+    <cfparam name="COOKIE['dd-skin']" default="1" />
     <cfparam name="rc.title" default="#application.app_name# - #application.app_short_description#" />
     <cfparam name="rc.pageTitle" default="" />
     <cfparam name="rc.pageDescription" default="#application.locale[session.auth.locale]['description']#" />
