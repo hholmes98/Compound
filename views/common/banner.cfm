@@ -1,28 +1,4 @@
 <!-- views/common/banner.cfm -->
-
-<!--- if logged in and not paid OR not logged in, show ads --->
-<cfif (session.auth.IsLoggedIn AND session.auth.user.getAccount_Type().getAccount_Type_Id() EQ 1) OR (!session.auth.isLoggedIn)>
-
-<!--- if this is not the login section, show ads --->
-<cfif !ListFindNoCase( 'login', getSection() )>
+<!--- this used to contain logic to hide/show ads, that's now handled by Google Auto Ads. This remains as a static padding-top --->
 <div id="top-banner">
-
-<!-- DD_Responsive -->
-<!---<ins class="adsbygoogle responsive_ad"
-     style="display:inline-block;"
-     data-ad-client="ca-pub-6215660586764867"
-     data-ad-slot="9656584127"
-     ></ins>
-<script>
-(adsbygoogle = window.adsbygoogle || []).push({});
-</script>--->
 </div>
-<cfelse>
-<div id="top-banner-empty"></div>
-</cfif>
-
-<cfelse>
-
-  <div id="top-banner-empty"></div>
-
-</cfif>

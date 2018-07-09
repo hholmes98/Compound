@@ -748,8 +748,13 @@ label {
   margin-top: 10px;
 }
 
+#top-banner {
+  padding-top: 40px;
+}
+
 /* FIXME: I have 0 confidence in this ad destkop/mobile code */
 /* mobile ads */
+/*
 #top-banner {
   position: fixed;
   left:0;
@@ -765,6 +770,7 @@ label {
   width: 100%;
   height: 50px;
 }
+*/
 
 /* default-mobile first: smallest screens (up to 800px); */
 .responsive_ad {
@@ -1092,6 +1098,7 @@ label {
   }
 }
 
+/*
 @media (min-width: 800px) {
   #top-banner {
     position: relative;
@@ -1102,8 +1109,9 @@ label {
     height: 98px;
     padding-top: 4px;
     padding-bottom: 4px;
-    /* background-color: #1c6a3a; */
+     background-color: #1c6a3a; 
     color: #fff;
     margin-top: 50px;
   }
 }
+*/

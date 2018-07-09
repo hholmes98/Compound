@@ -7,6 +7,23 @@
     <cfparam name="rc.pageTitle" default="" />
     <cfparam name="rc.pageDescription" default="#application.locale[session.auth.locale]['description']#" />
     <cfparam name="rc.robots" default="noarchive" />
+    <cfscript>
+    function canShowAds() {
+      var showAds = true; // we always show adverts, unless...
+
+      // ...a section specifically shouldn't
+      if ( ListFindNoCase( 'login', getSection() ) )
+        showAds = false;
+
+      // ...a logged in user has a paid account
+      if ( session.auth.isLoggedIn ) {
+        if ( session.auth.user.getAccount_Type().getAccount_Type_Id() > 1 )
+          showAds = false;
+      }
+
+      return showAds;
+    }
+    </cfscript>
   </cfsilent>
   <!-- layouts/default -->
   <base href="/">
@@ -77,13 +94,15 @@
   </script>
 
   <!-- Adsense -->
-  <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-  <script>
-    (adsbygoogle = window.adsbygoogle || []).push({
-      google_ad_client: "ca-pub-6158111396863200",
-      enable_page_level_ads: true
-    });
-  </script>
+  <cfif canShowAds()>
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({
+        google_ad_client: "ca-pub-6158111396863200",
+        enable_page_level_ads: true
+      });
+    </script>
+  </cfif>
 
   <!-- styles -->
   <cfinclude template="/includes/styles/styles.cfm">
@@ -97,16 +116,19 @@
 
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0" />
 
-  <script> 
-  window.onload = function() {
-    setTimeout(function() {
-      var ad = document.querySelector("ins.adsbygoogle");
-      if (ad && ad.innerHTML.replace(/\s/g, "").length == 0) {
-        ad.style.cssText = 'display:block !important'; 
-        ad.parentNode.innerHTML += '<div style="padding:5px; background-color:#171717; border:1px solid #fff; margin:5px 5px 10px 5px; display:inline-block; text-align:left; position: absolute; top: 0px; left: 0px;"><cfoutput>#application.ad_blocker#</cfoutput></div>';
-      }
-    }, 1000);
-  };
+  <script>
+
+  <cfif canShowAds()>
+    window.onload = function() {
+      setTimeout(function() {
+        var ad = document.querySelector("ins.adsbygoogle");
+        if (ad && ad.innerHTML.replace(/\s/g, "").length == 0) {
+          ad.style.cssText = 'display:block !important'; 
+          ad.parentNode.innerHTML += '<div style="padding:5px; background-color:#171717; border:1px solid #fff; margin:5px 5px 10px 5px; display:inline-block; text-align:left; position: absolute; top: 0px; left: 0px;"><cfoutput>#application.ad_blocker#</cfoutput></div>';
+        }
+      }, 1000);
+    };
+  </cfif>
 
   function CF_restErrorHandler( e ) {
     <cfif getEnvironment() == "development">
@@ -128,6 +150,7 @@
         break;
     }
   }
+
   </script>
 
 </head>
