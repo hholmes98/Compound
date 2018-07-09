@@ -206,12 +206,34 @@ html, body {
   font-weight: 400;
 }
 
+/* https://stackoverflow.com/questions/37504626/css-effect-to-render-a-font-with-rubber-stamp-effect*/
+.rubber {
+  box-shadow: 0 0 0 3px #a94442, 0 0 0 2px #a94442 inset;
+  border: 2px solid transparent;
+  display: inline-block;
+  padding: 5px 2px;
+  line-height: 22px;
+  color: #a94442;
+  font-size: 24px;
+  font-family: 'Allerta Stencil', sans-serif;
+  text-transform: uppercase;
+  text-align: center;
+  opacity: 0.7;
+  width: 155px;
+  transform: rotate(-12deg);
+  position: absolute;
+}
+
 .top-buffer {
   margin-top: 20px;
 }
 
 .bottom-buffer {
   margin-bottom: 20px;
+}
+
+.bottom-buffer-tall {
+  margin-bottom: 80px;
 }
 
 .form-control {
@@ -823,6 +845,10 @@ label {
   padding-top: 60px;
 }
 
+.spacer {
+  padding-top: 1200px;
+}
+
 /* the following section is relative */
 .focus, .fear, .support {
   position: relative;
@@ -970,6 +996,8 @@ label {
   font-size: 32px;
   font-weight: 600;
   text-transform: uppercase;
+  margin-left: -80px;
+  padding-bottom: 46px;
 
   /* scaleX, skewY, skewX, scaleY, translateX, translateY */
   /* https://meyerweb.com/eric/tools/matrix/ */
@@ -1076,6 +1104,6 @@ label {
     padding-bottom: 4px;
     /* background-color: #1c6a3a; */
     color: #fff;
-    margin-top: 10px;
+    margin-top: 50px;
   }
 }

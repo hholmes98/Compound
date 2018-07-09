@@ -2,9 +2,11 @@
 
 <div class="pan-page pan-page-1 slide" data-anchor="choose">
   <div class="container">
+
     <div class="page-header">
       <h1><cfoutput>What shall we do, #session.auth.user.getName()#?</cfoutput></h1>
     </div>
+
     <cfoutput>
     <div align="center">
       <span align="left">
@@ -18,6 +20,7 @@
       </span>
     </div>
     </cfoutput>
+
   </div>
 </div>
 

@@ -82,18 +82,27 @@ component accessors=true {
 
   public query function export( string user_id ) {
 
+    /* this is expensive, keep in mind this will have to be rewritten */
     var sql = '
       SELECT 
         e.event_id, e.plan_id, e.calculated_for_month, e.calculated_for_year, 
         CONCAT(e.calculated_for_year, ''-'', e.calculated_for_month) AS calculated_for, 
         ec.balance, ec.is_hot, ec.calculated_payment, ec.pay_date,
-        c.card_id, c.credit_limit, c.due_on_day, c.user_id, c.card_label, c.min_payment, c.is_emergency, c.interest_rate, c.zero_apr_end_date
+        c.card_id, c.credit_limit, c.due_on_day, c.user_id, c.card_label, c.min_payment, 
+        c.is_emergency, c.interest_rate, c.zero_apr_end_date, ucp.actual_payment, ucp.actually_paid_on
       FROM 
         "pEvents" e
       INNER JOIN 
         "pEventCards" ec ON e.event_id = ec.event_id
       INNER JOIN 
         "pCards" c ON ec.card_id = c.card_id
+      LEFT JOIN "pUserCardsPaid" ucp ON (
+          e.calculated_for_month = ucp.payment_for_month
+        AND
+          e.calculated_for_year = ucp.payment_for_year
+        AND
+        c.card_id = ucp.card_id
+      )
       WHERE 
         c.user_id = :uid
       ORDER BY 
@@ -122,13 +131,21 @@ component accessors=true {
         e.event_id, e.plan_id, e.calculated_for_month, e.calculated_for_year, 
         CONCAT(e.calculated_for_year, ''-'', e.calculated_for_month) AS calculated_for, 
         ec.balance, ec.is_hot, ec.calculated_payment, ec.pay_date,
-        c.card_id, c.credit_limit, c.due_on_day, c.user_id, c.card_label, c.min_payment, c.is_emergency, c.interest_rate, c.zero_apr_end_date
+        c.card_id, c.credit_limit, c.due_on_day, c.user_id, c.card_label, c.min_payment, 
+        c.is_emergency, c.interest_rate, c.zero_apr_end_date, ucp.actual_payment, ucp.actually_paid_on
       FROM 
         "pEvents" e
       INNER JOIN 
         "pEventCards" ec ON e.event_id = ec.event_id
       INNER JOIN 
         "pCards" c ON ec.card_id = c.card_id
+      LEFT JOIN "pUserCardsPaid" ucp ON (
+          e.calculated_for_month = ucp.payment_for_month
+        AND
+          e.calculated_for_year = ucp.payment_for_year
+        AND
+        c.card_id = ucp.card_id
+      )
       WHERE 
         e.event_id = :eid
       ORDER BY 

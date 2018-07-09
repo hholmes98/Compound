@@ -17,8 +17,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 
 <!-- needs to run at </body> -->
-<script src="/assets/js/dd-animatePage.js"></script>
-<!--- <script src="/assets/js/dd-bb.js"></script> --->
 <script src="/assets/js/dd-controller.js"></script>
 
 <!--- this remains in template to bridge cf/js --->

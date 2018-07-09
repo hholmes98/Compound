@@ -1136,6 +1136,7 @@ services
 
   };
 
+  /* userPurchase */
   service.pSavePaymentInfo = function( data ) {
 
     var deferred = $q.defer();
@@ -1161,6 +1162,137 @@ services
       deferred.resolve({
         data: response.data,
         user_id: CF_getUserID(), // don't do this, please. for the love of god.
+        chain: data
+      });
+
+    })
+    .catch( function( e ) {
+
+      deferred.reject({
+        error: e.data,
+        chain: data
+      });
+
+    });
+
+    return deferred.promise;
+
+  }
+
+  /* cardPaid */
+  service.pGetCardPayments = function( data ) {
+
+    /* event_ids are too volatile, as they're purged on every update
+    what is constant is the month and year for each event. Use those as
+    the lookup */
+
+    var key = deepGet(data,'user_id');
+    var month = deepGet(data,'payment_for_month');
+    var year = deepGet(data,'payment_for_year');
+
+    var deferred = $q.defer();
+
+    $http({
+        method: 'GET',
+        url: '/index.cfm/deck/getCardPayments/user_id/' + key + '/month/' + month + '/year/' + year
+    })
+    .then( function onSuccess( response ) {
+
+      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
+        throw new Error( 'REST Error' );
+      }
+
+      if ( response.data == -1 ) {
+        throw new Error( 'REST GET Error' );
+      }
+
+      deferred.resolve({
+        card_payments: response.data,
+        user_id: key,
+        chain: data
+      });
+
+    })
+    .catch( function onError( e ) {
+
+      deferred.reject({
+        error: e.data,
+        chain: data
+      });
+
+    });
+
+    return deferred.promise;
+
+  }
+
+  service.pGetCardPayment = function( data ) {
+
+    var key = deepGet(data,'card_id');
+    var month = deepGet(data,'payment_for_month');
+    var year = deepGet(data,'payment_for_year');
+
+    var deferred = $q.defer();
+
+    $http({
+        method: 'GET',
+        url: '/index.cfm/deck/getCardPayments/card_id/' + key + '/month/' + month + '/year/' + year
+    })
+    .then( function onSuccess( response ) {
+
+      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
+        throw new Error( 'REST Error' );
+      }
+
+      if ( response.data == -1 ) {
+        throw new Error( 'REST GET Error' );
+      }
+
+      deferred.resolve({
+        card_payment: response.data,
+        user_id: key,
+        chain: data
+      });
+
+    })
+    .catch( function onError( e ) {
+
+      deferred.reject({
+        error: e.data,
+        chain: data
+      });
+
+    });
+
+    return deferred.promise;
+
+  }
+
+  service.pSaveCardPayment = function( data ) {
+
+    var deferred = $q.defer();
+
+    $http({
+      method: 'POST',
+      url: '/index.cfm/deck/saveCardPayment',
+      data: $.param( data ),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    })
+    .then( function(response) {
+
+      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
+        throw new Error( 'REST Error' );
+      }
+
+      if ( response.data == -1 ) {
+        throw new Error( 'REST POST Error' );
+      }
+
+      deferred.resolve({
+        data: response.data,
+        user_id: data.user_id,
         chain: data
       });
 
@@ -1223,8 +1355,6 @@ services
 controller/cards
 
 ***************/
-//cardSorter:orderByField:reverseSort
-//$scope, $http, $q, DDService ) {
 .controller( 'ddDeck' , ['$http','$q','$scope','$filter','DDService', function($http, $q, $scope, $filter, DDService) {
 
   $scope.orderByField = 'label';
@@ -1833,25 +1963,8 @@ controller/pay
   $scope.orderByField = 'pay_date';
   $scope.reverseSort = false;
   $scope.showAllCards = false;
-
-  angular.element(document).ready(function(){
-
-    $('#pan-main').fullpage({
-      licenseKey:'OPEN-SOURCE-GPLV3-LICENSE', //TODO: buy a license
-      autoScrolling:false,
-      scrollHorizontally: true,
-      verticalCentered: false,
-      fitToSection: false,
-      scrollOverflow: true,
-      keyboardScrolling: false,
-      anchors:['pay']
-    });
-
-    //methods
-    $.fn.fullpage.setAllowScrolling(false);
-
-
-  });
+  $scope.loaded = false;
+  $scope.customAmount = false;
 
   /*********/
   /* main  */
@@ -1862,10 +1975,7 @@ controller/pay
     //success
     $scope.all_cards = response.event.plan.plan_deck.deck_cards;
     $scope.event_cards = response.event.event_cards;
-
     $scope.cards = $filter('cardSorter')($scope.all_cards, $scope.orderByField, $scope.reverseSort);
-
-    //$scope.keylist = Object.keys($scope.all_cards).sort(function(a, b){return b-a;});
     $scope.pay_dates = {};
 
     for (i = 0; i < Object.keys($scope.event_cards).length; i++ ) {
@@ -1874,24 +1984,72 @@ controller/pay
     }
 
     $scope.cards = $filter('noPaymentFilter')($scope.all_cards, $scope.pay_dates, $scope.showAllCards);
-
     $scope.selected = $scope.cards[Object.keys($scope.cards)[0]]; // by default, just pick the first one.
 
-    // chain into the preferences load
-    DDService.pGetPreferences({user_id:CF_getUserID()})
+    // chain into actual payments]
+    var in_data = {
+      user_id: CF_getUserID(),
+      payment_for_month: response.event.calculated_for_month,
+      payment_for_year: response.event.calculated_for_year
+    }
+    
+    DDService.pGetCardPayments( in_data )
     .then( function onSuccess( response ) {
 
-      //$scope.preferences = response.preferences;
+      for (j = 0; j < Object.keys($scope.event_cards).length; j++ ) {
+        var index =  Object.keys($scope.event_cards)[j];
+        if ( response.card_payments.findIndex(x => x.card_id == $scope.event_cards[index].card_id) != -1 ) {
+          var newIndex = $scope.cards.findIndex(y => y.card_id == $scope.event_cards[index].card_id)
+
+          $scope.cards[newIndex]['actual_payment'] = response.card_payments.find(x => x.card_id == $scope.event_cards[index].card_id).actual_payment;
+          $scope.cards[newIndex]['actually_paid_on'] = response.card_payments.find(x => x.card_id == $scope.event_cards[index].card_id).actually_paid_on;
+        }
+      }
+
+      // chain into the preferences load
+      DDService.pGetPreferences({user_id:CF_getUserID()})
+      .then( function onSuccess( response ) {
+
+        $scope.loaded = true;
+
+        $('#pan-main').fullpage({
+          licenseKey:'OPEN-SOURCE-GPLV3-LICENSE', //TODO: buy a license
+          animateAnchor: false,
+          controlArrows: false,
+          scrollOverflow: true,
+          scrollOverflowOptions: {
+            scrollbars: false,
+            bounce: false,
+            momentum: false, // allegedly a good perf boost even with them hidden tho?
+            fadeScrollbars: false,
+            disableTouch: true
+          },
+          autoScrolling: false,
+          verticalCentered: false,
+          fitToSection: false,
+          keyboardScrolling: false,
+          anchors:['pay']
+        });
+
+        //disabling scrolling
+        fullpage_api.setAllowScrolling(false); // no touch scrolling please
+
+      })
+      .catch( function onError( result ) { // pGetPreferences
+
+        CF_restErrorHandler( result );
+
+      });
 
     })
-    .catch( function onError( result ) {
+    .catch( function onError( result ) { // pGetCardPayments
 
       CF_restErrorHandler( result );
 
     });
 
   })
-  .catch( function onError( result ) {
+  .catch( function onError( result ) { // pGetEvent
 
       CF_restErrorHandler( result );
 
@@ -1912,40 +2070,26 @@ controller/pay
   }
 
   $scope.filterBy = function() {
-      $scope.cards = $filter('noPaymentFilter')($scope.all_cards, $scope.pay_dates, $scope.showAllCards);
+    $scope.cards = $filter('noPaymentFilter')($scope.all_cards, $scope.pay_dates, $scope.showAllCards);
   }
 
 
   $scope.resetForm = function( forms ) {
-
     $scope.card = {};
-
   };
 
   // compatibility bridge between angular $location and fw/1 buildUrl()
   $scope.navigateTo = function( path ) {
-
     location.href = path;
-
-  };
-
-  $scope.panTo = function( url, pageIndex ) {
-
-    location.href = url + "#p1/" + pageIndex;
-
   };
 
   $scope.selectCard = function( card ) {
-
     $scope.selected = card;
     location.hash = '#pay/summary';
-
   };
 
   $scope.returnToList = function( destIndex ) {
-
-    history.back();
-
+    location.hash = '#pay/cards';
   };
 
   $scope.recalculateCard = function( card ) {
@@ -1966,6 +2110,52 @@ controller/pay
     });
 
   };
+
+  $scope.makePayment = function() {
+
+    var in_card = $scope.selected;
+    var m = moment($scope.event_cards[$scope.selected.card_id].pay_date).month() + 1;
+    var y = moment($scope.event_cards[$scope.selected.card_id].pay_date).year();
+
+    var in_data = {
+      card_id: in_card.card_id,
+      user_id: in_card.user_id,
+      actual_payment: in_card.actual_payment,
+      payment_for_month: m,
+      payment_for_year: y
+    };
+
+    DDService.pSaveCardPayment( in_data )
+    .then( function( response ) {
+
+      // TODO: message will be populated with real stats based on the user's performance.
+      BootstrapDialog.show({
+        size: BootstrapDialog.SIZE_LARGE,
+        type: BootstrapDialog.TYPE_INFO,
+        closable: false,
+        closeByBackdrop: false,
+        closeByKeyboard: false,
+        title: 'PAYMENT RECORDED',
+        message: 'SWEET!! You\'re nailing this!<br><br><b>BONUS:</b> You are now a part of the <b>96.67%</b> of customers that pay their debts! AWESOME!!',
+        buttons: [{
+            id: 'btn-close',
+            label: 'Thanks!',
+            cssClass: 'btn-success pull-left',
+            action: function( dialogItself ) {
+              $scope.returnToList(1);
+              dialogItself.close();
+            }
+        }]
+      });
+
+    })
+    .catch( function onError( result ) {
+
+      CF_restErrorHandler( result );
+
+    });
+
+  }
 
 }) // controller/pay
 
@@ -2065,45 +2255,9 @@ controller/main
 
   }
 
-  $scope.buildAndPan = function(index) {
-
-    /* now smart enough to build a card in the future - but only if needed */
-    // hack in field validation
-    if (index == 1) {
-      if ($('#budget').val() == "") {
-        alert('Enter a budget before moving forward! If you have $200 a month to spend on paying off bills, enter \'200.00\' below!');
-        return;
-      } 
-    } else {
-      var label = $('input[name=credit-card-label' + (index-1).toString() + ']');
-      var cc_balance = $('input[name=credit-card-balance' + (index-1).toString() + ']');
-
-      if (cc_balance.val() == "") {
-        alert("Whoops! You forgot to enter a balance for this credit card! Whatever you have left to pay off on this card, just enter it below.");
-        return;
-      }
-
-      if (label.val() =="") {
-        alert('Don\'t forget to label the card! Anything will do...just use something you\'ll remember!');
-        return;
-      }
-
-    }
-
-    location.href='#p1/' + index;
-
-  };
-
   // compatibility bridge between angular $location and fw/1 buildUrl()
   $scope.navigateTo = function( path ) {
-    //$location.url( path ); // FIXME:this is angular pro-hash navigation
     location.href = path;
-  };
-
-  $scope.panTo = function( pageIndex ) {
-    location.href="#p1/" + pageIndex;
-    //AnimatePage.panForward( pageIndex );
-    //addHistory('AnimatePage.panBack(' + pageIndex + ');','#!/nb'+pageIndex.toString());
   };
 
   $scope.addAnother = function() {
@@ -2350,17 +2504,6 @@ controller/main
     .then( function onSuccess( response ) {
 
       $scope.plan = response.plan;
-      //$scope.keylist = Object.keys($scope.plan).sort(function(a, b){return b-a;});
-
-      /*
-      for (var card in $scope.keylist) {
-        if ( $scope.plan[$scope.keylist[card]].is_emergency ) {
-          $scope.selected = $scope.keylist[card];
-        }
-      }
-      */
-
-      //$scope.selected = Object.keys($scope.plan).find(thisCard => thisCard.is_emergency == 1);
 
     })
     .catch( function onError( result ) {

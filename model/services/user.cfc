@@ -543,9 +543,9 @@ component accessors=true {
   * @version 7, May 8, 2009
   */
   function isEmail(str) {
-      return REFindNoCase("^['_a-z0-9-\+]+(\.['_a-z0-9-\+]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*\.(([a-z]{2,3})|(aero|asia|biz|cat|coop|info|museum|name|jobs|post|pro|tel|travel|mobi))$",str) &&
-          Len( ListFirst(arguments.str, "@") ) <= 64 &&
-          Len( ListRest(arguments.str, "@") ) <= 255;
+    return REFindNoCase("^['_a-z0-9-\+]+(\.['_a-z0-9-\+]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*\.(([a-z]{2,3})|(aero|asia|biz|cat|coop|info|museum|name|jobs|post|pro|tel|travel|mobi))$",str) &&
+        Len( ListFirst(arguments.str, "@") ) <= 64 &&
+        Len( ListRest(arguments.str, "@") ) <= 255;
   }
 
 }

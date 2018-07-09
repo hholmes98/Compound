@@ -175,7 +175,7 @@ component extends = "framework.one" {
     application.static_urls = StructNew();
 
     // CALL Url
-    application.static_urls.call = 'https://www.nolo.com/legal-encyclopedia/negotiating-credit-card-debt.html'; // placeholder
+    application.static_urls.call = 'https://blog.debtdecimator.com/when-you-cant-pay-a-bill/';
 
     // ad blocking
     application.ad_blocker = 'We get it. Ads suck. But not everybody can pay for an account. Please consider whitelisting *.' & application.site_domain & ', upgrading to a paid account, or purchasing keys for other users who cannot.';
