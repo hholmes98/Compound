@@ -242,7 +242,7 @@ component accessors = true {
     session.tempPasswordReset[tmpKey] = userValid;
 
     // fire the temp password off in an email
-    destUrl = variables.fw.buildUrl('login.passwordChoose');
+    destUrl = variables.fw.buildUrl('login.choose');
     variables.mailService.sendPasswordResetEmail( rc.email, tmpKey, destUrl );
 
     // redirect to message
@@ -265,7 +265,7 @@ component accessors = true {
       rc.user.setPassword_Hash( newPassword.hash );
       rc.user.setPassword_Salt( newPassword.salt );
 
-      variables.userService.save( rc.user );
+      variables.userService.save( rc.user.flatten() );
 
       rc.message = ["Your account password was succesfully reset!"];
 

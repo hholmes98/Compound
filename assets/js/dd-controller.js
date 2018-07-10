@@ -1694,211 +1694,234 @@ controller/calculate
   $scope.scheduleTab = false;
   $scope.milestoneTab = false;
 
-  /*********/
-  /* main  */
-  /*********/
-  var in_data = { user_id:CF_getUserID() };
+  $scope.all_cards = {};
 
-  /* since plan loads the main screen, we do it first */
-  DDService.pGetPlan( in_data )
-  .then( function onSuccess( response ) {
+  DDService.pGetCards({user_id:CF_getUserID()})
+  .then( function onSucess( response ) {
 
-    // ********************
-    // 1. Populate the Plan
-    $scope.plan = response.plan;
-    //$scope.keylist = Object.keys($scope.plan).sort(function(a, b){return b-a;});
+    $scope.all_cards = response.cards;
 
-    //$scope.selected = Object.keys($scope.plan).find(thisCard => thisCard.is_emergency == 1);
+  })
+  .catch( function onError( result ) { 
 
-    /*
-    for (var card in $scope.plan) {
-      if ( card.is_emergency ) {
+      CF_restErrorHandler( result );
 
-        $scope.selected = $scope.keylist[card];
-      }
-    }
-    */
+  });
 
-    $scope.cards = $scope.plan; // FIXME: you're duping this var, just to make the ordering work? Don't.
+  if ( Object.keys($scope.all_cards).length ) {
 
-    /* ...then, we do the calendar and chart */
-    DDService.pGetSchedule( in_data )
-    .then( DDService.pGetJourney )
+    /*********/
+    /* main  */
+    /*********/
+    var in_data = { user_id:CF_getUserID() };
+
+    /* since plan loads the main screen, we do it first */
+    DDService.pGetPlan( in_data )
     .then( function onSuccess( response ) {
 
-      // **************************************
-      // 2. Populate the Schedule (-> Calendar)
-      var result = response.chain.schedule;
-      var i=0;
+      // ********************
+      // 1. Populate the Plan
+      $scope.plan = response.plan;
+      //$scope.keylist = Object.keys($scope.plan).sort(function(a, b){return b-a;});
 
-      for (i=0; i < result.length; i++) {
-        $scope.events.push({
-          title:result[i].title,
-          start:new Date(result[i].start)
-        });
+      //$scope.selected = Object.keys($scope.plan).find(thisCard => thisCard.is_emergency == 1);
+
+      /*
+      for (var card in $scope.plan) {
+        if ( card.is_emergency ) {
+
+          $scope.selected = $scope.keylist[card];
+        }
       }
+      */
 
-      $scope.schedule.push($scope.events);
-      // NOTE: we no longer populate at this stage, because if calendar is hidden by default,
-      // errors get thrown!! (see #601)
+      $scope.cards = $scope.plan; // FIXME: you're duping this var, just to make the ordering work? Don't.
 
-      // **************************************
-      // 3. Populate the Journey (-> Highchart)
-      var wins = [];
-      result = response.journey;
+      /* ...then, we do the calendar and chart */
+      DDService.pGetSchedule( in_data )
+      .then( DDService.pGetJourney )
+      .then( function onSuccess( response ) {
 
-      for (i=0; i<result.length;i++) {
+        // **************************************
+        // 2. Populate the Schedule (-> Calendar)
+        var result = response.chain.schedule;
+        var i=0;
 
-        // inject id
-        result[i].id = 'id_' + i;
-
-        // inject color
-        result[i].color = getColor(i);
-
-        // if this card has elements...
-        if ( result[i].data.length > 0 ) {
-
-          // ..it needs one more element to indicate $0.00
-          result[i].data.push(0);
-
-          // ..and it needs a partner series to display a milestone flag
-          var win = {
-            id: 'milestone_' + i,
-            type: 'flags',
-            shape: 'squarepin',
-            width: 82,
-            onSeries: 'id_' + i,
-            tooltip: {
-              pointFormatter: function() {
-                return this.text;
-              }
-            },
-            lineWidth: 2,
-            data: []
-          };
-
-          var startMoment = moment(new Date(y,m,1));
-          var endMoment = startMoment.add( result[i].data.length-1, 'months');
-
-          win.data.push({
-            color: getColor(i),
-            x: endMoment.toDate(),
-            title: 'CHECKPOINT!!',
-            text: (result[i].name + ' paid off in: <b>' + endMoment.format('MMMM') + ' of ' + endMoment.format('YYYY') + '</b>' ),
+        for (i=0; i < result.length; i++) {
+          $scope.events.push({
+            title:result[i].title,
+            start:new Date(result[i].start)
           });
+        }
 
-          wins.push(win);
+        $scope.schedule.push($scope.events);
+        // NOTE: we no longer populate at this stage, because if calendar is hidden by default,
+        // errors get thrown!! (see #601)
+
+        // **************************************
+        // 3. Populate the Journey (-> Highchart)
+        var wins = [];
+        result = response.journey;
+
+        for (i=0; i<result.length;i++) {
+
+          // inject id
+          result[i].id = 'id_' + i;
+
+          // inject color
+          result[i].color = getColor(i);
+
+          // if this card has elements...
+          if ( result[i].data.length > 0 ) {
+
+            // ..it needs one more element to indicate $0.00
+            result[i].data.push(0);
+
+            // ..and it needs a partner series to display a milestone flag
+            var win = {
+              id: 'milestone_' + i,
+              type: 'flags',
+              shape: 'squarepin',
+              width: 82,
+              onSeries: 'id_' + i,
+              tooltip: {
+                pointFormatter: function() {
+                  return this.text;
+                }
+              },
+              lineWidth: 2,
+              data: []
+            };
+
+            var startMoment = moment(new Date(y,m,1));
+            var endMoment = startMoment.add( result[i].data.length-1, 'months');
+
+            win.data.push({
+              color: getColor(i),
+              x: endMoment.toDate(),
+              title: 'CHECKPOINT!!',
+              text: (result[i].name + ' paid off in: <b>' + endMoment.format('MMMM') + ' of ' + endMoment.format('YYYY') + '</b>' ),
+            });
+
+            wins.push(win);
+
+          }
 
         }
 
-      }
+        // cat the two arrays together
+        result = result.concat(wins);
 
-      // cat the two arrays together
-      result = result.concat(wins);
+        Highcharts.SVGRenderer.prototype.symbols.doublearrow = function(x, y, w, h) {
+          return [
+            // right arrow
+            'M', x + w / 2 + 1, y,
+            'L', x + w / 2 + 1, y + h,
+            x + w + w / 2 + 1, y + h / 2,
+            'Z',
+            // left arrow
+            'M', x + w / 2 - 1, y,
+            'L', x + w / 2 - 1, y + h,
+            x - w / 2 - 1, y + h / 2,
+            'Z'
+          ];
+        };
 
-      Highcharts.SVGRenderer.prototype.symbols.doublearrow = function(x, y, w, h) {
-        return [
-          // right arrow
-          'M', x + w / 2 + 1, y,
-          'L', x + w / 2 + 1, y + h,
-          x + w + w / 2 + 1, y + h / 2,
-          'Z',
-          // left arrow
-          'M', x + w / 2 - 1, y,
-          'L', x + w / 2 - 1, y + h,
-          x - w / 2 - 1, y + h / 2,
-          'Z'
-        ];
-      };
+        if (Highcharts.VMLRenderer) {
+          Highcharts.VMLRenderer.prototype.symbols.doublearrow = Highcharts.SVGRenderer.prototype.symbols.doublearrow;
+        }
 
-      if (Highcharts.VMLRenderer) {
-        Highcharts.VMLRenderer.prototype.symbols.doublearrow = Highcharts.SVGRenderer.prototype.symbols.doublearrow;
-      }
+        Highcharts.stockChart('milestones', {
 
-      Highcharts.stockChart('milestones', {
+          //title: {
+          //  text: 'Payoff Milestones'
+          //},
 
-        //title: {
-        //  text: 'Payoff Milestones'
-        //},
+          credits: {
+            enabled: false
+          },
 
-        credits: {
-          enabled: false
-        },
+          chart: {
+            type: 'spline'
+          },
 
-        chart: {
-          type: 'spline'
-        },
+          rangeSelector: {
+            enabled: false
+          },
 
-        rangeSelector: {
-          enabled: false
-        },
-
-        // this is the visual display of the spline graph, and will only visibly show a smaller, selected range of the full timeline
-        xAxis: {
-          type: 'datetime',
-          ordinal: false,
-          min: Date.UTC(y,m,1),     // note: initial range start (today)
-          max: Date.UTC(y,m+4,1),    // TODO: calculate this range to be 1/5th of the complete timeline (so that the initial selection 1/5th of the navigator bar)
-          //tickInterval: 30 * 24 * 3600 * 1000 // a tick every month
-        },
-
-        // this start and end should be equal-to-or-longer than the visual display of the spline (set above in xAxis)
-        navigator: {
-          height: 80,
-          maskFill: 'rgba(131,145,120,0.6)', //'#839178',
-          maskInside: false,
-          outlineColor: '#000',
-          outlineWidth: 1,
+          // this is the visual display of the spline graph, and will only visibly show a smaller, selected range of the full timeline
           xAxis: {
             type: 'datetime',
             ordinal: false,
-            min: Date.UTC(y,m,1), // full range start (today)
-            tickInterval: 2 * 30 * 24 * 3600 * 1000 // a tick every 2 month
+            min: Date.UTC(y,m,1),     // note: initial range start (today)
+            max: Date.UTC(y,m+4,1),    // TODO: calculate this range to be 1/5th of the complete timeline (so that the initial selection 1/5th of the navigator bar)
+            //tickInterval: 30 * 24 * 3600 * 1000 // a tick every month
           },
-          handles: {
-            symbols: ['doublearrow','doublearrow'],
-            height: 20,
-            width: 12,
-            lineWidth: 1,
-            backgroundColor: '#d2691e',
-            borderColor: '#000'
-          }
-        },
 
-        yAxis: {
-          type: 'linear',
-          min: 0,
-        },
-
-        tooltip: {
-          split: true,
-          distance: 70, // undocumented, distance in pixels away from the point (calculated either + or -, based on best positioning of cursor)
-          padding: 5,
-          pointFormatter: function() {
-            return '<span style="color:' + this.color + '">\u25CF</span> ' + this.series.name + '\'s Balance: <b>$' + currencyFormatter.format(this.y) + '</b><br/>';
-          }
-        },
-
-        plotOptions: {
-          series: {
-            pointStart: Date.UTC(y,m,1), // we begin plotting on the 1st of the current month
-            pointIntervalUnit: 'month',  // every point along the x axis represents 1 month
-            animation: {
-              duration: 6200,
-              //easing: 'easeOutBounce'
+          // this start and end should be equal-to-or-longer than the visual display of the spline (set above in xAxis)
+          navigator: {
+            height: 80,
+            maskFill: 'rgba(131,145,120,0.6)', //'#839178',
+            maskInside: false,
+            outlineColor: '#000',
+            outlineWidth: 1,
+            xAxis: {
+              type: 'datetime',
+              ordinal: false,
+              min: Date.UTC(y,m,1), // full range start (today)
+              tickInterval: 2 * 30 * 24 * 3600 * 1000 // a tick every 2 month
             },
-            lineWidth: 4
-          }
-        },
+            handles: {
+              symbols: ['doublearrow','doublearrow'],
+              height: 20,
+              width: 12,
+              lineWidth: 1,
+              backgroundColor: '#d2691e',
+              borderColor: '#000'
+            }
+          },
 
-        series: result
+          yAxis: {
+            type: 'linear',
+            min: 0,
+          },
 
-        /*
-        REF 1 (adding something on the end): http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/highcharts/point/datalabels/
-        REF 2 (a 2nd series of flags): http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/stock/demo/flags-general/
-        REF 3 (multiple series, loaded asynchronously): http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/stock/demo/compare/
-        REF 4 (diff flags on diff series): http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/stock/demo/flags-placement/
-        */
+          tooltip: {
+            split: true,
+            distance: 70, // undocumented, distance in pixels away from the point (calculated either + or -, based on best positioning of cursor)
+            padding: 5,
+            pointFormatter: function() {
+              return '<span style="color:' + this.color + '">\u25CF</span> ' + this.series.name + '\'s Balance: <b>$' + currencyFormatter.format(this.y) + '</b><br/>';
+            }
+          },
+
+          plotOptions: {
+            series: {
+              pointStart: Date.UTC(y,m,1), // we begin plotting on the 1st of the current month
+              pointIntervalUnit: 'month',  // every point along the x axis represents 1 month
+              animation: {
+                duration: 6200,
+                //easing: 'easeOutBounce'
+              },
+              lineWidth: 4
+            }
+          },
+
+          series: result
+
+          /*
+          REF 1 (adding something on the end): http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/highcharts/point/datalabels/
+          REF 2 (a 2nd series of flags): http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/stock/demo/flags-general/
+          REF 3 (multiple series, loaded asynchronously): http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/stock/demo/compare/
+          REF 4 (diff flags on diff series): http://jsfiddle.net/gh/get/library/pure/highcharts/highcharts/tree/master/samples/stock/demo/flags-placement/
+          */
+
+        });
+
+      })
+      .catch( function onError( result ) {
+
+        CF_restErrorHandler( result );
 
       });
 
@@ -1909,12 +1932,28 @@ controller/calculate
 
     });
 
-  })
-  .catch( function onError( result ) {
+  } else {
 
-    CF_restErrorHandler( result );
+    BootstrapDialog.show({
+      size: BootstrapDialog.SIZE_LARGE,
+      type: BootstrapDialog.TYPE_INFO,
+      closable: false,
+      closeByBackdrop: false,
+      closeByKeyboard: false,
+      title: 'HEY!! NO PEEKING!!',
+      message: 'Whoops!<br><br>This is the <b>"Calculate Your Future"</b> section, but we can\'t calculate it unless you supply us with some cards first.<br><br>Let\'s head over to <b>"Update Your Budget"</b> to get some cards loaded first!',
+      buttons: [{
+          id: 'btn-close',
+          label: 'I understand. Take me to card management.',
+          cssClass: 'btn-success pull-left',
+          action: function( dialogItself ) {
+            dialogItself.close();
+            location.href="/index.cfm/manage/budget";
+          }
+      }]
+    });
 
-  });
+  }
 
   /************
      METHODS
@@ -1966,94 +2005,140 @@ controller/pay
   $scope.loaded = false;
   $scope.customAmount = false;
 
+  $scope.loadingBills = true;
+  $scope.loadingPlan = true;
+
+  $scope.all_cards = {};
+
   /*********/
   /* main  */
   /*********/
-  DDService.pGetEvent({user_id:CF_getUserID()})
-  .then( function onSuccess( response ) {
+  DDService.pGetCards({user_id:CF_getUserID()})
+  .then( function onSucess( response ) {
 
-    //success
-    $scope.all_cards = response.event.plan.plan_deck.deck_cards;
-    $scope.event_cards = response.event.event_cards;
-    $scope.cards = $filter('cardSorter')($scope.all_cards, $scope.orderByField, $scope.reverseSort);
-    $scope.pay_dates = {};
+    $scope.all_cards = response.cards;
 
-    for (i = 0; i < Object.keys($scope.event_cards).length; i++ ) {
-      var index =  Object.keys($scope.event_cards)[i];
-      $scope.pay_dates[index] = $scope.event_cards[index].pay_date;
-    }
+  })
+  .catch( function onError( result ) { 
 
-    $scope.cards = $filter('noPaymentFilter')($scope.all_cards, $scope.pay_dates, $scope.showAllCards);
-    $scope.selected = $scope.cards[Object.keys($scope.cards)[0]]; // by default, just pick the first one.
+      CF_restErrorHandler( result );
 
-    // chain into actual payments]
-    var in_data = {
-      user_id: CF_getUserID(),
-      payment_for_month: response.event.calculated_for_month,
-      payment_for_year: response.event.calculated_for_year
-    }
-    
-    DDService.pGetCardPayments( in_data )
+  });
+
+  if ( Object.keys($scope.all_cards).length ) {
+
+    DDService.pGetEvent({user_id:CF_getUserID()})
     .then( function onSuccess( response ) {
 
-      for (j = 0; j < Object.keys($scope.event_cards).length; j++ ) {
-        var index =  Object.keys($scope.event_cards)[j];
-        if ( response.card_payments.findIndex(x => x.card_id == $scope.event_cards[index].card_id) != -1 ) {
-          var newIndex = $scope.cards.findIndex(y => y.card_id == $scope.event_cards[index].card_id)
+      //success
+      //$scope.all_cards = response.event.plan.plan_deck.deck_cards;
+      $scope.event_cards = response.event.event_cards;
+      $scope.cards = $filter('cardSorter')($scope.all_cards, $scope.orderByField, $scope.reverseSort);
+      $scope.pay_dates = {};
 
-          $scope.cards[newIndex]['actual_payment'] = response.card_payments.find(x => x.card_id == $scope.event_cards[index].card_id).actual_payment;
-          $scope.cards[newIndex]['actually_paid_on'] = response.card_payments.find(x => x.card_id == $scope.event_cards[index].card_id).actually_paid_on;
-        }
+      for (i = 0; i < Object.keys($scope.event_cards).length; i++ ) {
+        var index =  Object.keys($scope.event_cards)[i];
+        $scope.pay_dates[index] = $scope.event_cards[index].pay_date;
       }
 
-      // chain into the preferences load
-      DDService.pGetPreferences({user_id:CF_getUserID()})
+      $scope.cards = $filter('noPaymentFilter')($scope.all_cards, $scope.pay_dates, $scope.showAllCards);
+      $scope.selected = $scope.cards[Object.keys($scope.cards)[0]]; // by default, just pick the first one.
+
+      // chain into actual payments]
+      var in_data = {
+        user_id: CF_getUserID(),
+        payment_for_month: response.event.calculated_for_month,
+        payment_for_year: response.event.calculated_for_year
+      }
+      
+      DDService.pGetCardPayments( in_data )
       .then( function onSuccess( response ) {
 
-        $scope.loaded = true;
+        for (j = 0; j < Object.keys($scope.event_cards).length; j++ ) {
+          var index =  Object.keys($scope.event_cards)[j];
+          if ( response.card_payments.findIndex(x => x.card_id == $scope.event_cards[index].card_id) != -1 ) {
+            var newIndex = $scope.cards.findIndex(y => y.card_id == $scope.event_cards[index].card_id)
 
-        $('#pan-main').fullpage({
-          licenseKey:'OPEN-SOURCE-GPLV3-LICENSE', //TODO: buy a license
-          animateAnchor: false,
-          controlArrows: false,
-          scrollOverflow: true,
-          scrollOverflowOptions: {
-            scrollbars: false,
-            bounce: false,
-            momentum: false, // allegedly a good perf boost even with them hidden tho?
-            fadeScrollbars: false,
-            disableTouch: true
-          },
-          autoScrolling: false,
-          verticalCentered: false,
-          fitToSection: false,
-          keyboardScrolling: false,
-          anchors:['pay']
+            $scope.cards[newIndex]['actual_payment'] = response.card_payments.find(x => x.card_id == $scope.event_cards[index].card_id).actual_payment;
+            $scope.cards[newIndex]['actually_paid_on'] = response.card_payments.find(x => x.card_id == $scope.event_cards[index].card_id).actually_paid_on;
+          }
+        }
+
+        // chain into the preferences load
+        DDService.pGetPreferences({user_id:CF_getUserID()})
+        .then( function onSuccess( response ) {
+
+          $scope.loaded = true;
+          if ($scope.event_cards.length) {
+            $scope.loadingBills = false;
+            $scope.loadingPlan = false;
+          }
+
+          $('#pan-main').fullpage({
+            licenseKey:'OPEN-SOURCE-GPLV3-LICENSE', //TODO: buy a license
+            animateAnchor: false,
+            controlArrows: false,
+            scrollOverflow: true,
+            scrollOverflowOptions: {
+              scrollbars: false,
+              bounce: false,
+              momentum: false, // allegedly a good perf boost even with them hidden tho?
+              fadeScrollbars: false,
+              disableTouch: true
+            },
+            autoScrolling: false,
+            verticalCentered: false,
+            fitToSection: false,
+            keyboardScrolling: false,
+            anchors:['pay']
+          });
+
+          //disabling scrolling
+          fullpage_api.setAllowScrolling(false); // no touch scrolling please
+
+        })
+        .catch( function onError( result ) { // pGetPreferences
+
+          CF_restErrorHandler( result );
+
         });
 
-        //disabling scrolling
-        fullpage_api.setAllowScrolling(false); // no touch scrolling please
-
       })
-      .catch( function onError( result ) { // pGetPreferences
+      .catch( function onError( result ) { // pGetCardPayments
 
         CF_restErrorHandler( result );
 
       });
 
     })
-    .catch( function onError( result ) { // pGetCardPayments
+    .catch( function onError( result ) { // pGetEvent
 
-      CF_restErrorHandler( result );
+        CF_restErrorHandler( result );
 
     });
 
-  })
-  .catch( function onError( result ) { // pGetEvent
+  } else {
 
-      CF_restErrorHandler( result );
+    BootstrapDialog.show({
+      size: BootstrapDialog.SIZE_LARGE,
+      type: BootstrapDialog.TYPE_INFO,
+      closable: false,
+      closeByBackdrop: false,
+      closeByKeyboard: false,
+      title: 'WELCOME TO DEBT DECIMATOR!',
+      message: 'Let\'s get started!!<br><br>Since you haven\'t added any cards yet, there won\'t be much to look at behind the "Pay My Bills" or "Calculate My Future" buttons. Instead, let\'s head directly over to "Update My Budget" and start loading some cards!',
+      buttons: [{
+          id: 'btn-close',
+          label: 'Excellent. Take me there.',
+          cssClass: 'btn-success pull-left',
+          action: function( dialogItself ) {
+            dialogItself.close();
+            location.href="/index.cfm/manage/budget";
+          }
+      }]
+    });
 
-  });
+  }
 
   /***********
     METHODS
@@ -2164,7 +2249,7 @@ controller/pay
 controller/main
 
 *****************/
-.controller( 'ddMain' , function ( $scope, $http, $q, $compile, DDService ) {
+.controller( 'ddMain', function ( $scope, $http, $q, $compile, DDService ) {
 
   angular.element(document).ready(function(){
 
@@ -2180,7 +2265,7 @@ controller/main
     });
 
     //methods
-    $.fn.fullpage.setAllowScrolling(true);
+    fullpage_api.setAllowScrolling(true);
 
     // setup the submit button
     $('#pan-main').on('click', '.btn-submit', function() {
@@ -2195,7 +2280,7 @@ controller/main
 
   $scope.verifyBudget = function() {
 
-    if ($('#budget').val() == "") {
+    if ( $('#budget').val() == "" || isNaN($('#budget').val()) || parseFloat($('#budget').val()) <= 0 ) {
 
       BootstrapDialog.show({
           size: BootstrapDialog.SIZE_LARGE,
@@ -2227,7 +2312,7 @@ controller/main
 
     var cc_balance = $('input[name=credit-card-balance' + (cardNum).toString() + ']');
 
-    if ( cc_balance.val() == "" ) {
+    if ( cc_balance.val() == "" || isNaN(cc_balance.val()) || parseFloat(cc_balance.val()) <= 0 ) {
 
       BootstrapDialog.show({
           size: BootstrapDialog.SIZE_LARGE,
