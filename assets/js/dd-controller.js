@@ -1948,7 +1948,6 @@ controller/calculate
 
     }
 
-
   })
   .catch( function onError( result ) { 
 
