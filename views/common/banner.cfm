@@ -13,6 +13,10 @@
         showAds = false;
     }
 
+    if ( getEnvironment() == 'development' ) {
+      showAds = false;
+    }
+
     return showAds;
   }
   </cfscript>
@@ -37,18 +41,18 @@
 
 <!-- views/common/banner.cfm -->
 <cfif canShowAds()>
-<div id="top-banner">
-  
-<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-<!-- DD_Responsive -->
-<ins class="adsbygoogle DD-Jackson"
-     style="display:inline-block;"
-     data-ad-client="ca-pub-6158111396863200"
-     data-ad-slot="5857880855"
-     ></ins>
-<script>
-(adsbygoogle = window.adsbygoogle || []).push({});
-</script>
-  
-</div>
+  <div id="top-banner">
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <!-- DD_Responsive -->
+    <ins class="adsbygoogle DD-Jackson"
+         style="display:inline-block;"
+         data-ad-client="ca-pub-6158111396863200"
+         data-ad-slot="5857880855"
+         ></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </div>
+<cfelse>
+  <div id="top-banner-empty"></div>
 </cfif>
