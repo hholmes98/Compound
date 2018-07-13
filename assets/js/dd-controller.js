@@ -1737,7 +1737,7 @@ controller/cards
         closable: false,
         closeByBackdrop: false,
         closeByKeyboard: false,
-        title: 'WELCOME TO CARD DESIGN STUDIO FOR: ' + data.label,
+        title: 'WELCOME TO CARD DESIGN STUDIO<br>Editing: ' + data.label,
         message: $textAndPic,
         buttons: [{
             id: 'btn-generate',

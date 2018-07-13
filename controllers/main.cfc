@@ -5,6 +5,8 @@ component accessors = true {
   property planService;
   property eventService;
   property mailService;
+  property cardService;
+  property fantabulousCardService;
 
   function init( fw, beanFactory ) {
 
@@ -37,6 +39,13 @@ component accessors = true {
     rc.pageTitle = application.app_name & " pricing";
     rc.pageDescription = "Affordable pricing plans for eliminating credit card debt with " & application.app_name;
   }
+
+  function top( struct rc ) {
+
+    variables.fw.setLayout('main.plan');
+    rc.codes = cardService.getCardCodes( limit=10 );
+    rc.fantabulous = fantabulousCardService;
+  }  
 
   private void function populate( struct rc ) {
 
@@ -189,5 +198,4 @@ component accessors = true {
 
   }
 
-/* front-end methods */
 }

@@ -653,7 +653,7 @@ component accessors=true {
 
   }
 
-  remote string function render( string cardName="FantabulousCard", cardClass="", numeric width=120, height=70, struct data = {}, string hash="" ) {
+  remote string function getHTML( string cardName="FantabulousCard", cardClass="", numeric width=120, height=70, struct data = {}, string hash="" ) {
 
     var css = getCompleteCSS( argumentCollection=arguments );
 
@@ -691,6 +691,14 @@ component accessors=true {
     </body>
     </html>
 ';
+
+    return html;
+
+  }
+
+  remote string function render( string cardName="FantabulousCard", cardClass="", numeric width=120, height=70, struct data = {}, string hash="" ) {
+
+    var html = getHTML( argumentCollection=arguments );
 
     cfcontent( type="text/html" );
     writeOutput( html );

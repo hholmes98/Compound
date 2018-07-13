@@ -136,4 +136,26 @@ component accessors=true {
     variables.fw.renderdata( 'JSON', data_out );
   }
 
+  // debug only!
+  public void function spitCards( struct rc ) {
+    param name="rc.limit" default=0;
+
+    var codeQry = cardService.getCardCodes( rc.limit );
+
+    cfsavecontent( variable="cardContent", append=true ) {
+
+      cfloop( query=codeQry ) {
+
+        WriteOutput( codeQry.code[codeQry.currentRow] & "<br>" );
+        WriteOutput( fantabulousCardService.getHTML( cardName="temp" & codeQry.currentRow, cardClass="temp" & codeQry.currentRow, hash=codeQry.code[codeQry.currentRow] ) );
+        WriteOutput( "<br><br>" );
+
+      }
+
+    }
+
+    variables.fw.renderdata( 'HTML', cardContent );
+
+  }
+
 }

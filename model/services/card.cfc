@@ -331,4 +331,31 @@ component accessors=true {
 
   }
 
+  public query function getCardCodes( numeric limit=0 ) {
+
+    var sql = '
+      SELECT 
+        c.code, COUNT(DISTINCT c.code) AS total
+      FROM 
+        "pCards" c
+      GROUP BY
+        c.code
+      ORDER BY
+        total DESC';
+
+    if ( limit > 0 ) {
+      sql = sql & '
+  LIMIT ' & arguments.limit;
+    }
+
+    sql = sql & ';';
+
+    var params = {};
+
+    var result = QueryExecute( sql, params, variables.defaultOptions );
+
+    return result;
+
+  }
+
 }
