@@ -2204,7 +2204,7 @@ controller/pay
       .then( function onSuccess( response ) {
 
         //success
-        //$scope.all_cards = response.event.plan.plan_deck.deck_cards;
+        $scope.all_cards = response.event.plan.plan_deck.deck_cards; // overwrite the first test call
         $scope.event_cards = response.event.event_cards;
         $scope.cards = $filter('cardSorter')($scope.all_cards, $scope.orderByField, $scope.reverseSort);
         $scope.pay_dates = {};
