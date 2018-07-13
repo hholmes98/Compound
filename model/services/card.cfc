@@ -112,7 +112,7 @@ component accessors=true {
     param name="card.credit_limit" default=-1;
     param name="card.due_on_day" default=0;
     param name="card.zero_apr_end_date" default="1900-01-01";
-    param name="card.code" default="#Hash(card.card_label,"SHA-256","UTF-8")#";
+    param name="card.code" default="#Hash(Now(),"SHA-256","UTF-8")#";
 
     if ( arguments.card.card_id <= 0 ) {
 

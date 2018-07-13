@@ -1729,7 +1729,7 @@ controller/cards
 
   $scope.designCard = function( data ) {
 
-    var $textAndPic = $('<div><div class="holder large" style="height:145px;"><div class="' + data.className + ' large"></div></div></div><div><input type="text" name="new_code" placeholder="Enter a new code" style="width:580px;" class="form-control"></div>');
+    var $textAndPic = $('<div><div class="holder large" style="height:145px;"><div class="' + data.className + ' large"></div></div></div><div><div style="font-size:13px"><b>Current Code:</b> ' + data.code + '</div><input type="text" name="new_code" placeholder="Enter a new code" style="width:580px;" class="form-control top-buffer"></div>');
 
     var designModeEditor = new BootstrapDialog({
         size: BootstrapDialog.SIZE_LARGE,
