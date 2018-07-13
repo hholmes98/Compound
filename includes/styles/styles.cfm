@@ -14,4 +14,4 @@
   <link href="/node_modules/fullcalendar/dist/fullcalendar.css" rel="stylesheet" />
   <link href="/node_modules/angular-tooltips/dist/angular-tooltips.css" rel="stylesheet" />
 
-  <link href="/assets/css/<cfoutput>#application.skins[COOKIE["dd-skin"]].path#</cfoutput>" type="text/css" rel="stylesheet" />
+  <link id="skin" href="/assets/css/<cfoutput>#application.skins[COOKIE["dd-skin"]].path#</cfoutput>" type="text/css" rel="stylesheet" />

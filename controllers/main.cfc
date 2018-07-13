@@ -62,6 +62,7 @@ component accessors = true {
   public void function list( struct rc ) {
 
     var plan = tempService.createPlan( session.auth.user.getUser_Id() );
+
     variables.fw.renderdata( 'JSON', plan.getPlan_Deck().getDeck_Cards() );
 
   }

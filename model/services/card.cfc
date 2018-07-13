@@ -53,6 +53,7 @@ component accessors=true {
       card.setBalance( result.balance[i] );
       card.setInterest_Rate( result.interest_rate[i] );
       card.setZero_APR_End_Date( result.zero_apr_end_date[i] );
+      card.setCode( result.code[i] );
 
       cards[card.getCard_Id()] = card;
 
@@ -95,6 +96,7 @@ component accessors=true {
       card.setBalance( result.balance[1] );
       card.setInterest_Rate( result.interest_rate[1] );
       card.setZero_APR_End_Date( result.zero_apr_end_date[1] );
+      card.setCode( result.code[1] );
 
     }
 
@@ -110,6 +112,7 @@ component accessors=true {
     param name="card.credit_limit" default=-1;
     param name="card.due_on_day" default=0;
     param name="card.zero_apr_end_date" default="1900-01-01";
+    param name="card.code" default="#Hash(card.card_label,"SHA-256","UTF-8")#";
 
     if ( arguments.card.card_id <= 0 ) {
 
@@ -123,7 +126,8 @@ component accessors=true {
           is_emergency,
           balance,
           interest_rate,
-          zero_apr_end_date
+          zero_apr_end_date,
+          code
         ) VALUES (
           #arguments.card.credit_limit#,
           #arguments.card.due_on_day#,
@@ -133,13 +137,17 @@ component accessors=true {
           #arguments.card.is_emergency#,
           #arguments.card.balance#,
           #arguments.card.interest_rate#,
-          #CreateODBCDate(arguments.card.zero_apr_end_date)#
+          #CreateODBCDate(arguments.card.zero_apr_end_date)#,
+          :code
         ) RETURNING card_id AS card_id_out;
       ';
 
       var params = {
         label = {
           value = arguments.card.label, sqltype = 'varchar'
+        },
+        code = {
+          value = arguments.card.code, sqltype = 'varchar'
         },
         psq = true
       };
@@ -161,7 +169,8 @@ component accessors=true {
           is_emergency = #arguments.card.is_emergency#,
           balance = #arguments.card.balance#,
           interest_rate = #arguments.card.interest_rate#,
-          zero_apr_end_date = #CreateODBCDate(arguments.card.zero_apr_end_date)#
+          zero_apr_end_date = #CreateODBCDate(arguments.card.zero_apr_end_date)#,
+          code = :code
         WHERE
           card_id = :cid;
       ';
@@ -169,6 +178,9 @@ component accessors=true {
       var params = {
         label = {
           value = arguments.card.label, sqltype = 'varchar'
+        },
+        code = {
+          value = arguments.card.code, sqltype = 'varchar'
         },
         cid = {
           value = card.card_id, sqltype = 'integer'

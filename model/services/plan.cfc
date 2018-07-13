@@ -431,27 +431,52 @@ component accessors=true {
 
     } else {
 
-      /************
-      get CALL, remove it, run again, add back
-      ************/
+      /*new*/
+      /* get the total number of remaining cards */
+      var cards = plan.getPlan_Deck().getDeck_Cards();
 
-      // use logic to determine the top most offending card
-      var off_card_id = plan.findNextCallCardID();
+      /* if there are more than 1 card left, move into the CALL card logic below */
+      if ( StructCount( cards ) > 1 ) {
 
-      if ( off_card_id != 0 ) {
-        var off_card = plan.getCard( off_card_id );
+        /************
+        get CALL, remove it, run again, add back
+        ************/
 
-        // set it to Calculated_Payment(-1)
-        off_card.setCalculated_Payment( -1 );
+        // use logic to determine the top most offending card
+        var off_card_id = plan.findNextCallCardID();
 
-        // remove it from the deck
-        plan.removeCard( off_card );
+        if ( off_card_id != 0 ) {
 
-        // set plan = recurse into calculated_payments, passing in the plan with the smaller deck but the same budget
-        plan = calculatePayments( plan, arguments.available_budget, arguments.target, arguments.use_interest, arguments.emergency_priority );
+          var off_card = plan.getCard( off_card_id );
 
-        // add it back into the plan deck
-        plan.addCard( off_card );
+          // set it to Calculated_Payment(-1)
+          off_card.setCalculated_Payment( -1 );
+
+          // remove it from the deck
+          plan.removeCard( off_card );
+
+          // set plan = recurse into calculated_payments, passing in the plan with the smaller deck but the same budget
+          plan = calculatePayments( plan, arguments.available_budget, arguments.target, arguments.use_interest, arguments.emergency_priority );
+
+          // add it back into the plan deck
+          plan.addCard( off_card );
+
+        }
+
+      /* if there is only 1 card left... */
+      } else {
+
+        // get the last remaining card
+        var final_card = cards.reduce( function(p,k,v) {
+          return v;
+        });
+
+        // set the budget = to the minimum payment on the card, and go again
+        plan = calculatePayments( plan, final_card.getMin_Payment(), arguments.target, arguments.use_interest, arguments.emergency_priority );
+
+        // throw the override flag so we can notify the front-end
+        plan.setIsBudgetOverride(true);
+
       }
 
     }

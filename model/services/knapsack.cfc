@@ -1,4 +1,4 @@
-//model/servcies/knapsack
+//model/services/knapsack
 component accessors=true {
   // The knapsack problem asks, given a set of items of various weights, find a subset or subsets of items such that their total weight is no larger than some given capacity but as large as possible.
   // This module solves a special case of the 0-1 knapsack problem when the value of each item is equal to its weight. Capacity and weights are restricted to positive integers.

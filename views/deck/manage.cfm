@@ -1,29 +1,33 @@
 <cfsilent>
-<cfscript>
-function dayOfMonthFormat(day) {
-  var tested = Right(arguments.day,1);
-  switch(tested) {
-    case "1":
-      return arguments.day & "st";
-      break;
-    case "2":
-      return arguments.day & "nd";
-      break;
-    case "3":
-      return arguments.day & "rd";
-      break;
-    case "4":
-    case "5":
-    case "6":
-    case "7":
-    case "8":
-    case "9":
-    case "0":
-      return arguments.day & "th";
-      break;
+  <cfscript>
+  function dayOfMonthFormat(day) {
+    var tested = Right(arguments.day,1);
+    switch(tested) {
+      case "1":
+        return arguments.day & "st";
+        break;
+      case "2":
+        return arguments.day & "nd";
+        break;
+      case "3":
+        return arguments.day & "rd";
+        break;
+      case "4":
+      case "5":
+      case "6":
+      case "7":
+      case "8":
+      case "9":
+      case "0":
+        return arguments.day & "th";
+        break;
+    }
   }
-}
-</cfscript>
+  </cfscript>
+  <cfsavecontent variable="cssContent">
+    <cfoutput><link id="cardStyleSheet" href="#request.abs_url##buildUrl(action='deck.css', queryString={'user_id':#session.auth.user.getUser_Id()#})#?v=#Millisecond(Now())#" rel="stylesheet" /></cfoutput>
+  </cfsavecontent>
+  <cfhtmlhead text="#cssContent#" />
 </cfsilent>
 
 <!-- views/cards/manage -->
@@ -82,8 +86,13 @@ function dayOfMonthFormat(day) {
           <ng-form name="innerForm">
             <input type="hidden" ng-model="card.id">
             <input type="hidden" ng-model="card.is_emergency">
+            <input type="hidden" ng-model="card.code">
 
             <div class="col-md-4">
+              <div class="holder small">
+                <div ng-class="card.className" ng-click="designCard(card)"></div>
+              </div>
+
               <div ng-class="{'has-error': innerForm.label.$invalid }">
                 <input type="text" name="label" class="form-control" ng-model="card.label" ng-required="true">
                 <span ng-show="innerForm.label.$invalid" class="help-block">Must name this card.</span>
@@ -156,7 +165,7 @@ function dayOfMonthFormat(day) {
 
           </ng-form>
 
-        </div><!--- //row --->
+        </div><!--- //row ng-repeat --->
 
       </div><!--- // table --->
     </div><!--- // tab1 --->

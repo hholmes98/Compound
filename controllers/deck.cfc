@@ -3,6 +3,7 @@ component accessors=true {
 
   property cardService;
   property card_paidService;
+  property fantabulousCardService;
 
   function init( fw ) {
 
@@ -85,6 +86,54 @@ component accessors=true {
 
     variables.fw.renderdata( 'JSON', ret );
 
+  }
+
+  public void function css( struct rc ) {
+
+    var cards = cardService.deck( arguments.rc.user_id ).getDeck_Cards();
+    var out = '';
+    var cardObj = '';
+
+    cfloop( collection=cards, item="card" ) {
+      var class = "card" & cards[card].getCard_Id();
+
+      if ( cards[card].getCode() == "" ) {
+        cardObj = fantabulousCardService.fantabulousCard( cardName=cards[card].getLabel(), cardClass=class ); // should never happen
+      } else {
+        cardObj = fantabulousCardService.fantabulousCard( cardName=cards[card].getLabel(), cardClass=class, hash=cards[card].getCode() );
+      }
+
+      out = out & Chr(13) & Chr(10) & "/* " & class & " */" & Chr(13) & Chr(10) & cardObj.getCSS();
+    }
+
+    // kind of a hack, but it works because all the cards should be the same size
+    out = cardObj.getHolderCSS() & out;
+
+    // deliver it
+    variables.fw.renderdata().data( out ).type( function( outData ) {
+      return {
+        contentType = 'text/css',
+        output = outData.data
+      };
+    });
+
+  }
+
+  public void function getNewDesign( struct rc ) {
+    param name="rc.code" default="";
+
+    if ( !Len(Trim(rc.code) ) ) {
+      rc.code = Hash( Now(), "SHA-256", "UTF-8" );
+    }
+
+    var designObj = fantabulousCardService.fantabulousCard( cardName="temp", cardClass="temp", hash=rc.code );
+
+    var data_out = {
+      'code' = rc.code,
+      'css' = designObj.getCSS()
+    }
+
+    variables.fw.renderdata( 'JSON', data_out );
   }
 
 }

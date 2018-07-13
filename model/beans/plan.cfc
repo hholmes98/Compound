@@ -9,7 +9,14 @@ component accessors = true {
   // cards
   property plan_deck; // the entire user deck for a given (active-on) date.
 
-  function init( string plan_id = 0, string user_id = "", string active_on = "", any plan_deck="" ) {
+  // new
+  property isBudgetOverride;
+
+  /* TO FUTURE ME */
+  /* modify the plan bean so that you set/get budget, prior to the calculation */
+  /* then, the isBudgetOverride flag can be thrown if it needs to be overrridden */
+
+  function init( string plan_id = 0, string user_id = "", string active_on = "", any plan_deck="", any isBudgetOverride = false ) {
 
     variables.plan_id = arguments.plan_id;
     variables.user_id = arguments.user_id;
@@ -17,8 +24,16 @@ component accessors = true {
 
     variables.plan_deck = arguments.plan_deck; // since plan_deck mutates during calculation, consider storing the initial list of CardIDs
 
+    // internal only
+    variables.isBudgetOverride = arguments.isBudgetOverride;
+
     return this;
 
+  }
+
+  function isBudgetOverride() {
+
+    return getIsBudgetOverride();
   }
 
   // setPlan_Deck

@@ -1310,6 +1310,53 @@ services
 
   }
 
+  service.pGenerateDesign = function( data ) {
+
+    //var key = deepGet(data,'card_id');
+    //var month = deepGet(data,'payment_for_month');
+    //var year = deepGet(data,'payment_for_year');
+
+    var dest_url = '/index.cfm/deck/getNewDesign';
+    var deferred = $q.defer();
+    var code = deepGet(data,'code');
+    if (code != null && code != "")
+      dest_url = dest_url + '/code/' + code;
+
+    $http({
+        method: 'GET',
+        url: dest_url
+    })
+    .then( function onSuccess( response ) {
+
+      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
+        throw new Error( 'REST Error' );
+      }
+
+      if ( response.data == -1 ) {
+        throw new Error( 'REST GET Error' );
+      }
+
+      deferred.resolve({
+        code: response.data.code,
+        css: response.data.css,
+        user_id: CF_getUserID(),
+        chain: data
+      });
+
+    })
+    .catch( function onError( e ) {
+
+      deferred.reject({
+        error: e.data,
+        chain: data
+      });
+
+    });
+
+    return deferred.promise;
+
+  }
+
   // I dunno how i feel about this
   function deepGet(source, key) {
 
@@ -1372,7 +1419,14 @@ controller/cards
   .then( function onSuccess( response ) {
 
     $scope.cards = $filter('cardSorter')(response.cards, $scope.orderByField, $scope.reverseSort);
+
+    for (var card in $scope.cards) {
+      $scope.cards[card]['className'] = 'card' + $scope.cards[card].card_id.toString() + ' small';
+    }
+
     //$scope.keylist = Object.keys($scope.cards).sort(function(a, b){return b-a;});
+    
+
     $scope.calculateAll();
 
     console.log($scope.cards);
@@ -1672,6 +1726,131 @@ controller/cards
     }
 
   };
+
+  $scope.designCard = function( data ) {
+
+    var $textAndPic = $('<div><div class="holder large" style="height:145px;"><div class="' + data.className + ' large"></div></div></div><div><input type="text" name="new_code" placeholder="Enter a new code" style="width:580px;" class="form-control"></div>');
+
+    var designModeEditor = new BootstrapDialog({
+        size: BootstrapDialog.SIZE_LARGE,
+        type: BootstrapDialog.TYPE_INFO,
+        closable: false,
+        closeByBackdrop: false,
+        closeByKeyboard: false,
+        title: 'WELCOME TO CARD DESIGN STUDIO FOR: ' + data.label,
+        message: $textAndPic,
+        buttons: [{
+            id: 'btn-generate',
+            label: 'Surprise me.',
+            cssClass: 'btn-success pull-left',
+            action: function( dialogItself ) {
+
+              var $generate = dialogItself.getButton('btn-generate');
+              $generate.disable()
+
+              var $try = dialogItself.getButton('btn-code');
+              $try.disable()
+
+              DDService.pGenerateDesign( {'code':'' } )
+              .then( function onSuccess( response ) {
+
+                var $newcode = response.code;
+                var $newCss = response.css;
+                var $newTextAndPic = $('<style>'+ $newCss + '</style><div><div class="holder large" style="height:145px;"><div class="temp large"></div></div></div><div><input type="text" name="new_code" width="64" class="form-control" value="' + $newcode + '" style="width:580px;"></div>');
+
+                dialogItself.setMessage($newTextAndPic);
+
+                // change the cancel button (if it needs changing)
+                var $cancel = dialogItself.getButton('btn-goback');
+                $cancel[0].innerText = "Revert";
+                //var $cancel.setMessage('Revert');
+
+                var $save = dialogItself.getButton('btn-save');
+                $save.enable();
+
+                var $generate = dialogItself.getButton('btn-generate');
+                $generate.enable();
+
+                var $try = dialogItself.getButton('btn-code');
+                $try.enable();
+
+              })
+              .catch( function onError( result ) {
+                CF_restErrorHandler( result );
+              });
+
+            }
+        }, {
+            id: 'btn-code',
+            label: 'Try code.',
+            cssClass: 'btn-success pull-left',
+            action: function( dialogItself ) {
+
+              var new_code = dialogItself.getModalBody().find('input').val();
+
+              DDService.pGenerateDesign( {'code':new_code} )
+              .then( function onSuccess( response ) {
+
+                var $newCss = response.css;
+                var $newTextAndPic = $('<style>' + $newCss + '</style><div><div class="holder large" style="height:145px;"><div class="temp large"></div></div></div><div><input type="text" name="new_code" width="64" class="form-control" value="' + new_code + '" style="width:580px;"></div>');
+
+                dialogItself.setMessage($newTextAndPic);
+
+                // change the cancel button (if it needs changing)
+                var $cancel = dialogItself.getButton('btn-goback');
+                $cancel[0].innerText = "Revert";
+
+                var $save = dialogItself.getButton('btn-save');
+                $save.enable(true);
+
+
+              })
+              .catch( function onError( result ) {
+                CF_restErrorHandler( result );
+              });
+
+            }
+
+        }, {
+            id: 'btn-goback',
+            label: 'Keep old design.',
+            cssClass: 'btn-link',
+            action: function( dialogItself ) {
+              dialogItself.close();
+            }
+
+        },{
+            id: 'btn-save',
+            label: 'Save',
+            cssClass: 'btn-success',
+            action: function( dialogItself ) {
+              var new_code = dialogItself.getModalBody().find('input').val();
+              var key = Object.keys($scope.cards).find(thisIndex => $scope.cards[thisIndex].card_id == data.card_id);
+              $scope.cards[key].code = new_code;
+              DDService.pSaveCard( $scope.cards[key] )
+              .then( function onSuccess( response ) {
+                $('#cardStyleSheet').attr( "href", $('#cardStyleSheet').attr( "href" ) + (Math.random() * 10).toString() );
+                dialogItself.close();
+              })
+              .catch( function onError( result ) {
+                CF_restErrorHandler( result );
+              });
+              
+            }
+        }]
+    });
+
+    // fire the init
+    designModeEditor.realize();
+
+    // disable Save
+    var save = designModeEditor.getButton('btn-save');
+    save.disable()
+
+    // open
+    designModeEditor.open();
+
+  }
 
 }]) // controller-cards
 
@@ -2088,7 +2267,8 @@ controller/pay
             });
 
             //disabling scrolling
-            fullpage_api.setAllowScrolling(false); // no touch scrolling please
+            $.fn.fullpage.setAllowScrolling(false);
+            //fullpage_api.setAllowScrolling(false); // no touch scrolling please
 
           })
           .catch( function onError( result ) { // pGetPreferences
@@ -2254,24 +2434,28 @@ controller/main
 
   angular.element(document).ready(function(){
 
-    $('#pan-main').fullpage({
-      licenseKey:'OPEN-SOURCE-GPLV3-LICENSE', //TODO: buy a license
-      autoScrolling:false,
-      scrollHorizontally: true,
-      verticalCentered: false,
-      fitToSection: false,
-      keyboardScrolling: false,
-      animateAnchor: false,
-      anchors:['try']
-    });
+    if ( $('#pan-main').length > 0 ) {
 
-    //methods
-    fullpage_api.setAllowScrolling(true);
+      $('#pan-main').fullpage({
+        licenseKey:'OPEN-SOURCE-GPLV3-LICENSE', //TODO: buy a license
+        autoScrolling:false,
+        scrollHorizontally: true,
+        verticalCentered: false,
+        fitToSection: false,
+        keyboardScrolling: false,
+        animateAnchor: false,
+        anchors:['try']
+      });
 
-    // setup the submit button
-    $('#pan-main').on('click', '.btn-submit', function() {
-      $('#entry').submit();
-    });
+      //methods
+      $.fn.fullpage.setAllowScrolling(true);
+
+      // setup the submit button
+      $('#pan-main').on('click', '.btn-submit', function() {
+        $('#entry').submit();
+      });
+
+    }
 
   });
 
@@ -2657,16 +2841,18 @@ controller/profile
 
   $scope.updateSkin = function( sIndex ) {
 
-    var oldlink = document.getElementsByTagName( 'link' ).item( document.getElementsByTagName( 'link' ).length-1 );
+    //var oldlink = document.getElementsByTagName( 'link' ).item( document.getElementsByTagName( 'link' ).length-1 );
 
     var newPath = CF_getTheme(sIndex).replace(/https?\:/,"");
 
-    var newlink = document.createElement( 'link' );
-    newlink.setAttribute( 'rel', 'stylesheet' );
-    newlink.setAttribute( 'type', 'text/css' );
-    newlink.setAttribute( 'href', newPath );
+    $('#skin').attr( "href", newPath );
 
-    document.getElementsByTagName( 'head' ).item( 0 ).replaceChild( newlink, oldlink );
+    //var newlink = document.createElement( 'link' );
+    //newlink.setAttribute( 'rel', 'stylesheet' );
+    //newlink.setAttribute( 'type', 'text/css' );
+    //newlink.setAttribute( 'href', newPath );
+
+    //document.getElementsByTagName( 'head' ).item( 0 ).replaceChild( newlink, oldlink );
 
     var prefs = $cookies.get( 'DD-SKIN' );
 
