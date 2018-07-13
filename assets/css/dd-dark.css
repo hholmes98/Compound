@@ -363,7 +363,7 @@ label {
 }
 
 .container {
-  margin-top: 0px;
+  margin-top: 12px;
   margin-bottom: 3px;
 }
 
@@ -886,7 +886,7 @@ label {
 @media screen and (max-width: 553px) {
 
   .about {
-    padding-top: 780px;
+    padding-top: 10px;
   }
 
   .nav-tabs > li {
@@ -1014,6 +1014,14 @@ label {
 
   .pan-perspective {
     margin-top: 20px;
+  }
+
+  .code {
+    font-size: 10px;
+  }
+
+  .container {
+    margin-top: 48px;
   }
 
 }

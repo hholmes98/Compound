@@ -89,7 +89,22 @@
 
       </div>
 
-      <div class="row">
+      <div class="row" ng-show="!try">
+
+        <div class="col-md-2"></div>
+        <div class="col-md-8">
+
+          <hr>
+
+          <span>
+            <button type="button" class="btn button btn-primary" ng-click="try=true" onClick="location.hash='##try/0'"><i class="fas fa-calculator"></i> Try it now!</button>
+          </span>
+        </div>
+        <div class="col-md-2"></div>
+
+      </div>
+
+      <div class="row" ng-show="try">
 
         <div class="col-md-2"></div>
         <div class="col-md-8">
@@ -206,7 +221,7 @@
 
       <div class="row top-buffer bottom-buffer" align="center">
 
-        <button type="button" class="btn button btn-primary btn-submit" form="entry"><i class="fas fa-calculator"></i> Show Me The Plan</button>
+        <button type="button" class="btn button btn-primary btn-submit bottom-buffer" form="entry"><i class="fas fa-calculator"></i> Show Me The Plan</button>
 
       </div><!-- // row -->
 

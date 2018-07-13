@@ -1,6 +1,6 @@
 <!-- views/main/features -->
 
-<div>
+<div class="top-buffer">
 
   <section>
 
@@ -9,24 +9,8 @@
 
         <div class="col-md-12">
           <div align="center">
-            <h1>Phenomenal Cosmic Powers</h1>
-            <h3>You want features? <cfoutput>#application.locale[session.auth.locale]['name']#</cfoutput> has the right stuff.</h3>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <div>
-      &nbsp;<br><br><br>
-    </div>
-
-    <div class="container">
-      <div class="row">
-
-        <div class="col-md-12">
-          <div align="center">
-            <h2 shadow-text="Features">Features</h2>
+            <h1>Features You Can Count On</h1>
+            <h3>You want functionality? <cfoutput>#application.locale[session.auth.locale]['name']#</cfoutput> has the right stuff.</h3>
           </div>
         </div>
 

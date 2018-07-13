@@ -1,6 +1,22 @@
 <!-- views/common/nav/footer -->
 <cfsilent>
   <cfparam name="get_started" default="inner" />
+  <cfif get_started is 'home'>
+    <cfsavecontent variable="scrollUp">
+      <script>
+      $(document).ready( function() {
+
+        $('#returnTop').on('click', function() {
+          $('html,body').animate({
+            scrollTop: 0
+          }, 'slow');
+        });
+
+      });
+      </script>
+    </cfsavecontent>
+    <cfhtmlhead text="#scrollUp#">
+  </cfif>
 </cfsilent>
 <section dir="ltr" class="footer">
   <div class="section-inner">
@@ -9,7 +25,7 @@
     <h3>#application.locale[session.auth.locale]['motto']#</h3>
     </cfoutput>
     <cfif get_started is 'home'>
-      <button class="btn btn-default" onClick="location.hash='#try'"> Get started</button>
+      <button class="btn btn-default" id="returnTop"> Get started</button>
     <cfelse>
       <cfoutput><button class="btn btn-default" onClick="location.href='#buildUrl('main')#'"> Get started</button></cfoutput>
     </cfif>

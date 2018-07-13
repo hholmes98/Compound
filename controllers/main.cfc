@@ -43,6 +43,9 @@ component accessors = true {
   function top( struct rc ) {
 
     variables.fw.setLayout('main.plan');
+    rc.pageTitle = application.app_name & " top ranked cards";
+    rc.pageDescription = "Check out the most popular custom credit card designs in use at " & application.app_name;
+
     rc.codes = cardService.getCardCodes( limit=10 );
     rc.fantabulous = fantabulousCardService;
   }  
@@ -78,6 +81,7 @@ component accessors = true {
 
   public void function journey( struct rc ) {
 
+    //FIXME: trap if the session times out, send the user back to the homepage
     populate( arguments.rc );
     var events = arguments.rc.events;
     var milestones = ArrayNew(1);

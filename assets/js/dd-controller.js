@@ -2432,13 +2432,16 @@ controller/main
 *****************/
 .controller( 'ddMain', function ( $scope, $http, $q, $compile, DDService ) {
 
+  $scope.try = false;
+
   angular.element(document).ready(function(){
 
     if ( $('#pan-main').length > 0 ) {
 
       $('#pan-main').fullpage({
         licenseKey:'OPEN-SOURCE-GPLV3-LICENSE', //TODO: buy a license
-        autoScrolling:false,
+        autoScrolling: false,
+        recordHistory: true,
         scrollHorizontally: true,
         verticalCentered: false,
         fitToSection: false,
@@ -2448,7 +2451,7 @@ controller/main
       });
 
       //methods
-      $.fn.fullpage.setAllowScrolling(true);
+      $.fn.fullpage.setAllowScrolling(false);
 
       // setup the submit button
       $('#pan-main').on('click', '.btn-submit', function() {

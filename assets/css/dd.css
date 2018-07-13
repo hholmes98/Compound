@@ -339,7 +339,7 @@ label {
 }
 
 .container {
-  margin-top: 0px;
+  margin-top: 12px;
   margin-bottom: 3px;
 }
 
@@ -373,6 +373,10 @@ label {
 .btn > .glyphicon, .btn > .fas-large, .btn > .svg-inline--fa {
   color: #D2691E;
   top: 2px;
+}
+
+.btn.btn-primary > .glyphicon, .btn.btn-primary > .fas-large, .btn.btn-primary > .svg-inline--fa {
+  color: #fff;
 }
 
 /* glyphs on buttons that are being hovered or focused (orange) will flip to black */
@@ -692,8 +696,14 @@ label {
 }
 
 #top-banner-empty {
+  position: fixed;
+  left:0;
+  bottom: 0;
+  text-align: center;
   width: 100%;
-  padding-top: 70px;
+  height: 50px;
+  z-index: 999;
+  background-color: transparent;
 }
 
 /* default-mobile first: smallest screens (up to 800px); */
@@ -838,7 +848,7 @@ label {
 @media screen and (max-width: 553px) {
 
   .about {
-    padding-top: 780px;
+    padding-top: 10px;
   }
 
   .nav-tabs > li {
@@ -970,6 +980,15 @@ label {
     margin-top: 20px;
   }
 
+  .code {
+    font-size: 10px;
+  }
+
+  .container {
+    margin-top: 48px;
+  }
+
+
 }
 
 @media screen and (max-width: 394px) {
@@ -1010,4 +1029,19 @@ label {
     margin-top: 50px;
     background: transparent;
   }
+
+  #top-banner-empty {
+    position: relative;
+    border-bottom: 1px solid #000;
+    bottom: inherit;
+    text-align: center;
+    width: 100%;
+    height: 98px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    color: #fff;
+    margin-top: 50px;
+    background: transparent;
+  }
+
 }
