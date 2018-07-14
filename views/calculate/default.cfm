@@ -41,7 +41,7 @@
         <div class="col-md-6">For This Card</div>
         <div class="col-md-6">Pay This Amount</div>
       </div>
-      <div class="row panel-body" ng-form name="myForm" ng-repeat="card in cards | cardSorter:orderByField:reverseSort">
+      <div class="row panel-body" ng-form name="planForm" ng-repeat="card in cards | cardSorter:orderByField:reverseSort">
         <div class="col-md-6">{{card.label}}</div>
         <div class="col-md-6"><span ng-bind-html="card.calculated_payment|calculatedPaymentFilter" tooltip-enable="{{card.calculated_payment < 0}}" uib-tooltip-html="'<cfoutput>#application.locale[session.auth.locale]['name']#</cfoutput> recommends you do not make a payment on this card this month. Instead, call the company to request a deferral. If you need help with this, <a href=\'<cfoutput>#application.static_urls.call#</cfoutput>\'>follow this guide</a>.'" /></div>
       </div>

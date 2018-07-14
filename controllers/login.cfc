@@ -14,7 +14,6 @@ component accessors = true {
   }
 
   function before( struct rc ) {
-
     // you must be logged in for 'logout','updateConfirm' methods, and
     // must be logged out for all others. Otherwise, back to main.
     // TODO: break this out into

@@ -48,6 +48,21 @@ Didact Gothic - alternate to "Graphik" (barely)
   -moz-osx-font-smoothing: grayscale;
 }
 
+[class^="icon-"], [class*=" icon-"] {
+    height: 26px;
+    width: 26px;
+    display: inline-block;
+    fill: currentColor;
+    margin: -4px 0px -7px -4px;
+}
+
+.icon-large {
+    height: 120px;
+    width: 120px;
+    margin: -20px -20px -20px -20px;
+    fill: #fff;
+}
+
 /* Loader... */
 .loader {
   border: 16px solid #f3f3f3; /* Light grey */
@@ -727,7 +742,7 @@ label {
 
 #top-banner-empty {
   width: 100%;
-  padding-top: 70px;
+  padding-top: 50px;
 }
 
 /* default-mobile first: smallest screens (up to 800px); */

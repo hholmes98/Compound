@@ -20,7 +20,7 @@
       <ul class="nav navbar-nav">
         <li<cfif REQUEST.section is 'pay'> class="active"</cfif>><a href="#buildUrl('pay.bills')#"><i class="fas fa-dollar-sign"></i> <span class="nav-label">Pay Bills</span><cfif REQUEST.section is 'pay'> <span class="sr-only">(current)</span></cfif></a></li>
         <li<cfif REQUEST.section is 'deck'> class="active"</cfif>><a href="#buildUrl('manage.budget')#"><i class="fas fa-chart-pie"></i> <span class="nav-label">Update Budget</span><cfif REQUEST.section is 'main'> <span class="sr-only">(current)</span></cfif></a></li>
-        <li<cfif REQUEST.section is 'calculate'> class="active"</cfif>><a href="#buildUrl('calculate.future')#"><i class="fas fa-calculator"></i> <span class="nav-label">Calculate Payoff</span><cfif REQUEST.section is 'plan'> <span class="sr-only">(current)</span></cfif></a></li>
+        <li<cfif REQUEST.section is 'calculate'> class="active"</cfif>><a href="#buildUrl('calculate.future')#"><svg class="icon-dd-calculator"><use xlink:href="/assets/img/icons.svg##icon-dd-calculator"></use></svg> <span class="nav-label">Calculate Payoff</span><cfif REQUEST.section is 'plan'> <span class="sr-only">(current)</span></cfif></a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li class="dropdown">

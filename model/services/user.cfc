@@ -57,7 +57,7 @@ component accessors=true {
     var result = QueryExecute( sql, params, variables.defaultOptions );
     var users = {};
 
-    for ( var i = 1; i <= result.RecordCount; i++ ) {
+    for ( var i = 1; i <= result.recordCount; i++ ) {
 
       var user = variables.beanFactory.getBean('userBean');
 
@@ -128,7 +128,7 @@ component accessors=true {
     var result = QueryExecute( sql, params, variables.defaultOptions );
     var user = variables.beanFactory.getBean('userBean');
 
-    if ( result.RecordCount ) {
+    if ( result.recordCount ) {
 
       user.setUser_Id(result.user_id[1]);
       user.setName(result.name[1]);
@@ -407,7 +407,7 @@ component accessors=true {
 
     var user = variables.beanFactory.getBean('userBean');
 
-    if ( result.RecordcounT ) {
+    if ( result.recordCount ) {
 
       // we do this so that we have a central sql call to pull a user, rather
       // than risk duplicating code and increasing maintenance.
