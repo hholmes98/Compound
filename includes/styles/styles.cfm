@@ -10,6 +10,9 @@
 
   <link href="//cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.7/css/bootstrap-dialog.min.css" rel="stylesheet" />
 
+  <link href="/node_modules/propellerkit/dist/css/propeller.css" rel="stylesheet" />
+  <link href="/node_modules/angularjs-slider/dist/rzslider.css" rel="stylesheet" />
+
   <link href="/node_modules/fullpage.js/dist/fullpage.css" rel="stylesheet" />
   <link href="/node_modules/fullcalendar/dist/fullcalendar.css" rel="stylesheet" />
   <link href="/node_modules/angular-tooltips/dist/angular-tooltips.css" rel="stylesheet" />

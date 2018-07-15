@@ -1414,6 +1414,21 @@ controller/cards
   $scope.budgetTab = false;
   $scope.pagecheckFrequencyTab = false;
 
+  /*
+  $scope.defaultSlider = {
+    min: 0,
+    options: {
+      floor: 0,
+      ceil: 1,
+      precision: 2,
+      step: 0.01,
+      rightToLeft: true,
+      onChange: function(sliderId, modelValue, highValue, pointerType) {
+        sliderId.getForm().$setPristine(false);
+      }
+    }
+  }*/
+
   // init-start
   DDService.pGetCards({user_id:CF_getUserID()})
   .then( function onSuccess( response ) {
@@ -1422,6 +1437,8 @@ controller/cards
 
     for (var card in $scope.cards) {
       $scope.cards[card]['className'] = 'card' + $scope.cards[card].card_id.toString() + ' small';
+      //$scope.cards[card]['slider'] = $scope.defaultSlider;
+      //$scope.cards[card]['slider']['options']['id'] = 'slider' + $scope.cards[card].card_id.toString();
     }
 
     //$scope.keylist = Object.keys($scope.cards).sort(function(a, b){return b-a;});
@@ -1619,7 +1636,11 @@ controller/cards
 
     var newid = 0;
 
-    $scope.cards.unshift({ "user_id":uid, "card_id":0, "label":"", "is_emergency":0 }); 
+    $scope.cards.unshift({ "user_id":uid, "card_id":0, "label":"", "is_emergency":0, "priority":0.00 });
+
+    $('html,body').animate({
+      scrollTop: jQuery('#top-form').offset().top
+    }, 'slow');
 
     console.log( $scope.cards );
     //console.log( $scope.keylist );

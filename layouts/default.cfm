@@ -86,7 +86,7 @@
   <cfinclude template="/includes/scripts/scripts.cfm">
 
   <script>
-  var ddApp = angular.module('ddApp', ['ngSanitize', 'ngCookies', 'ui.calendar', 'ui.bootstrap', '720kb.tooltips', 'ui.toggle']);
+  var ddApp = angular.module('ddApp', ['ngSanitize', 'ngCookies', 'ui.calendar', 'ui.bootstrap', '720kb.tooltips', 'ui.toggle', 'rzModule']);
 
   function CF_restErrorHandler( e ) {
     <cfif getEnvironment() == "development">

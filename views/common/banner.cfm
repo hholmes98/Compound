@@ -44,7 +44,7 @@
   <div id="top-banner">
     <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
     <!-- DD_Responsive -->
-    <ins class="adsbygoogle DD-Jackson"
+    <ins class="adsbygoogle responsive_ad"
          style="display:inline-block;"
          data-ad-client="ca-pub-6158111396863200"
          data-ad-slot="5857880855"

@@ -67,8 +67,8 @@
           </div>
         </div>
 
-        <div class="row panel-header">
-          <div class="col-md-2"><button uib-tooltip="Cards can also be loans!" type="button" class="btn button btn-default" ng-click="newCard(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>)"><span class="glyphicon glyphicon-plus"></span> Add a new card</button></div>
+        <div class="row panel-header"id="top-form">
+          <div class="col-md-2"></div>
           <div class="col-md-4 col-md-offset-2"><strong>Debt Load:</strong> <font style="color:red">{{totalDebtLoad | currency}}</font></div>
           <div class="col-md-4"><strong>Monthly Payments:</strong> {{totalMinPayment | currency}}</div>
         </div>
@@ -129,6 +129,28 @@
                       </select>
                       <span ng-show="card.due_on_day > 0"><font size="-1">of the month</font></span>
                       <span ng-show="innerForm.due_on_day.$invalid" class="help-block">Must choose a valid day of the month (1-31)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <br/>
+                <div class="row">
+                  <div class="col-md-8">
+                    <div>
+                      <font size="-1">Pay this card:</font>
+                    </div>
+                    <div>
+                      <rzslider
+                          class="with-legend"
+                          rz-slider-model="card.priority"
+                          rz-slider-max="1"
+                          rz-slider-options="{floor: 0,
+                            ceil: 1,
+                            precision: 2,
+                            step: 0.01,
+                            rightToLeft: true
+                          }">
+                      </rzslider>
                     </div>
                   </div>
                 </div>
@@ -272,3 +294,9 @@
   </div><!-- /tab-content -->
 
 </div><!-- /panel -->
+
+<div class="menu pmd-floating-action" role="navigation">
+  <a class="btn btn-primary pmd-floating-action-btn pmd-button-fab pmd-button-raised" ng-click="newCard(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>)" data-title="Add a new card" href="javascript:void(0);">
+    <i class="fas fa-credit-card"></i>
+  </a>
+</div>

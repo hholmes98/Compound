@@ -1,11 +1,12 @@
 //model/services/plan
 component accessors=true {
 
-  public any function init( beanFactory, preferenceService, plan_cardService ) {
+  public any function init( beanFactory, preferenceService, plan_cardService, userService ) {
 
     variables.beanFactory = arguments.beanFactory;
     variables.preferenceService = arguments.preferenceService;
     variables.plan_cardService = arguments.plan_cardService;
+    variables.userService = arguments.userService;
 
     variables.defaultOptions = {
       datasource = application.datasource
@@ -322,10 +323,10 @@ component accessors=true {
   Plan Calculations
   ****************/
 
-  /* will eventually be an alias to plan.create() */
   public any function create( string user_id, date calculated_for=Now(), no_cache=false ) {
 
     // 1. get the user's budget
+    var user = userService.get( arguments.user_id );
     var budget = preferenceService.get( arguments.user_id ).getBudget();
 
     // 2. Get the user's deck
@@ -337,6 +338,14 @@ component accessors=true {
     in_plan.setUser_Id( arguments.user_id );
     in_plan.setPlan_Deck( plan_deck );
     in_plan.setActive_On( CreateDate( Year( arguments.calculated_for ), Month( arguments.calculated_for ), 1 ) );
+    in_plan.setBudget( budget );
+
+    if ( user.getAccount_Type_Id() == 4 ) { // life hacker
+
+      in_plan.setConsiderAPRExpiry( true );
+      in_plan.setConsiderPriority( true );
+
+    }
 
     var out_plan = calculatePayments( in_plan, budget, arguments.calculated_for );
 

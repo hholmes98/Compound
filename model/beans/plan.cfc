@@ -1,5 +1,5 @@
 //model/beans/plan
-component accessors = true {
+component accessors=true {
 
   // explicit (db rows)
   property plan_id;
@@ -10,13 +10,16 @@ component accessors = true {
   property plan_deck; // the entire user deck for a given (active-on) date.
 
   // new
+  property budget;
   property isBudgetOverride;
+  property considerAPRExpiry;
+  property considerPriority;
 
   /* TO FUTURE ME */
   /* modify the plan bean so that you set/get budget, prior to the calculation */
   /* then, the isBudgetOverride flag can be thrown if it needs to be overrridden */
 
-  function init( string plan_id = 0, string user_id = "", string active_on = "", any plan_deck="", any isBudgetOverride = false ) {
+  function init( string plan_id = 0, string user_id = "", string active_on = "", any plan_deck="", any budget="", any isBudgetOverride = false, any considerAPRExpiry = false, any considerPriority = false ) {
 
     variables.plan_id = arguments.plan_id;
     variables.user_id = arguments.user_id;
@@ -24,8 +27,10 @@ component accessors = true {
 
     variables.plan_deck = arguments.plan_deck; // since plan_deck mutates during calculation, consider storing the initial list of CardIDs
 
-    // internal only
+    variables.budget = arguments.budget;
     variables.isBudgetOverride = arguments.isBudgetOverride;
+    variables.considerAPRExpiry = arguments.considerAPRExpiry;
+    variables.considerPriority = arguments.considerPriority;
 
     return this;
 
@@ -82,6 +87,14 @@ component accessors = true {
 
   function findNextHotCardID( numeric available_budget ) {
 
+    /***********/
+    /* phase 1 */
+    /***********/
+
+    /**********************************************/
+    /* should the emergency card be the hot card? */
+    /**********************************************/
+
     // get the emergency card from the plan.
     var e_card = getEmergencyCard( true );
     if ( !IsSimpleValue(e_card) ) {
@@ -96,7 +109,7 @@ component accessors = true {
         // is the emergency card already one of the hot cards?
         if ( !ListFind( hot_card_ids, e_card.getCard_Id() ) ) {
 
-          // yes? next: what % of its calculated_payment is of the available budget
+          // it isn't? next Q: what % of its calculated_payment is of the available budget
           var e_payment = calculatePayment( e_card.getBalance(), e_card.getMin_Payment(), 0 );
 
           if ( e_payment / arguments.available_budget > application.emergency_balance_threshold ) {
@@ -109,6 +122,14 @@ component accessors = true {
       } // the e_card has no balance
 
     } // no e_card exists
+
+    /***********/
+    /* phase 2 */
+    /***********/
+
+    /********************************************************************/
+    /* sort the cards so that the next best candidate is in the 1st row */
+    /********************************************************************/
 
     var cards = variables.plan_deck.getDeck_Cards();
     var sorted = sortHotCards( cards );
@@ -194,6 +215,60 @@ component accessors = true {
     return 0;
   }
 
+  function sortZeroAPRExpiryDESC(left, right) {
+    if ( variables.plan_deck.getCard( arguments.left ).getZero_APR_End_Date() > variables.plan_deck.getCard( arguments.right ).getZero_APR_End_Date() )
+      return -1;
+    else if ( variables.plan_deck.getCard( arguments.left ).getZero_APR_End_Date() < variables.plan_deck.getCard( arguments.right ).getZero_APR_End_Date() )
+      return 1;
+
+    return 0;
+  }
+
+  function sortZeroAPRExpiryASC(left, right) {
+    if ( variables.plan_deck.getCard( arguments.left ).getZero_APR_End_Date() > variables.plan_deck.getCard( arguments.right ).getZero_APR_End_Date() )
+      return 1;
+    else if ( variables.plan_deck.getCard( arguments.left ).getZero_APR_End_Date() < variables.plan_deck.getCard( arguments.right ).getZero_APR_End_Date() )
+      return -1;
+
+    return 0;
+  }
+
+  function sortPriorityDESC(left, right) {
+    if ( variables.plan_deck.getCard( arguments.left ).getPriority() > variables.plan_deck.getCard( arguments.right ).getPriority() )
+      return -1;
+    else if ( variables.plan_deck.getCard( arguments.left ).getPriority() < variables.plan_deck.getCard( arguments.right ).getPriority() )
+      return 1;
+
+    return 0;
+  }
+
+  function sortPriorityASC(left, right) {
+    if ( variables.plan_deck.getCard( arguments.left ).getPriority() > variables.plan_deck.getCard( arguments.right ).getPriority() )
+      return 1;
+    else if ( variables.plan_deck.getCard( arguments.left ).getPriority() < variables.plan_deck.getCard( arguments.right ).getPriority() )
+      return -1;
+
+    return 0;
+  }
+
+  function sortBalanceASC_interestRateDESC_zeroAPRExpiryASC_priorityDESC( left, right ) {
+
+    var sorted = sortBalanceASC( arguments.left, arguments.right );;
+
+    if ( !sorted ) {
+      sorted = sortInterestRateDESC( arguments.left, arguments.right );
+      if ( !sorted ) {
+        sorted = sortZeroAPRExpiryASC( arguments.left, arguments.right );
+        if ( !sorted ) {
+          sorted = sortPriorityDESC( arguments.left, arguments.right );
+        }
+      }
+    }
+
+    return sorted;
+
+  }
+
   function sortBalanceASC_interestRateDESC( left, right ) {
 
     var sorted = sortBalanceASC( arguments.left, arguments.right );
@@ -231,8 +306,19 @@ component accessors = true {
     // convert to array
     var a_cards = StructKeyArray(f_cards);
 
-    // balance ASC, interest_rate DESC
-    a_cards.sort( sortBalanceASC_interestRateDESC );
+    if ( variables.considerAPRExpiry || variables.considerPriority ) {
+
+      //TODO: you need to take a look at the current date. if the current date > the card's 0% apr expirty date, the card should be treated normally.
+
+      // balance ASC, interest_rate DESC
+      a_cards.sort( sortBalanceASC_interestRateDESC_zeroAPRExpiryASC_priorityDESC );
+
+    } else {
+
+      // balance ASC, interest_rate DESC
+      a_cards.sort( sortBalanceASC_interestRateDESC );
+
+    }
 
     return a_cards;
 

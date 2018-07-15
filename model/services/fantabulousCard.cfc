@@ -134,7 +134,7 @@ component accessors=true {
     variables.properties = {
       'border-color': arguments.fc_data['border-color'],
       'border-style': getBorderStyle( arguments.fc_data['border-style'] ),
-      'background': getGradient( arguments.fc_data['background'] ),
+      'background': buildBackground( arguments.fc_data['background'] ),
       'hasChip': hasChip( arguments.fc_data['hasChip'] ),
       'chipColor': getChipColor( arguments.fc_data['chipColor'] ),
       'chipPosition': {
@@ -184,8 +184,84 @@ component accessors=true {
     var full_stop = variables.fc_data['full_stop'];
     var position = getPercentage(variables.fc_data['position']);
     var girth = getPercentage(variables.fc_data['girth']);
-    
-    return angle & 'deg, ##' & start & ' ' & position & '%, ##' & stop & ' ' & Round(girth*.33) & '%, ##' & full_stop & ' ' & Round(girth*.66) & '%';
+
+    var repeat = ((girth*.33) MOD 8) + 1;
+
+    var ordered = [position,(girth*.33),(girth*.66)];
+    ordered.sort("numeric","asc");
+
+    var txt = '';
+    cfloop(from=1, to=repeat, index="i") {
+      txt = txt & 'repeating-linear-gradient(' & angle+(i*8) & 'deg, ' & RepeatString('transparent ' & i*2 & 'px,', i) & ' ##' & start & ' ' & ordered[1]*i & '%, ##' & stop & ' ' & ordered[2]*i & '%, ##' & full_stop & ' ' & ordered[3]*i & '%)';
+      if (i < repeat-1) {
+        txt = txt & ',' & Chr(13) & Chr(10);
+      } else {
+        //txt = txt & ';';
+      } 
+    }
+
+    return txt;
+
+
+    //return 'repeating-linear-gradient(' & angle & 'deg, ##' & start & ' ' & ordered[1] & '%, ##' & stop & ' ' & ordered[2] & '%, ##' & full_stop & ' ' & ordered[3] & '%)';
+
+    /*
+    var txt = '
+    repeating-linear-gradient(
+      transparent, 
+      transparent 50px, 
+      rgba(0,255,255, .25) 50px,
+      rgba(0,255,255, .25) 100px
+    ),
+    repeating-linear-gradient(
+      90deg, 
+      rgba(0,255,255, .25), 
+      rgba(0,255,255, .25) 50px, 
+      transparent 50px, 
+      transparent 100px
+    ),
+    repeating-linear-gradient(
+      135deg, 
+      transparent, 
+      transparent 4px, 
+      rgba(255,255,255,.1) 4px, 
+      rgba(255,255,255,.1) 8px
+    ),
+    repeating-linear-gradient(
+      45deg, 
+      transparent, 
+      transparent 4px, 
+      rgba(255,255,255,.1) 4px, 
+      rgba(255,255,255,.1) 8px
+    ),
+    repeating-linear-gradient(
+      transparent, 
+      transparent 20px, 
+      rgba(100,250,250, .2) 20px, 
+      rgba(100,250,250, .2) 21px, 
+      transparent 21px,
+      transparent 29px, 
+      rgba(100,250,250, .2) 29px, 
+      rgba(100,250,250, .2) 30px, 
+      transparent 30px, 
+      transparent 50px
+    ),
+    repeating-linear-gradient(
+      90deg, 
+      transparent, 
+      transparent 20px, 
+      rgba(100,250,250, .2) 20px, 
+      rgba(100,250,250, .2) 21px, 
+      transparent 21px, 
+      transparent 29px, 
+      rgba(100,250,250, .2) 29px, 
+      rgba(100,250,250, .2) 30px,
+      transparent 30px, 
+      transparent 50px
+    );';
+
+    return txt;
+    */
 
   }
 
@@ -198,6 +274,86 @@ component accessors=true {
     var position = getPercentage(variables.fc_data['position']);
 
     return angle & 'deg, ##' & start & ' ' & position & '%, ##' & stop & ', ##' & full_stop;
+  }
+
+  remote string function buildMarrakesh() {
+
+    var nl = chr(13) & chr(10);
+    var position = getPercentage(variables.fc_data['position']);
+    var girth = getPercentage(variables.fc_data['girth']);
+    
+    var data = {
+      'background-color': '##' & variables.fc_data['start'],
+      'background-image': {
+        'radial-gradient': '##' & variables.fc_data['stop'] & ' 9px, transparent 10px',
+        'repeating-radial-gradient': '##' & variables.fc_data['stop'] &' 0, ' & '##' & variables.fc_data['stop'] & ' 4px, transparent 5px, transparent 20px, ' & '##' & variables.fc_data['stop'] & ' 21px, ' & '##' & variables.fc_data['stop'] & ' 25px, transparent 26px, transparent 50px',
+      },
+      'background-size': girth & 'px ' & girth & 'px, ' & position & 'px ' & position & 'px',
+      'background-position':'0 0'
+    }
+
+    return 'background-color: ' & data['background-color'] & ';' & nl & 
+        '  background-image: radial-gradient(' & data['background-image']['radial-gradient'] & '),' & nl & '  repeating-radial-gradient(' & data['background-image']['repeating-radial-gradient'] & ');' & nl &
+        '  background-size: ' & data['background-size'] & ';' & nl &
+        '  background-position: ' & data['background-position'];
+
+  }
+
+  remote string function buildZigZag() {
+
+    var nl = chr(13) & chr(10);
+    var start = variables.fc_data['start'];
+    var full_stop = variables.fc_data['full_stop'];
+    var perc1 = getPercentage(variables.fc_data['position']);
+    var perc2 = getPercentage(variables.fc_data['girth']);
+
+    var txt = 'background: linear-gradient(135deg, ##' & start & ' 25%, transparent 25%) -50px 0,' & nl &
+        '  linear-gradient(225deg, ##' & start & ' 25%, transparent 25%) -50px 0,' & nl &
+        '  linear-gradient(315deg, ##' & start & ' 25%, transparent 25%), ' & nl &
+        '  linear-gradient(45deg, ##' & start & ' 25%, transparent 25%); ' & nl &
+        '  background-size: ' & perc1 & 'px ' & perc2 & 'px; ' & nl &
+        '  background-color: ##' & full_stop;
+
+    return txt;
+
+  }
+
+  remote string function buildStairs() {
+
+    var nl = chr(13) & chr(10);
+    var start = variables.fc_data['start'];
+    var full_stop = variables.fc_data['full_stop'];
+    var angle = getAngle(variables.fc_data['angle']);
+
+    var txt = 'background: linear-gradient(63deg, ##' & full_stop & ' 25%, transparent 23%) 7px 0, ' & nl &
+        '  linear-gradient(63deg, transparent 74%, ##' & full_stop & ' 78%),' & nl &
+        '  linear-gradient(63deg, transparent 34%, ##' & full_stop & ' 38%, ##' & full_stop & ' 58%, transparent 62%),' & nl &
+        '  ##' & start & ';' & nl & 
+        '  background-size: ' & angle & 'px 48px';
+
+    return txt;
+
+  }
+
+  remote string function buildRainbowBokeh() {
+
+    var perc1 = getPercentage(variables.fc_data['position']);
+    var perc2 = getPercentage(variables.fc_data['girth']);
+    var perc3 = getPercentage(variables.fc_data['angle']);
+    var full_stop = variables.fc_data['full_stop'];
+    var girth = getAngle(variables.fc_data['girth']);
+
+    var txt = '
+    background: 
+    radial-gradient(rgba(255,255,255,0) 0, rgba(255,255,255,.15) 30%, rgba(255,255,255,.3) 32%, rgba(255,255,255,0) 33%) 0 0,
+    radial-gradient(rgba(255,255,255,0) 0, rgba(255,255,255,.2) 17%, rgba(255,255,255,.43) 19%, rgba(255,255,255,0) 20%) 0 110px,
+    radial-gradient(rgba(255,255,255,0) 0, rgba(255,255,255,.2) 11%, rgba(255,255,255,.4) 13%, rgba(255,255,255,0) 14%) 130px 370px,
+    linear-gradient(' & buildLinearGradient() & ');
+    background-size: ' & perc1 & '% ' & (perc1*2) & '%, ' & perc2 & '% ' & (perc2*2) & '%, ' & perc3 & '% ' & (perc3*2) & '%, 100% ' & girth & '%;
+    background-color: ##' & full_stop & ';';
+
+    return txt;
+
   }
 
   remote numeric function hex2dec( string hex ) {
@@ -309,8 +465,6 @@ component accessors=true {
 
   remote boolean function hasVendor( numeric value ) {
 
-    //var vendByte = Mid( c, 41, 2 );
-    //var value = InputBaseN( vendByte, 16 );
     var choice = arguments.value MOD 2;
 
     switch(choice) {
@@ -392,8 +546,6 @@ component accessors=true {
 
   remote boolean function hasChip( numeric value ) {
 
-    //var chipByte = Mid( c, 35, 2 );
-    //var value = InputBaseN( chipByte, 16 );
     var choice = arguments.value MOD 2;
 
     switch(choice) {
@@ -432,7 +584,7 @@ component accessors=true {
         return 'linear-gradient(' & buildLinearGradient() & ')';
         break;
       case 1:
-        return 'repeating-linear-gradient(' & buildRepeatingLinearGradient() & ')';
+        return buildRepeatingLinearGradient();
         break;
       case 2:
         return 'radial-gradient(' & buildRadialGradient() & ')';
@@ -440,7 +592,37 @@ component accessors=true {
       case 3:
         return 'repeating-radial-gradient(' & buildRadialGradient() & ')';
         break;
+
     }
+
+  }
+
+  remote string function buildBackground( numeric value ) {
+
+    var choice = arguments.value MOD 8;
+
+    switch(choice) {
+      case 0:
+      case 1:
+      case 2:
+      case 3:
+        return 'background: ' & getGradient( arguments.value );
+        break;
+      case 4:
+        return buildMarrakesh();
+        break;
+      case 5:
+        return buildZigZag();
+        break;
+      case 6:
+        return buildStairs();
+        break;
+      case 7:
+        return buildRainbowBokeh();
+        break;
+
+    }
+
 
   }
 
@@ -607,7 +789,7 @@ component accessors=true {
   border-width: 3px;
   border-color: ##' & variables.properties['border-color'] & ';
   border-style: ' & variables.properties['border-style'] & ';
-  background: ' & variables.properties['background'] & ';
+  ' & variables.properties['background'] & ';
 }
 
 .' & variables.cardClass & '.small {

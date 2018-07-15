@@ -12,10 +12,11 @@ component accessors = true {
   property interest_rate; // decimal
   property zero_apr_end_date; // date
   property code; // string
+  property priority; // numeric
 
   function init( string card_id = 0, string credit_limit= -1, string due_on_day= 0, string user_id="", string label="", 
     string min_payment="", string is_emergency=0, string balance=0, string interest_rate=0.29, 
-    string zero_apr_end_date="1900-01-01", string code="" ) {
+    string zero_apr_end_date="", string code="", string priority="" ) {
 
     variables.card_id = arguments.card_id;
     variables.credit_limit = arguments.credit_limit;
@@ -28,6 +29,7 @@ component accessors = true {
     variables.interest_rate = arguments.interest_rate;
     variables.zero_apr_end_date = arguments.zero_apr_end_date;
     variables.code = arguments.code;
+    variables.priority = arguments.priority;
 
     return this;
 

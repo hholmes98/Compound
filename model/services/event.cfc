@@ -1,7 +1,7 @@
 //model/services/event
 component accessors=true {
 
-  public any function init( beanFactory, planService, cardService, preferenceService, knapsackService, pay_periodService ) {
+  public any function init( beanFactory, planService, cardService, preferenceService, knapsackService, pay_periodService, userService ) {
 
     variables.beanFactory = arguments.beanFactory;
     variables.planService = arguments.planService;
@@ -9,6 +9,7 @@ component accessors=true {
     variables.preferenceService = arguments.preferenceService;
     variables.knapsackService = arguments.knapsackService;
     variables.pay_periodService = arguments.pay_periodService;
+    variables.userService = arguments.userService;
 
     variables.defaultOptions = {
       datasource = application.datasource
@@ -404,6 +405,7 @@ component accessors=true {
     // ================
     var plan = arguments.in_plan;
     var user_id = plan.getUser_Id();
+    var user = userService.get(user_id);
     var deck = plan.getPlan_Deck(); // should probably run a verify here - must be a populated plan.
     var cards = deck.getDeck_Cards();
     var pay_freq = preferenceService.get( user_id ).getPay_Frequency();
@@ -421,52 +423,31 @@ component accessors=true {
     event.setCalculated_For_Month( Month(calculated_for) );
     event.setCalculated_For_Year( Year(calculated_for) );
 
-    // 1. including the_date[], an array of dates in the month that will be used as a ref. point
-    // for deciding what to assign to each card.
-    var valid_dates_for_month = ArrayNew(1);
-    valid_dates_for_month[1] = CreateDate( Year( calculated_for ), Month( calculated_for ), DaysInMonth( calculated_for ) ); // end of the month
-
-    // 2. Examine the user's preferences, and modify/update the_date[] accordingly.
-    if ( pay_freq == 2 ) {
-
-      valid_dates_for_month[2] = CreateDate( Year( calculated_for ), Month( calculated_for ), 15 );
-
-    } else if ( pay_freq == 3 ) {
-
-      var qMonthPayPeriods = pay_periodService.qGetPayPeriodsInMonthOfDate( calculated_for );
-
-      for ( var m=qMonthPayPeriods.RecordCount; m > 0; m-- ) { // walk backwards
-
-        valid_dates_for_month[m] = qMonthPayPeriods.pay_date[m];
-
-      }
-
-    }
-
-    // 3. Reduce the cards to only those with a balance, and split their payments with a knapsack algorithm
     var nonzero_cards = plan.getNonZeroCalculatedPaymentCards();
-    var paymentsArray = splitPayments( nonzero_cards, ArrayLen(valid_dates_for_month) );
 
-    // 4. Assign pay_dates to the split payments, based on the available dates of the month (the_date[]).
-    var pay_dates = ArrayReverse( valid_dates_for_month ); // pay_dates should now be 1st, 15th, 30th, etc.
+    // PAID ACCOUNTS
+    if ( user.getAccount_Type_Id() == 4 ) {
 
-    // looping over the pay_days array assures us we'll only use what we *need* from the_dates[], so if we erroneously
-    // assigned a 3rd pay date -- we won't even iterate that far.
-    for ( var p=1; p <= ArrayLen(paymentsArray); p++ ) {
+      for ( var card in nonzero_cards ) {
 
-      for ( var card_id in paymentsArray[p] ) {
+        // did the user actually specify a due date?
+        if ( nonzero_cards[card].getDue_On_Day() > 0 ) {
 
-        if ( paymentsArray[p][card_id] > 0 ) {
+          var intended_day = nonzero_cards[card].getDue_On_Day();
 
-          var card = plan.getCard( card_id );
+          // 31st, 30th, 29th (leap year) handling
+          if ( DaysInMonth(calculated_for) < intended_day )
+            intended_day = DaysInMonth(calculated_for);
 
           // populate event_card bean with its starting values
-          var event_card = variables.beanFactory.getBean('event_cardBean').init( argumentCollection=card.flatten() );
-
-          event_card.setPay_Date( pay_dates[p] );
+          var event_card = variables.beanFactory.getBean('event_cardBean').init( argumentCollection=nonzero_cards[card].flatten() );
+          event_card.setPay_Date( CreateDate( Year(calculated_for), Month(calculated_for), intended_day ) );
 
           // store in event
           event.addCard( event_card );
+
+          // remote this card from the nonzero_cards
+          StructDelete( nonzero_cards, card ); // uh within the loop?
 
         }
 
@@ -474,8 +455,64 @@ component accessors=true {
 
     }
 
-    // 5. FIXME: Handle any ignored cards (not sure why they should be included at all?) - their absence is probably fucking up forecasting.
+    // if any cards remain that need their pay_date set...
+    if ( !StructIsEmpty( nonzero_cards ) ) {
 
+      // 1. including the_date[], an array of dates in the month that will be used as a ref. point
+      // for deciding what to assign to each card.
+      var valid_dates_for_month = ArrayNew(1);
+      valid_dates_for_month[1] = CreateDate( Year( calculated_for ), Month( calculated_for ), DaysInMonth( calculated_for ) ); // end of the month
+
+      // 2. Examine the user's preferences, and modify/update the_date[] accordingly.
+      if ( pay_freq == 2 ) {
+
+        valid_dates_for_month[2] = CreateDate( Year( calculated_for ), Month( calculated_for ), 15 );
+
+      } else if ( pay_freq == 3 ) {
+
+        var qMonthPayPeriods = pay_periodService.qGetPayPeriodsInMonthOfDate( calculated_for );
+
+        for ( var m=qMonthPayPeriods.RecordCount; m > 0; m-- ) { // walk backwards
+
+          valid_dates_for_month[m] = qMonthPayPeriods.pay_date[m];
+
+        }
+
+      }
+
+      // 3. Reduce the cards to only those with a balance, and split their payments with a knapsack algorithm
+      var paymentsArray = splitPayments( nonzero_cards, ArrayLen(valid_dates_for_month) );
+
+      // 4. Assign pay_dates to the split payments, based on the available dates of the month (the_date[]).
+      var pay_dates = ArrayReverse( valid_dates_for_month ); // pay_dates should now be 1st, 15th, 30th, etc.
+
+      // looping over the pay_days array assures us we'll only use what we *need* from the_dates[], so if we erroneously
+      // assigned a 3rd pay date -- we won't even iterate that far.
+      for ( var p=1; p <= ArrayLen(paymentsArray); p++ ) {
+
+        for ( var card_id in paymentsArray[p] ) {
+
+          if ( paymentsArray[p][card_id] > 0 ) {
+
+            var card = plan.getCard( card_id );
+
+            // populate event_card bean with its starting values
+            var event_card = variables.beanFactory.getBean('event_cardBean').init( argumentCollection=card.flatten() );
+
+            event_card.setPay_Date( pay_dates[p] );
+
+            // store in event
+            event.addCard( event_card );
+
+          }
+
+        }
+
+      }
+
+    } // if cards remain that need have their pay_date set
+
+    // 5. FIXME: Handle any ignored cards (not sure why they should be included at all?) - their absence is probably fucking up forecasting.
 
     if (!arguments.no_cache) {
       var event_id = save(event);
@@ -516,7 +553,7 @@ component accessors=true {
         if ( a < arguments.dividend && !StructIsEmpty( calc_cards ) ) {
 
           // split pay
-          var splitArray = knapsackservice.knapsack( calc_cards, pay_frequency_capacity );
+          var splitArray = knapsackService.knapsack( calc_cards, pay_frequency_capacity );
 
           // if nothing was splittable...
           if ( !ArrayLen(splitArray) ) {
@@ -583,15 +620,19 @@ component accessors=true {
     var plan = arguments.in_plan;
     var fp = plan.getFingerprint();
     var user_id = plan.getUser_Id();
+    var user = userService.get( user_id );
     var deck = plan.getPlan_Deck();
     var cards = deck.getDeck_Cards();
     var budget = preferenceService.get( user_id ).getBudget();
     var next_date = plan.getActive_On();
     var events = ArrayNew(1);
+
     /* 5. convert the plan into an event.*/
     var event = create( plan );
+
     /* 6. add that new event into the events array */
     ArrayAppend( events, event );
+
     /*7. calculate the total_remaining_balance by summing the remaining_balance of each card in the current event*/
     var totalrb = event.getEvent_Cards().reduce( function(result, key, value) {
       return result + value.getRemaining_Balance();
@@ -623,11 +664,37 @@ component accessors=true {
         // if there is a remaining balance
         if ( cards[card_id].getRemaining_Balance() > 0 ) {
 
-            // 8bi. calculate the interest for next month
-            var next_interest = plan.calculateMonthInterest( cards[card_id].getRemaining_Balance(), cards[card_id].getInterest_Rate(), next_date );
+            // ***PAID*** support only
+            if ( user.getAccount_Type_Id() == 4 ) {
 
-            // 8bii. add it to the card's reamining_balance.
-            var next_balance = cards[card_id].getRemaining_Balance() + next_interest;
+              var expiryDate = cards[card_id].getZero_APR_End_Date();
+
+              // if there is an expiry date, and it hasn't yet lapsed (compared to date being computed)
+              if ( isDate( expiryDate ) && DateCompare( next_date, expiryDate, "m" ) <= 0 ) {
+
+                // 8bii. add it to the card's reamining_balance.
+                var next_balance = cards[card_id].getRemaining_Balance();
+
+              } else {
+
+                // it's either not a zero apr card, or it is but the expiry has passed
+                // 8bi. calculate the interest for next month (STANDARD/FREE accounts)
+                var next_interest = plan.calculateMonthInterest( cards[card_id].getRemaining_Balance(), cards[card_id].getInterest_Rate(), next_date );
+
+                // 8bii. add it to the card's reamining_balance.
+                var next_balance = cards[card_id].getRemaining_Balance() + next_interest;
+
+              }
+
+            } else {
+
+              // 8bi. calculate the interest for next month (STANDARD/FREE accounts)
+              var next_interest = plan.calculateMonthInterest( cards[card_id].getRemaining_Balance(), cards[card_id].getInterest_Rate(), next_date );
+
+              // 8bii. add it to the card's reamining_balance.
+              var next_balance = cards[card_id].getRemaining_Balance() + next_interest;
+
+            }
 
             // 8biii and set it
             cards[card_id].setBalance( next_balance );

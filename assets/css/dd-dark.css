@@ -113,12 +113,6 @@ Didact Gothic - alternate to "Graphik" (barely)
 .main-center {
   margin: 0 auto;
   padding: 20px 40px 0px 40px;
-  border-top: 1px;
-  border-top-color: rgba(0,0,0,0.3);
-  border-top-style: solid;
-  border-left: 1px;
-  border-left-color: rgba(0,0,0,0.3);
-  border-left-style: solid;
 }
 
 .sub-main-center {
@@ -126,9 +120,6 @@ Didact Gothic - alternate to "Graphik" (barely)
   padding: 20px 0px 20px 0px;
 }
 
-/* toggle buttons */
-
-/* settings */
 .toggle-on.btn {
   padding-top: 7px;
 }
@@ -138,29 +129,6 @@ Didact Gothic - alternate to "Graphik" (barely)
   padding-top:  7px;
 }
 
-
-
-
-
-/*.toggle-off.btn {
-  padding-left: 14px;
-  padding-top: 7px;
-}*/
-
-/* toggle on the pay screen */
-.toggle.btn {
-  /*min-width: 155px;*/
-}
-/*
-.toggle.btn-xs {
-  min-height: 40px;
-}
-
-.btn.toggle-off.btn-sm {
-  padding: 8px 0px 8px 8px;
-}
-*/
-/* glyphs */
 .glyphicon-large {
   font-size: 42px;
 }
@@ -218,12 +186,38 @@ html, body {
   font-weight: 400;
 }
 
+/* https://stackoverflow.com/questions/37504626/css-effect-to-render-a-font-with-rubber-stamp-effect*/
+.rubber {
+  box-shadow: 0 0 0 3px #ff69b4, 0 0 0 2px #ff69b4 inset;
+  border: 2px solid transparent;
+  display: inline-block;
+  padding: 5px 2px;
+  line-height: 22px;
+  color: #ff69b4;
+  font-size: 24px;
+  font-family: 'Allerta Stencil', sans-serif;
+  text-transform: uppercase;
+  text-align: center;
+  opacity: 0.7;
+  width: 155px;
+  transform: rotate(-12deg);
+  position: absolute;
+}
+
 .top-buffer {
   margin-top: 20px;
 }
 
 .bottom-buffer {
   margin-bottom: 20px;
+}
+
+.bottom-buffer-tall {
+  margin-bottom: 80px;
+}
+
+.form-control {
+  background-color: #000;
 }
 
 a {
@@ -285,7 +279,7 @@ h1, h2, h3, .navbar-brand, .navbar-brand a, .navbar-inverse .navbar-brand a {
 }
 
 .navbar-brand, .navbar-inverse .navbar-brand a {
-  font-family: 'Slabo 13px', serif;
+  font-family: 'Nunito', sans-serif;
 }
 
 h1 {
@@ -370,11 +364,6 @@ label {
   background-color: #222222;
   border: 1px solid #333333;
   font-size: 17px;
-  color: #88fef0;
-}
-
-.input-group {
-  /* margin-top: 6px; */
 }
 
 .container {
@@ -419,6 +408,10 @@ label {
   top: 2px;
 }
 
+.btn.btn-primary > .glyphicon, .btn.btn-primary > .fas-large, .btn.btn-primary > .svg-inline--fa {
+  color: #fff;
+}
+
 /* glyphs on buttons that are being hovered or focused (orange) will flip to black */
 .btn:hover .glyphicon, .btn:focus .glyphicon {
   color: #ffffff;
@@ -445,6 +438,20 @@ label {
   letter-spacing: 2px;
 }
 
+/* material */
+.btn-primary.pmd-button-fab {
+  border-radius: 50%;
+  padding: 0;
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+}
+
+.btn-primary.pmd-button-fab > .svg-inline--fa {
+  line-height: 56px;
+  height: 50px;
+}
+
 .btn.btn-sm {
   padding: 5px 10px;
 }
@@ -464,6 +471,19 @@ label {
   color: #555555;
 }
 
+
+.btn-link {
+  font-weight: 700;
+  color: #19842c;
+  border-radius: 0;
+}
+
+.btn-link:focus, .btn-link:hover {
+  color: #d2691e;
+  text-decoration: none;
+  background-color: transparent;
+}
+
 .navbar-fixed-top {
   top: 0;
   border-top-color: #49bfb1;
@@ -478,8 +498,6 @@ label {
 .navbar-inverse {
   background-color: #111111;
   font-size: 17px;
-  /*border-color: #000;*/
-  /* border-top: 2px; */
 }
 
 .navbar-inverse a {
@@ -517,6 +535,11 @@ label {
   color: #000;
 }
 
+.navbar-inverse .navbar-nav>.open>a, .navbar-inverse .navbar-nav>.open>a:focus, .navbar-inverse .navbar-nav>.open>a:hover {
+  color: #fff;
+  background-color: transparent;
+}
+
 .navbar-inverse .navbar-nav > .active > a > .glyphicon {
   color: #49bfb1;
 }
@@ -528,12 +551,6 @@ label {
 .navbar-inverse .navbar-toggle .icon-bar {
   background-color: #333333;
 }
-
-/* nav tabs */
-.nav-tabs > li {
-  /* margin-bottom: 0px; */
-}
-
 .nav-tabs > li > a {
   color: #555555;
   font-weight: 700;
@@ -550,8 +567,7 @@ label {
 }
 
 /* panels */
-.panel
-{
+.panel {
   background: #444444;
   border-radius: 8px;
   border: 2px solid #49bfb1;
@@ -560,9 +576,6 @@ label {
 .panel .row {
   margin-right: 0px;
   margin-left: 0px;
-  /* border: 1px; */
-  /* border-color: #000; */
-  /* border:  1px solid black; */
 }
 
 .panel .tab-content {
@@ -619,8 +632,7 @@ label {
   border-top-color: #49bfb1;
 }
 
-.panel-default
-{
+.panel-default {
   border-color: #49bfb1;
 }
 
@@ -648,7 +660,6 @@ label {
   border-right-color: #49bfb1;
   border-bottom-color: #333333; /* same as the bg color. i get it. we're cheating */
   border-left-color: #49bfb1;
-  
 }
 
 /* tabs being hovered over */
@@ -661,13 +672,6 @@ label {
 .panel > .nav-tabs > .active > a:hover > .svg-inline--fa {
   color: #49bfb1;
 }
-
-/* form fields */
-/*
-.form-horizontal .control-label {
-  padding-top: 0px;
-}
-*/
 
 .form-control {
   color: #111111;
@@ -762,15 +766,6 @@ label {
   margin: 0 auto;
 }
 
-/*
-1. focus
-2. security
-3. fear
-4. privacy
-5. support
-
-*/
-
 /* all tiles */
 .splash-icon {
   background-position: 0 -233px;
@@ -808,7 +803,6 @@ label {
   background-position: 0 -270px;
   border: 2px solid #e5e5e5;
   border-radius: 6px;
-  /* padding: 0 30px 0 0; */
 }
 
 /* right-text */
@@ -817,14 +811,16 @@ label {
   vertical-align: middle;
   display: inline-block;
   width: 520px;
-  /* padding: 0 0 0 30px; */
 }
 
 .about {
   padding-top: 60px;
 }
 
-/* the following section is relative */
+.spacer {
+  padding-top: 1200px;
+}
+
 .focus, .fear, .support {
   position: relative;
   top: 0;
@@ -1057,14 +1053,6 @@ label {
   }
 }
 
-@media (max-width: 992px) {
-
-  label {
-    /*width: 240px;*/
-  }
-
-}
-
 /* last, screen widths up 800px and wider (desktop) */
 @media (min-width: 800px) {
   .responsive_ad {
@@ -1084,7 +1072,8 @@ label {
     padding-top: 4px;
     padding-bottom: 4px;
     color: #fff;
-    margin-top: 10px;
+    margin-top: 50px;
     background: transparent;
   }
+
 }

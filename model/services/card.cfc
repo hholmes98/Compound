@@ -54,6 +54,7 @@ component accessors=true {
       card.setInterest_Rate( result.interest_rate[i] );
       card.setZero_APR_End_Date( result.zero_apr_end_date[i] );
       card.setCode( result.code[i] );
+      card.setPriority( result.priority[i] );
 
       cards[card.getCard_Id()] = card;
 
@@ -97,6 +98,7 @@ component accessors=true {
       card.setInterest_Rate( result.interest_rate[1] );
       card.setZero_APR_End_Date( result.zero_apr_end_date[1] );
       card.setCode( result.code[1] );
+      card.setPriority( result.code[1] );
 
     }
 
@@ -111,8 +113,14 @@ component accessors=true {
   public any function save( any card ) {
     param name="card.credit_limit" default=-1;
     param name="card.due_on_day" default=0;
-    param name="card.zero_apr_end_date" default="1900-01-01";
-    param name="card.code" default="#Hash(Now(),"SHA-256","UTF-8")#";
+    param name="card.zero_apr_end_date" default="";
+    param name="card.code" default="#Hash(RandRange(1,9999),'SHA-256','UTF-8')#";
+
+    if ( IsDate( arguments.card.zero_apr_end_date ) && arguments.card.zero_apr_end_date != '1900-01-01' ) {
+      var in_date = CreateODBCDate( arguments.card.zero_apr_end_date );
+    } else {
+      var in_date = 'NULL';
+    }
 
     if ( arguments.card.card_id <= 0 ) {
 
@@ -127,7 +135,8 @@ component accessors=true {
           balance,
           interest_rate,
           zero_apr_end_date,
-          code
+          code,
+          priority
         ) VALUES (
           #arguments.card.credit_limit#,
           #arguments.card.due_on_day#,
@@ -137,8 +146,9 @@ component accessors=true {
           #arguments.card.is_emergency#,
           #arguments.card.balance#,
           #arguments.card.interest_rate#,
-          #CreateODBCDate(arguments.card.zero_apr_end_date)#,
-          :code
+          #in_date#,
+          :code,
+          #arguments.card.priority#
         ) RETURNING card_id AS card_id_out;
       ';
 
@@ -169,8 +179,9 @@ component accessors=true {
           is_emergency = #arguments.card.is_emergency#,
           balance = #arguments.card.balance#,
           interest_rate = #arguments.card.interest_rate#,
-          zero_apr_end_date = #CreateODBCDate(arguments.card.zero_apr_end_date)#,
-          code = :code
+          zero_apr_end_date = #in_date#,
+          code = :code,
+          priority = #arguments.card.priority#
         WHERE
           card_id = :cid;
       ';

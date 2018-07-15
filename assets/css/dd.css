@@ -417,6 +417,20 @@ label {
   letter-spacing: 2px;
 }
 
+/* material */
+.btn-primary.pmd-button-fab {
+  border-radius: 50%;
+  padding: 0;
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+}
+
+.btn-primary.pmd-button-fab > .svg-inline--fa {
+  line-height: 56px;
+  height: 50px;
+}
+
 .btn.btn-sm {
   padding: 5px 10px;
 }
@@ -530,8 +544,7 @@ label {
 }
 
 /* panels */
-.panel
-{
+.panel {
   background: #42493C;
   border-radius: 8px;
   border: 2px solid #171717;
@@ -596,8 +609,7 @@ label {
   border-top-color: #171717;
 }
 
-.panel-default
-{
+.panel-default {
   border-color: #171717;
 }
 
@@ -625,7 +637,6 @@ label {
   border-right-color: #171717;
   border-bottom-color: #839178; /* same as the bg color. i get it. we're cheating */
   border-left-color: #171717;
-  
 }
 
 /* tabs being hovered over */

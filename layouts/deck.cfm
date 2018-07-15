@@ -8,7 +8,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <cfoutput>#view('common/nav/loggedin')#</cfoutput>
 <cfoutput>#view('common/banner')#</cfoutput>
 
-<div class="container"> 
+<div class="container">
   <cfoutput>
     #view('common/func/msg')#
 
