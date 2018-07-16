@@ -12,6 +12,8 @@ component accessors=true extends=model.beans.card {
   property balance; // number (8,2)
   property interest_rate; // decimal
   property zero_apr_end_date; // date
+  property code; // charcter varying(64)
+  property priority; // numeric (3,2)
   /* end */
 
   property plan_id;
@@ -20,7 +22,8 @@ component accessors=true extends=model.beans.card {
 
   function init( string card_id = 0, string credit_limit= -1, string due_on_day= 0, string user_id="", string label="", 
       string min_payment="", string is_emergency=0, string balance=0, string interest_rate=0.29, 
-      string zero_apr_end_date="1900-01-01", string plan_id = 0, string is_hot=0, string calculated_payment="" ) {
+      string zero_apr_end_date="", string code="", string priority=0, string plan_id = 0, string is_hot=0, 
+      string calculated_payment="" ) {
 
     variables.plan_id = arguments.plan_id;
     variables.is_hot = arguments.is_hot;
@@ -36,7 +39,9 @@ component accessors=true extends=model.beans.card {
       arguments.is_emergency,
       arguments.balance,
       arguments.interest_rate,
-      arguments.zero_apr_end_date
+      arguments.zero_apr_end_date,
+      arguments.code,
+      arguments.priority
     );
 
   }

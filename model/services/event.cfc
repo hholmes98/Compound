@@ -59,6 +59,8 @@ component accessors=true {
         card.setBalance(result.balance);
         card.setInterest_Rate(result.interest_rate);
         card.setZero_APR_End_Date(result.zero_apr_end_date);
+        card.setCode(result.code);
+        card.setPriority(result.priority);
 
         // plan_card
         card.setPlan_Id(result.plan_id);
@@ -90,7 +92,7 @@ component accessors=true {
         CONCAT(e.calculated_for_year, ''-'', e.calculated_for_month) AS calculated_for, 
         ec.balance, ec.is_hot, ec.calculated_payment, ec.pay_date,
         c.card_id, c.credit_limit, c.due_on_day, c.user_id, c.card_label, c.min_payment, 
-        c.is_emergency, c.interest_rate, c.zero_apr_end_date, ucp.actual_payment, ucp.actually_paid_on
+        c.is_emergency, c.interest_rate, c.zero_apr_end_date, c.code, c.priority, ucp.actual_payment, ucp.actually_paid_on
       FROM 
         "pEvents" e
       INNER JOIN 
@@ -133,7 +135,7 @@ component accessors=true {
         CONCAT(e.calculated_for_year, ''-'', e.calculated_for_month) AS calculated_for, 
         ec.balance, ec.is_hot, ec.calculated_payment, ec.pay_date,
         c.card_id, c.credit_limit, c.due_on_day, c.user_id, c.card_label, c.min_payment, 
-        c.is_emergency, c.interest_rate, c.zero_apr_end_date, ucp.actual_payment, ucp.actually_paid_on
+        c.is_emergency, c.interest_rate, c.zero_apr_end_date, c.code, c.priority, ucp.actual_payment, ucp.actually_paid_on
       FROM 
         "pEvents" e
       INNER JOIN 
@@ -145,7 +147,7 @@ component accessors=true {
         AND
           e.calculated_for_year = ucp.payment_for_year
         AND
-        c.card_id = ucp.card_id
+          c.card_id = ucp.card_id
       )
       WHERE 
         e.event_id = :eid

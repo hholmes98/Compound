@@ -85,6 +85,7 @@ component accessors = true {
     c_data.interest_rate = variables.getinterest_rate();
     c_data.zero_apr_end_date = variables.getzero_apr_end_date();
     c_data.code = variables.getcode();
+    c_data.priority = variables.getpriority();
 
     return c_data;
 

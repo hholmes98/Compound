@@ -27,7 +27,7 @@ component accessors=true {
 
     var sql = '
       SELECT p.plan_id, p.active_on, c.card_id, c.credit_limit, c.due_on_day, c.user_id, c.card_label, c.min_payment, c.is_emergency, c.balance, 
-        c.interest_rate, c.zero_apr_end_date, pc.is_hot, pc.calculated_payment
+        c.interest_rate, c.zero_apr_end_date, c.code, c.priority, pc.is_hot, pc.calculated_payment
       FROM "pPlans" p
       INNER JOIN "pPlanCards" pc ON
         p.plan_id = pc.plan_id
@@ -71,6 +71,8 @@ component accessors=true {
         card.setBalance(result.balance);
         card.setInterest_Rate(result.interest_rate);
         card.setZero_APR_End_Date(result.zero_apr_end_date);
+        card.setCode(result.code);
+        card.setPriority(result.priority);
 
         // plan_card
         card.setPlan_Id(result.plan_id);
@@ -99,7 +101,7 @@ component accessors=true {
 
     var sql = '
       SELECT p.plan_id, p.user_id, p.active_on, c.card_id, c.credit_limit, c.due_on_day, c.user_id, c.card_label, c.min_payment, 
-        c.is_emergency, c.balance, c.interest_rate, c.zero_apr_end_date, pc.is_hot, pc.calculated_payment
+        c.is_emergency, c.balance, c.interest_rate, c.zero_apr_end_date, c.code, c.priority, pc.is_hot, pc.calculated_payment
       FROM "pPlans" p
       INNER JOIN "pPlanCards" pc ON
         p.plan_id = pc.plan_id
@@ -140,6 +142,8 @@ component accessors=true {
         card.setBalance(result.balance);
         card.setInterest_Rate(result.interest_rate);
         card.setZero_APR_End_Date(result.zero_apr_end_date);
+        card.setCode(result.code);
+        card.setPriority(result.priority);
 
         // plan_card
         card.setPlan_Id(result.plan_id);

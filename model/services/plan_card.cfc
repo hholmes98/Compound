@@ -34,6 +34,8 @@ component accessors=true extends="model.services.card" {
       plan_card.setBalance( cards[card_id].getBalance() );
       plan_card.setInterest_Rate( cards[card_id].getInterest_Rate() );
       plan_card.setZero_APR_End_Date( cards[card_id].getZero_APR_End_Date() );
+      plan_card.setCode( cards[card_id].getCode() );
+      plan_card.setPriority( cards[card_id].getPriority() );
 
       plan_cards[plan_card.getCard_Id()] = plan_card;
     }

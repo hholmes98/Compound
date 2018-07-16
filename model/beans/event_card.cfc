@@ -25,8 +25,8 @@ component accessors=true extends=model.beans.plan_card {
 
   function init( string card_id = 0, string credit_limit= -1, string due_on_day= 0, string user_id="", string label="", 
       string min_payment="", string is_emergency=0, string balance=0, string interest_rate=0.29, 
-      string zero_apr_end_date="1900-01-01", string plan_id=0, string is_hot="", string calculated_payment="", 
-      string event_id=0, string pay_date="" ) {
+      string zero_apr_end_date="", string code="", string priority=0, string plan_id=0, string is_hot="",
+      string calculated_payment="", string event_id=0, string pay_date="" ) {
 
     variables.event_id = arguments.event_id;
     variables.pay_date = arguments.pay_date;
@@ -42,6 +42,8 @@ component accessors=true extends=model.beans.plan_card {
       arguments.balance,
       arguments.interest_rate,
       arguments.zero_apr_end_date,
+      arguments.code,
+      arguments.priority,
       arguments.plan_id,
       arguments.is_hot,
       arguments.calculated_payment
