@@ -42,7 +42,10 @@ component accessors = true {
 
   function top( struct rc ) {
 
-    variables.fw.setLayout('main.plan');
+    if ( session.auth.isLoggedIn )
+      variables.fw.setLayout('deck');
+    else
+      variables.fw.setLayout('main.plan');
     rc.pageTitle = application.app_name & " top ranked cards";
     rc.pageDescription = "Check out the most popular custom credit card designs in use at " & application.app_name;
 

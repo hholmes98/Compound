@@ -18,7 +18,9 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.7/js/bootstrap-dialog.min.js"></script>
 
   <!-- Locals -->
-  <script src="/node_modules/propellerkit/dist/js/propeller.js"></script>
+  <cfif !ListFindNoCase( 'pay', getSection() )>
+    <script src="/node_modules/propellerkit/dist/js/propeller.js"></script>
+  </cfif>
   <script src="/node_modules/angularjs-slider/dist/rzslider.js"></script>
   
   <script src="/node_modules/angular-tooltips/lib/angular-tooltips.js"></script>
