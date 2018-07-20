@@ -1,4 +1,9 @@
 <!-- views/main/plan.cfm -->
+<cfif StructIsEmpty( session.tmp.preferences )>
+  <!--- someone tried to go directly this page, send 'em back --->
+  <cflocation url="/" addtoken="false" />
+</cfif>
+
 <!--- this mirrors plan.default, but shows to anonymous/non-auth'd users --->
 
   <div class="container">
