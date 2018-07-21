@@ -125,6 +125,11 @@ component accessors = true {
 
   /* back-end actions */
   public void function calculate( struct rc ) {
+    param name="rc.budget" default=0;
+
+    /* shut down direct access */
+    if ( !rc.budget )
+      variables.fw.redirect( application.start_page );
 
     var cardcount = 0;
 
