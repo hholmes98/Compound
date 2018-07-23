@@ -34,6 +34,26 @@ component accessors=true {
 
   }
 
+  private function loadCardInfo( struct rc ) {
+    param name="rc.card" default=StructNew();
+    param name="rc.asterisks" default=StructNew();
+
+    // credit card info
+    if ( StructKeyExists( rc.customer, 'default_source' ) &&
+        rc.customer.default_source != '' && 
+        StructKeyExists( rc.customer, 'sources' ) &&
+        ArrayLen( rc.customer.sources.data ) && 
+        rc.customer.sources.data[1].id == rc.customer.default_source ) {
+
+      rc.card = rc.customer.sources.data[1];
+      rc.asterisks = variables.paymentService.getAsterisks( rc.card.brand );
+
+    }
+
+    //TODO: else, add a specific call to stripe to retrieve the card info (if needed)
+
+  }
+
   private function loadInvoices( struct rc ) {
     param name="rc.invoices" default=ArrayNew(1);
 
@@ -67,12 +87,7 @@ component accessors=true {
       loadCustomer( arguments.rc );
 
       // credit card info
-      if ( rc.customer.default_source != '' && ArrayLen( rc.customer.sources.data ) && rc.customer.sources.data[1].id == rc.customer.default_source ) {
-
-        rc.card = rc.customer.sources.data[1];
-        rc.asterisks = variables.paymentService.getAsterisks( rc.card.brand );
-
-      }
+      loadCardInfo( arguments.rc );
 
       // subscription info
       if ( ArrayLen( rc.customer.subscriptions.data ) && rc.customer.subscriptions.data[1].id == session.auth.user.getStripe_Subscription_Id() ) {
@@ -265,7 +280,6 @@ component accessors=true {
       var userPayment = variables.beanFactory.getBean('user_purchaseBean');
       userPayment.setUser_Id( session.auth.user.getUser_Id() );
       userPayment.setStripe_Customer_Id( session.auth.user.getStripe_Customer_Id() );
-      //userPayment.setStripe_Payment_Id( ); // not sure yet. source_id perhaps?
       userPayment.setStripe_Plan_Id( rc.stripe_plan_id );
       userPayment.setStripe_Subscription_Id( session.auth.user.getStripe_Subscription_Id() );
       userPayment.setGood_Until( subscription.current_period_end );
@@ -299,34 +313,23 @@ component accessors=true {
 
   }
 
-  function upgradeSub( struct rc ) {
+  function upgrade( struct rc ) {
     param name="rc.upgrade" default="upgrade";
-
-    // handles free->paid
-    // handles paid->paid (higher)
-
-    /*
-    This interface kicks in when a user wants to either
-    a) upgrade a free account to a paid account,
-    b) upgrade a paid account to another type of paid account (with more features), or
-    c) resubscribe to a previously-canceled paid account.
-
-    In all 3 instances, a valid source (method-of-payment) is already in-play, so we're just:
-    a) re-configuring the subscription in stripe, and
-    b) re-configuring the subscription locally.
-    */
+    param name="rc.card" default=StructNew();
+    param name="rc.asterisks" default="";
+    param name="rc.subscription" default=StructNew();
+    param name="rc.at_id" default="";
 
     rc.customer_id = session.auth.user.getStripe_Customer_Id()
     loadCustomer( arguments.rc );
 
-    rc.card = rc.customer.sources.data[1];
-    rc.asterisks = paymentService.getAsterisks( rc.card.brand );
-    rc.subscription = rc.customer.subscriptions.data[1];
+    // card info
+    loadCardInfo( arguments.rc );
 
-    // step 2: grab the sub that we're working with
-    //var subObj = rc.stripe.subscriptions.retrieve( session.auth.user.getStripe_Subscription_Id() );
-
-    //rc.subscription = subObj.content;
+    // if user already had/has a subscription
+    if ( StructKeyExists( rc.customer, 'subscription' ) && ArrayLen( rc.subscription.data ) ) {
+      rc.subscription = rc.customer.subscriptions.data[1];
+    }
 
   }
 
@@ -334,9 +337,9 @@ component accessors=true {
 
     rc.upgrade = "resub";
 
-    upgradeSub( arguments.rc );
+    upgradesub( arguments.rc );
 
-    variables.fw.setView('profile.upgradeSub');
+    variables.fw.setView('profile.upgrade');
 
   }
 

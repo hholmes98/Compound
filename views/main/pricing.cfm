@@ -58,7 +58,15 @@
               </ul>
             </div>
             <div class="generic_price_btn clearfix">
-              <cfoutput><a href="#buildUrl('login.create')#">Sign up</a></cfoutput>
+              <cfif session.auth.isLoggedIn>
+                <cfif session.auth.user.getAccount_Type_Id() == 1>
+                  YOUR PLAN
+                <cfelse>
+                  <cfoutput><a href="#buildUrl('profile.cancel')#">DOWNGRADE</a></cfoutput>
+                </cfif>
+              <cfelse>
+                <cfoutput><a href="#buildUrl('login.create')#">Sign up</a></cfoutput>
+              </cfif>
             </div>
           </div>
         </div>
@@ -95,7 +103,19 @@
               </ul>
             </div>
             <div class="generic_price_btn clearfix">
-              <cfoutput><a href="#buildUrl( action = 'login.create', queryString = { "at_id" = 2 } )#">Sign up</a></cfoutput>
+              <cfif session.auth.isLoggedIn>
+                <cfif session.auth.user.getAccount_Type_Id() == 2>
+                  YOUR PLAN
+                <cfelse>
+                  <cfif session.auth.user.getAccount_Type_Id() LT 2>
+                    <cfoutput><a href="#buildUrl( action = 'profile.upgrade', queryString = { "at_id" = 2 } )#">UPGRADE</a></cfoutput>
+                  <cfelse>
+                    <cfoutput><a href="#buildUrl( action = 'profile.downgrade', queryString = { "at_id" = 2 } )#">DOWNGRADE</a></cfoutput>
+                  </cfif>
+                </cfif>
+              <cfelse>
+                <cfoutput><a href="#buildUrl( action = 'login.create', queryString = { "at_id" = 2 } )#">Sign up</a></cfoutput>
+              </cfif>
             </div>
           </div>
         </div>
@@ -132,7 +152,19 @@
               </ul>
             </div>
             <div class="generic_price_btn clearfix">
-              <cfoutput><a href="#buildUrl( action = 'login.create', queryString = { "at_id" = 3 } )#">Sign up</a></cfoutput>
+              <cfif session.auth.isLoggedIn>
+                <cfif session.auth.user.getAccount_Type_Id() == 3>
+                  YOUR PLAN
+                <cfelse>
+                  <cfif session.auth.user.getAccount_Type_Id() LT 3>
+                    <cfoutput><a href="#buildUrl( action = 'profile.upgrade', queryString = { "at_id" = 3 } )#">UPGRADE</a></cfoutput>
+                  <cfelse>
+                    <cfoutput><a href="#buildUrl( action = 'profile.downgrade', queryString = { "at_id" = 3 } )#">DOWNGRADE</a></cfoutput>
+                  </cfif>
+                </cfif>
+              <cfelse>
+                <cfoutput><a href="#buildUrl( action = 'login.create', queryString = { "at_id" = 3 } )#">Sign up</a></cfoutput>
+              </cfif>
             </div>
           </div>
         </div>
@@ -169,7 +201,15 @@
               </ul>
             </div>
             <div class="generic_price_btn clearfix">
-              <cfoutput><a href="#buildUrl( action = 'login.create', queryString = { "at_id" = 4 } )#">Sign up</a></cfoutput>
+              <cfif session.auth.isLoggedIn>
+                <cfif session.auth.user.getAccount_Type_Id() == 4>
+                  YOUR PLAN
+                <cfelse>
+                  <cfoutput><a href="#buildUrl( action = 'profile.upgrade', queryString = { "at_id" = 4 } )#">UPGRADE</a></cfoutput>
+                </cfif>
+              <cfelse>
+                <cfoutput><a href="#buildUrl( action = 'login.create', queryString = { "at_id" = 4 } )#">Sign up</a></cfoutput>
+              </cfif>
             </div>
           </div>
         </div>

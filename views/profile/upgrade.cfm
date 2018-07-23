@@ -1,22 +1,37 @@
-<!--- model/views/upgradeSub --->
+<!-- model/views/upgrade -->
 <cfsilent>
   <cfif rc.upgrade == 'upgrade'>
     <cfset title = "Upgrade Subscription" />
   <cfelse>
     <cfset title = "Resubscribe" />
   </cfif>
+
+  <!--- the plan_id prepopulation priority is as follows:
+  1. if at_id is present(Len), it takes priority
+  2. if rc.subscription.items is present, the current most plan it takes priority
+  3. if neither 1 nor 2 are specified, the cheapest plan (2) is preselected --->
+  <cfset selected_plan_id = 2 />
+  <cfif StructKeyExists( rc.subscription, 'items' )>
+    <cfset selected_plan_id = rc.subscription.items.data[rc.subscription.items.total_count].plan.id />
+  </cfif>
+  <cfif (Len(rc.at_id)) AND (IsNumeric(rc.at_id)) and (rc.at_id GT 1) AND (rc.at_id LTE ArrayLen(application.stripe_plans))>
+    <cfset selected_plan_id = rc.at_id />
+  </cfif>
 </cfsilent>
+
 <cfoutput><h2 shadow-text="#title#">#title#</h2></cfoutput>
 
-<form action="<cfoutput>#buildUrl('profile.paymentComplete')#</cfoutput>" method="POST" id="paymentForm">
+<form class="form-inline" action="<cfoutput>#buildUrl('profile.paymentComplete')#</cfoutput>" method="POST" id="paymentForm">
 
-<div class="row top-buffer">
-  <div class="col-xs-2"></div>
-  <div class="col-xs-8" align="center">
-    You are about to resubscribe to a paid plan: <strong><cfoutput>#rc.subscription.items.data[rc.subscription.items.total_count].plan.nickname#</cfoutput></strong>.
+<cfif StructKeyExists( rc.subscription, 'items' )>
+  <div class="row top-buffer">
+    <div class="col-xs-2"></div>
+    <div class="col-xs-8" align="center">
+      You are about to resubscribe to a paid plan: <strong><cfoutput>#rc.subscription.items.data[rc.subscription.items.total_count].plan.nickname#</cfoutput></strong>.
+    </div>
+    <div class="col-xs-2"></div>
   </div>
-  <div class="col-xs-2"></div>
-</div>
+</cfif>
 
 <div class="row bottom-buffer">
   <div class="col-xs-2"></div>
@@ -35,9 +50,10 @@
   <div class="col-md-offset-5 col-xs-3">
     <select class="form-control" name="stripe_plan_id">
       <cfloop from="2" to="4" index="i">
-        <cfoutput><option value="#application.stripe_plans[i].id#"<cfif application.stripe_plans[i].id EQ rc.subscription.items.data[rc.subscription.items.total_count].plan.id> selected</cfif>>#application.stripe_plans[i].nickname#</option></cfoutput>
+        <cfoutput><option value="#application.stripe_plans[i].id#"<cfif i EQ selected_plan_id> selected</cfif>>#application.stripe_plans[i].nickname#</option></cfoutput>
       </cfloop>
     </select>
+    <cfoutput><a href="#buildUrl('main.pricing')#" tooltip="Ack! Show me the plans again!"><i class="far fa-question-circle"></i></a></cfoutput>
   </div>
 </div>
 
@@ -104,7 +120,9 @@
   <div class="col-xs-4">
     <button type="button" class="btn button btn-link" onClick="history.back()"> Go back</button>
     &nbsp;
-    <button class="btn button btn-default btn-success" form="paymentForm"><i class="fas fa-check"></i> Confirm Purchase</button>
+    <!-- fixme: ng-disabled should be set on the value of no credit card -->
+    <!-- fixme: when submitted, set to disabled -->
+    <button class="btn button btn-default btn-success form="paymentForm"><i class="fas fa-check"></i> Confirm Purchase</button>
   </div>
   <div class="col-xs-4"></div>
 </div>

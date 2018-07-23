@@ -3,7 +3,6 @@ component accessors=true {
 
   property user_id;
   property stripe_customer_id;
-  property stripe_payment_id;
   property good_until;
   property stripe_plan_id;
   property stripe_subscription_id;

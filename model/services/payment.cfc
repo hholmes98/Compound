@@ -20,7 +20,6 @@ component accessors=true {
       (
         user_id,
         stripe_customer_id,
-        stripe_payment_id,
         good_until,
         stripe_plan_id,
         stripe_subscription_id,
@@ -30,7 +29,6 @@ component accessors=true {
       (
         #arguments.userPayment.user_id#,
         ''#arguments.userPayment.stripe_customer_id#'',
-        ''#arguments.userPayment.stripe_payment_id#'',
         #CreateODBCDate( arguments.userPayment.good_until )#,
         ''#arguments.userPayment.stripe_plan_id#'',
         ''#arguments.userPayment.stripe_subscription_id#'',

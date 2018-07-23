@@ -57,7 +57,7 @@
     <span class="pull-right">
       <cfoutput>
         <cfif session.auth.user.getAccount_Type_Id() == 1>
-          <strong>Free</strong> <button class="btn button btn-default" onClick="location.href='#buildUrl('profile.upgradeSub')#';"> <i class="fas fa-shopping-cart"></i> Upgrade to paid</button>
+          <strong>Free</strong> <button class="btn button btn-default" onClick="location.href='#buildUrl('profile.upgrade')#';"> <i class="fas fa-shopping-cart" tooltip="Paid accounts disable advertisements!"></i> Upgrade to paid</button>
         <cfelse>
           <strong>Paid</strong> 
           <cfif Len(rc.subscription)>
@@ -77,7 +77,7 @@
     <span class="pull-right">
       <strong>
         <cfif session.auth.user.getAccount_Type_Id() == 1>
-          ~
+          <cfoutput><a href="#buildUrl('main.pricing')#">Penny-Pincher</a></cfoutput>
         <cfelse>
           <cfoutput>#application.stripe_plans[session.auth.user.getAccount_Type_Id()]["nickname"]#</cfoutput>
         </cfif>
@@ -131,67 +131,61 @@
   </div>
 </div>
 
-<cfif session.auth.user.getAccount_Type_Id() EQ 1>
-  <!-- Upgrade to Paid -->
-  <div class="row">
-    <div class="col-xs-6"></div>
-    <div class="col-xs-6">
-      <span class="pull-right">
-        <input type="button" class="btn button btn-default btn-primary col-xs-12" value="Upgrade to paid" tooltip="Paid accounts disable advertisements!" />
-      </span>
-    </div>
-  </div>
-</cfif>
+<!--- if no card info is present, and the user is on a free account, just hide the entire billing interface - showing it
+just confuses users --->
+<cfif !(StructIsEmpty(rc.card) AND session.auth.user.getAccount_Type_Id() == 1)>
 
 <!-- Billing -->
-<div class="strike">
-  <span><h3>Billing Information</h3></span>
-</div>
-
-<form id="profileForm">
-
-<div class="row">
-  <div class="col-xs-4">Card info</div>
-  <div class="col-xs-8">
-
-      <!-- read-only -->
-      <span ng-show="!editingCard">
-        <cfif NOT StructIsEmpty(rc.card)>
-          <i class="fas fa-credit-card"></i>
-          <cfoutput>
-            <strong>#rc.card.brand# #rc.asterisks##rc.card.last4#</strong>
-            Expiration: <strong>#rc.card.exp_month#/#rc.card.exp_year#</strong>
-          </cfoutput>
-          <button class="btn button btn-default" ng-click="editingCard=true;"><span class="glyphicon glyphicon-credit-card"></span> Update payment method</button>
-        <cfelse>
-          (no payment specified)
-          <button class="btn button btn-default" ng-click="editingCard=true;"><span class="glyphicon glyphicon-credit-card"></span> Add payment method</button>
-        </cfif>
-      </span>
-
-      <!-- editing -->
-      <span ng-show="editingCard">
-        <ng-form name="paymentInfoForm" stripe-form>
-        <div>
-          <span>
-            <div id="card-element">
-            <!-- A Stripe Element will be inserted here. -->
-            </div>
-            <button class="btn button btn-link" type="button" ng-click="editingCard=false;"> <i class="fas fa-times-circle"></i> Cancel</button>
-            <button class="btn button btn-default" type="button" ng-click="submitCard()"> <i class="fas fa-check"></i> Save Payment Info</button>
-          </span>
-        </div>
-        <div>
-          <!-- used to display element errors. -->
-          <span id="card-errors" class="text-danger" role="alert"></span>
-        </div>
-        </ng-form>
-      </span>
-
+  <div class="strike">
+    <span><h3>Billing Information</h3></span>
   </div>
-</div>
 
-</form>
+  <form id="profileForm">
+
+  <div class="row">
+    <div class="col-xs-4">Card info</div>
+    <div class="col-xs-8">
+
+        <!-- read-only -->
+        <span ng-show="!editingCard">
+          <cfif NOT StructIsEmpty(rc.card)>
+            <i class="fas fa-credit-card"></i>
+            <cfoutput>
+              <strong>#rc.card.brand# #rc.asterisks##rc.card.last4#</strong>
+              Expiration: <strong>#rc.card.exp_month#/#rc.card.exp_year#</strong>
+            </cfoutput>
+            <button class="btn button btn-default" ng-click="editingCard=true;"><span class="glyphicon glyphicon-credit-card"></span> Update payment method</button>
+          <cfelse>
+            (no payment specified)
+            <button class="btn button btn-default" ng-click="editingCard=true;"><span class="glyphicon glyphicon-credit-card"></span> Add payment method</button>
+          </cfif>
+        </span>
+
+        <!-- editing -->
+        <span ng-show="editingCard">
+          <ng-form name="paymentInfoForm" stripe-form>
+          <div>
+            <span>
+              <div id="card-element">
+              <!-- A Stripe Element will be inserted here. -->
+              </div>
+              <button class="btn button btn-link" type="button" ng-click="editingCard=false;"> <i class="fas fa-times-circle"></i> Cancel</button>
+              <button class="btn button btn-default" type="button" ng-click="submitCard()"> <i class="fas fa-check"></i> Save Payment Info</button>
+            </span>
+          </div>
+          <div>
+            <!-- used to display element errors. -->
+            <span id="card-errors" class="text-danger" role="alert"></span>
+          </div>
+          </ng-form>
+        </span>
+
+    </div>
+  </div>
+
+  </form>
+
+</cfif>
 
       <!---<tr>
         <td>Coupon</td>
@@ -207,48 +201,55 @@
       </tr>
       --->
 
-<!-- Payment History -->
-<div class="strike">
-  <span><h3>Payment History</h3></span>
-</div>
+<!--- if no card info is present, and the user is on a free account, just hide the entire payment history inteface - showing it
+just confuses users --->
+<cfif !(StructIsEmpty(rc.card) AND session.auth.user.getAccount_Type_Id() == 1)>
 
-<cfif ArrayLen(rc.invoices)>
-<div class="table"> 
-  <table class="table table-striped">
-    <thead>
-      <tr>
-        <th>&nbsp;</th>
-        <th>ID</th>
-        <th>Date</th>
-        <th>Payment Method</th>
-        <th>Amount</th>
-        <th>Receipt</th>
-      </tr>
-    </thead>
-    <cfloop array="#rc.invoices#" item="invoice">
-    <tbody>
-      <cfoutput>
-      <tr>
-        <td><span class="glyphicon glyphicon-ok"></span></td>
-        <td>#invoice.number#</td>
-        <td>#DateFormat(invoice.date, "yyyy-mm-dd")#</td>
-        <td><i class="fas fa-credit-card"></i> #rc.card.brand# ending in #rc.card.last4#</td>
-        <td>$#Evaluate(invoice.total/100)#</td>
-        <td><a href="#invoice.invoice_pdf#"><span class="glyphicon glyphicon-floppy-save"></span></a></td>
-      </tr>
-      </cfoutput>
+  <!-- Payment History -->
+  <div class="strike">
+    <span><h3>Payment History</h3></span>
+  </div>
 
-      <!--- <tr class="warning text-muted">
-        <td><span class="glyphicon glyphicon-remove"></span></td>
-        <td>67118Z70</td>
-        <td>2017-10-24</td>
-        <td><span class="glyphicon glyphicon-credit-card"></span> American Express ending in 2003</td>
-        <td>$1.99</td>
-        <td>&nbsp;</td>
-      </tr> --->
-    </tbody>
-    </cfloop>
-  </table>
-</div>
+  <cfif ArrayLen(rc.invoices)>
+  <div class="table"> 
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>&nbsp;</th>
+          <th>ID</th>
+          <th>Date</th>
+          <th>Payment Method</th>
+          <th>Amount</th>
+          <th>Receipt</th>
+        </tr>
+      </thead>
+      <cfloop array="#rc.invoices#" item="invoice">
+      <tbody>
+        <cfoutput>
+        <tr>
+          <td><span class="glyphicon glyphicon-ok"></span></td>
+          <td>#invoice.number#</td>
+          <td>#DateFormat(invoice.date, "yyyy-mm-dd")#</td>
+          <td><i class="fas fa-credit-card"></i> #rc.card.brand# ending in #rc.card.last4#</td>
+          <td>$#Evaluate(invoice.total/100)#</td>
+          <td><a href="#invoice.invoice_pdf#"><span class="glyphicon glyphicon-floppy-save"></span></a></td>
+        </tr>
+        </cfoutput>
+
+        <!--- <tr class="warning text-muted">
+          <td><span class="glyphicon glyphicon-remove"></span></td>
+          <td>67118Z70</td>
+          <td>2017-10-24</td>
+          <td><span class="glyphicon glyphicon-credit-card"></span> American Express ending in 2003</td>
+          <td>$1.99</td>
+          <td>&nbsp;</td>
+        </tr> --->
+      </tbody>
+      </cfloop>
+    </table>
+  </div>
+  <cfelse>
+    No history yet! (Your receipts will show here)
+  </cfif>
+
 </cfif>
-
