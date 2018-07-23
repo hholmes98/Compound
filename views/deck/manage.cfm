@@ -170,7 +170,8 @@
                 <input type="text" name="interest_rate" class="form-control" ng-model="card.interest_rate" interest-rate-input>
                 <span class="input-group-addon">%</span>
               </div>
-              <span ng-show="innerForm.interest_rate.$invalid" class="help-block">Must be a valid interest rate.</span>
+              <span ng-show="innerForm.interest_rate.$invalid" class="help-block">Must be a valid interest rate</span>
+              <span ng-show="innerForm.interest_rate.$error.range" class="help-block">between 0% and 100% (typically 29.99%).</span>
             </div>
             <div class="col-md-2">
               <div class="input-group" ng-class="{'has-error': innerForm.min_payment.$invalid }">
@@ -181,7 +182,7 @@
             </div>
             <div class="col-md-2">
               <button class="btn button btn-default" ng-class="{'btn-success': !cardsForm.$pristine }" ng-disabled="cardsForm.$pristine || cardsForm.$invalid" ng-click="saveCard(card);calculateAll();cardsForm.$setPristine(true)" ><span class="glyphicon glyphicon-ok"></span> Save Changes</button>
-              <button class="btn button btn-default" ng-class="{'btn-warning': !cardsForm.$pristine }" ng-disabled="cardsForm.$pristine" ng-click="resetCard(card);cardsForm.$setPristine(true)" ><span class="glyphicon glyphicon-refresh"></span> Reset</button>
+              <button class="btn button btn-default" ng-class="{'btn-warning': !cardsForm.$pristine }" ng-disabled="cardsForm.$pristine" ng-click="resetCard(card);cardsForm.$setPristine(true)"><span class="glyphicon glyphicon-refresh"></span> Reset</button>
               <button class="btn button btn-link" ng-click="deleteCard($index);cardsForm.$setPristine(true)"><span class="glyphicon glyphicon-remove"></span> Delete</button>
             </div>
 

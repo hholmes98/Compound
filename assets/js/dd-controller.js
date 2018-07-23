@@ -110,6 +110,15 @@ function interestRateLink( scope, element, attributes, ngModel ) {
 
   ngModel.$validators.interestRate = function(modelVal, viewVal) {
 
+    // directly manipulating the model via resetCard skips parser/formatter, but not the validator! So...
+    ngModel.$setValidity('range', true);
+
+    if (modelVal < 0 || modelVal > 1)
+      ngModel.$setValidity('range', false);
+
+    if (viewVal < 0 || viewVal > 100)
+      ngModel.$setValidity('range', false);
+
     var myVal = modelVal || viewVal;
     return /^[\d|,|.]+$/.test(myVal);
 
@@ -117,16 +126,8 @@ function interestRateLink( scope, element, attributes, ngModel ) {
 
   function parser(value) {
 
-    // TODO: incoming values  should be checked for %ages greater than 30 or less than 0 (eg 0.1 = conveting to 0.001 interest = triggering validation)
-    // if ( valid ) { // FIXME: do any validation
-      value /= 100;
-      // ngModel.$setValidity('interest_rate', true)  // FIXME: This will flag the field on the form
-    //} else {
-      //value = null;
-      // ngModel.$setValidity('interest_rate', false)  // FIXME: This will flag the field on the form
-    //}
-
-    return value;
+    var ret = value / 100; // converts the percentage (formatted) to a decimal (parsed)
+    return ret;
 
   }
 
@@ -1734,7 +1735,7 @@ controller/cards
         var idx = Object.keys($scope.cards).find(thisCard => $scope.cards[thisCard].card_id == response.card.card_id);
 
         if (idx != "") {
-          $scope.cards[idx] = response.card; 
+          $scope.cards[idx] = response.card;
         } else {
           throw new Error('fail to reset!');
         }

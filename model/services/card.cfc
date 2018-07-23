@@ -98,7 +98,7 @@ component accessors=true {
       card.setInterest_Rate( result.interest_rate[1] );
       card.setZero_APR_End_Date( result.zero_apr_end_date[1] );
       card.setCode( result.code[1] );
-      card.setPriority( result.code[1] );
+      card.setPriority( result.priority[1] );
 
     }
 
