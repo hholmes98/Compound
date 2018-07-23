@@ -761,9 +761,9 @@ services
       }
 
       deferred.resolve({
+        events: response.data,
         user_id: key,
         chain: data,
-        events: response.data
       });
 
     })
@@ -800,9 +800,9 @@ services
       }
 
       deferred.resolve({
+        event: response.data,
         user_id: key,
-        chain: data,
-        event: response.data
+        chain: data
       });
 
     })
@@ -1023,8 +1023,8 @@ services
     var deferred = $q.defer();
 
     $http({
-        method: 'GET',
-        url: '/index.cfm/preferences/get/user_id/' + key
+      method: 'GET',
+      url: '/index.cfm/preferences/get/user_id/' + key
     })
     .then( function onSuccess( response ) {
 
@@ -1138,6 +1138,45 @@ services
   };
 
   /* userPurchase */
+  service.pGetPaymentInfo = function( data ) {
+
+    var deferred = $q.defer();
+    var key = deepGet(data,'user_id');
+
+    $http({
+      method: 'GET',
+      url: '/index.cfm/profile/getPaymentInfo/user_id/' + key
+    })
+    .then( function( response ) {
+
+      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
+        throw new Error( 'REST Error' );
+      }
+
+      if ( response.data == -1 ) {
+        throw new Error( 'REST POST Error' );
+      }
+
+      deferred.resolve({
+        payment_info: response.data,
+        user_id: key,
+        chain: data
+      });
+
+    })
+    .catch( function ( result ) {
+
+      deferred.reject({
+        error:result.data,
+        chain:data
+      });
+
+    });
+
+    return deferred.promise;
+
+  };
+
   service.pSavePaymentInfo = function( data ) {
 
     var deferred = $q.defer();
@@ -2816,15 +2855,20 @@ controller/main
 controller/profile
 
 *****************/
-.controller( 'ddProfile' , function ( $scope, $http, $q, $cookies, DDService ) {
+.controller( 'ddProfile' , function ( $scope, $http, $q, $cookies, $sce, DDService ) {
 
   $scope.skin = $cookies.get( 'DD-SKIN' );
   $scope.editingCard = false;
+  $scope.paymentInfo = '(no payment specified)';
 
   DDService.pGetPreferences({user_id:CF_getUserID()})
+  .then( DDService.pGetPaymentInfo )
   .then( function onSuccess( result ) {
 
     $scope.preferences = result.preferences;
+
+    if ( result.payment_info.card != undefined )
+      $scope.paymentInfo = $scope.formatPaymentInfo(result.payment_info);
 
   })
   .catch( function onError( e ) {
@@ -2928,6 +2972,10 @@ controller/profile
 
   }
 
+  $scope.formatPaymentInfo = function( paymentInfo ) {
+    return $sce.trustAsHtml(paymentInfo.card.brand + ' ' + paymentInfo.asterisks + paymentInfo.card.last4 + '<br\/>Expiration: ' + paymentInfo.card.exp_month + '/' + paymentInfo.card.exp_year);
+  }
+
   $scope.updatePayment = function( card ) {
 
     DDService.pSavePaymentInfo( card )
@@ -2952,6 +3000,14 @@ controller/profile
       });
 
       $scope.editingCard = false; // I'd prefer this happen on the action method above, but need to pass scope in somehow.
+
+      DDService.pGetPaymentInfo({user_id:CF_getUserID()})
+      .then( function onSuccess( result ){
+        $scope.paymentInfo = $scope.formatPaymentInfo(result.payment_info);
+      })
+      .catch( function onError( e ) {
+        CF_restErrorHandler( e );
+      });
 
     })
     .catch( function onError( e ) {

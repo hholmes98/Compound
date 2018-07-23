@@ -295,6 +295,16 @@ component accessors=true {
 
   }
 
+  function paymentConfirmed( struct rc ) {
+
+    variables.fw.setView('payment.confirmed');
+  }
+
+  function cancelConfirmed( struct rc ) {
+
+    variables.fw.setView('payment.cancelled');
+  }
+
   function cancelSub( struct rc ) {
 
     var subObj = rc.stripe.subscriptions.delete(
@@ -346,6 +356,26 @@ component accessors=true {
   /*******
   * REST *
   *******/
+
+  function getPaymentInfo( struct rc ) {
+    param name="rc.user_id" default="";
+    param name="rc.payment" default=StructNew();
+
+    if ( Len(rc.user_id) && rc.user_id == session.auth.user.getUser_Id() && session.auth.user.getStripe_Customer_Id() != '' ) {
+
+      // customer info
+      rc.customer_id = session.auth.user.getStripe_Customer_Id();
+      loadCustomer( arguments.rc );
+      loadCardInfo( arguments.rc );
+
+      rc.payment['card'] = rc.card;
+      rc.payment['asterisks'] = rc.asterisks;
+
+    }
+
+    variables.fw.renderdata( 'JSON', rc.payment );
+
+  }
 
   function savePaymentInfo( struct rc ) {
 

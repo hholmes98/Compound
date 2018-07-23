@@ -63,15 +63,17 @@
 
     <!-- read-only -->
     <span ng-show="!editingCard">
-      <cfif NOT StructIsEmpty(rc.card)>
-        <i class="fas fa-credit-card"></i>
-        <cfoutput>
-        <strong>#rc.card.brand# #rc.asterisks##rc.card.last4#</strong>
-        Expiration: <strong>#rc.card.exp_month#/#rc.card.exp_year#</strong>
-        </cfoutput>
-      <cfelse>
-        (no payment specified)
-      </cfif>
+      <div id="payment" name="payment" ng-bind-html="paymentInfo">
+        <!--- <cfif NOT StructIsEmpty(rc.card)>
+          <i class="fas fa-credit-card"></i>
+          <cfoutput>
+          <strong>#rc.card.brand# #rc.asterisks##rc.card.last4#</strong>
+          Expiration: <strong>#rc.card.exp_month#/#rc.card.exp_year#</strong>
+          </cfoutput>
+        <cfelse>
+          (no payment specified)
+        </cfif> --->
+      </div>
     </span>
 
     <!-- editing -->
@@ -120,9 +122,8 @@
   <div class="col-xs-4">
     <button type="button" class="btn button btn-link" onClick="history.back()"> Go back</button>
     &nbsp;
-    <!-- fixme: ng-disabled should be set on the value of no credit card -->
     <!-- fixme: when submitted, set to disabled -->
-    <button class="btn button btn-default btn-success form="paymentForm"><i class="fas fa-check"></i> Confirm Purchase</button>
+    <button class="btn button btn-default btn-success" ng-disabled="paymentInfo=='(no payment specified)';" onClick="this.form.submit();this.disabled=true;this.value='Processing...';this.innerHTML='Processing...';" form="paymentForm"><i class="fas fa-check"></i> Confirm Purchase</button>
   </div>
   <div class="col-xs-4"></div>
 </div>
