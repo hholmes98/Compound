@@ -2865,7 +2865,7 @@ controller/profile
   .then( DDService.pGetPaymentInfo )
   .then( function onSuccess( result ) {
 
-    $scope.preferences = result.preferences;
+    $scope.preferences = result.chain.preferences;
 
     if ( result.payment_info.card != undefined )
       $scope.paymentInfo = $scope.formatPaymentInfo(result.payment_info);

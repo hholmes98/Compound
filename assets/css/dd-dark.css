@@ -60,7 +60,7 @@ Didact Gothic - alternate to "Graphik" (barely)
     height: 120px;
     width: 120px;
     margin: -20px -20px -20px -20px;
-    fill: #fff;
+    fill: #88fef0;
 }
 
 /* Loader... */
@@ -364,6 +364,7 @@ label {
   background-color: #222222;
   border: 1px solid #333333;
   font-size: 17px;
+  color: #88fef0;
 }
 
 .container {
@@ -378,7 +379,8 @@ label {
 /* buttons */
 .btn {
   padding: 10px 10px 10px 10px;
-  /* font-size: 14px; */
+  font-size: 14px;
+  line-height: 20px;
 }
 
 .btn-default {
@@ -445,6 +447,8 @@ label {
   width: 56px;
   height: 56px;
   min-width: 56px;
+  line-height: 1.1;
+  font-size: .875rem;
 }
 
 .btn-primary.pmd-button-fab > .svg-inline--fa {
@@ -454,6 +458,12 @@ label {
 
 .btn.btn-sm {
   padding: 5px 10px;
+}
+
+.btn.btn-sm.toggle-off {
+  font-size: .4rem;
+  padding-right: 1px;
+  padding-top: 6px;
 }
 
 .btn-tile {
@@ -474,14 +484,14 @@ label {
 
 .btn-link {
   font-weight: 700;
-  color: #19842c;
+  color: #fff;
   border-radius: 0;
 }
 
 .btn-link:focus, .btn-link:hover {
-  color: #d2691e;
+  color: #fff;
   text-decoration: none;
-  background-color: transparent;
+  border-radius: 8px;
 }
 
 .navbar-fixed-top {
@@ -674,7 +684,7 @@ label {
 }
 
 .form-control {
-  color: #111111;
+  color: #fff;
   font-weight: 700;
   height: 38px;
 }
@@ -967,12 +977,18 @@ label {
   font-size: 32px;
   font-weight: 600;
   text-transform: uppercase;
+  margin-left: -80px;
+  padding-bottom: 46px;
 
   /* scaleX, skewY, skewX, scaleY, translateX, translateY */
   /* https://meyerweb.com/eric/tools/matrix/ */
   -ms-transform: matrix(1.2, 0, -0.404026, 1.8, 116, 44); /* IE 9 */
   -webkit-transform: matrix(1.2, -0.404026, 0, 1.8, 116, 44); /* Safari */
   transform: matrix(1.2, 0, -0.404026, 1.8, 116, 44);
+}
+
+.ow-data.light {
+  color: #fff;
 }
 
 @media screen and (max-width: 553px) {

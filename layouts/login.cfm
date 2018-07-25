@@ -16,4 +16,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </cfoutput>
 </div>
 
+<cfoutput>#view('common/func/scripts')#</cfoutput>
+
 </body>

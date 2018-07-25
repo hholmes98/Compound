@@ -18,8 +18,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   #body#
 </cfoutput>
 
-
-<!-- needs to run at </body> -->
-<script src="/assets/js/dd-controller.js"></script>
+<cfoutput>#view('common/func/scripts')#</cfoutput>
 
 </body>

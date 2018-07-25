@@ -281,14 +281,21 @@ component accessors=true {
     var nl = chr(13) & chr(10);
     var position = getPercentage(variables.fc_data['position']);
     var girth = getPercentage(variables.fc_data['girth']);
+
+    var size = {
+      "x1":position & "%",
+      "y1":Round(position+(position*.65)) & "%",
+      "x2":girth & "%",
+      "y2":Round(girth+(girth*.638)) & "%"
+    };
     
     var data = {
       'background-color': '##' & variables.fc_data['start'],
       'background-image': {
-        'radial-gradient': '##' & variables.fc_data['stop'] & ' 9px, transparent 10px',
-        'repeating-radial-gradient': '##' & variables.fc_data['stop'] &' 0, ' & '##' & variables.fc_data['stop'] & ' 4px, transparent 5px, transparent 20px, ' & '##' & variables.fc_data['stop'] & ' 21px, ' & '##' & variables.fc_data['stop'] & ' 25px, transparent 26px, transparent 50px',
+        'radial-gradient': '##' & variables.fc_data['stop'] & ' 40%, transparent 30%',
+        'repeating-radial-gradient': '##' & variables.fc_data['stop'] &' 0%, ' & '##' & variables.fc_data['stop'] & ' 13%, transparent 13%, transparent 31%, ' & '##' & variables.fc_data['stop'] & ' 26%, ' & '##' & variables.fc_data['stop'] & ' 39%, transparent 40%, transparent 75%',
       },
-      'background-size': girth & 'px ' & girth & 'px, ' & position & 'px ' & position & 'px',
+      'background-size': size.x1 & ' ' & size.y1 & ', ' & size.x2 & ' ' & size.y2,
       'background-position':'0 0'
     }
 
@@ -311,7 +318,7 @@ component accessors=true {
         '  linear-gradient(225deg, ##' & start & ' 25%, transparent 25%) -50px 0,' & nl &
         '  linear-gradient(315deg, ##' & start & ' 25%, transparent 25%), ' & nl &
         '  linear-gradient(45deg, ##' & start & ' 25%, transparent 25%); ' & nl &
-        '  background-size: ' & perc1 & 'px ' & perc2 & 'px; ' & nl &
+        '  background-size: ' & perc1 & '% ' & perc2 & '%; ' & nl &
         '  background-color: ##' & full_stop;
 
     return txt;
@@ -323,13 +330,14 @@ component accessors=true {
     var nl = chr(13) & chr(10);
     var start = variables.fc_data['start'];
     var full_stop = variables.fc_data['full_stop'];
-    var angle = getAngle(variables.fc_data['angle']);
+    var angle = getPercentage(variables.fc_data['angle']);
+    var step = getPercentage(variables.fc_data['girth']);
 
     var txt = 'background: linear-gradient(63deg, ##' & full_stop & ' 25%, transparent 23%) 7px 0, ' & nl &
         '  linear-gradient(63deg, transparent 74%, ##' & full_stop & ' 78%),' & nl &
         '  linear-gradient(63deg, transparent 34%, ##' & full_stop & ' 38%, ##' & full_stop & ' 58%, transparent 62%),' & nl &
         '  ##' & start & ';' & nl & 
-        '  background-size: ' & angle & 'px 48px';
+        '  background-size: ' & angle & '% ' & step & '%';
 
     return txt;
 
@@ -358,6 +366,52 @@ component accessors=true {
 
   remote numeric function hex2dec( string hex ) {
     return InputBaseN( arguments.hex, 16 );
+  }
+
+  remote string function dec2hex( numeric value ) {
+
+    var tmp = FormatBaseN( arguments.value, 16 );
+
+    if ( Len(tmp) == 1) {
+      tmp = '0' & tmp;
+    }
+
+    return tmp;
+  }
+
+  remote string function color2hex( struct in_color ) {
+    return dec2hex(arguments.in_color.r) & dec2hex(arguments.in_color.g) & dec2hex(arguments.in_color.b);
+  }
+
+  remote struct function hex2color( string hex ) {
+    var data = {};
+
+    var R = Left(arguments.hex, 2);
+    var G = Mid(arguments.hex, 3, 2);
+    var B = Right(arguments.hex, 2);
+
+    data['r'] = hex2dec(R);
+    data['g'] = hex2dec(G);
+    data['b'] = hex2dec(B);
+
+    return data;
+  }
+
+  /* https://stackoverflow.com/questions/1855884/determine-font-color-based-on-background-color */
+  remote string function contrastColor( string hex ) {
+    var in_color = hex2color(arguments.hex);
+    var d=0;
+
+    // Counting the perceptive luminance - human eye favors green color... 
+    var luminance = ( (0.299 * in_color.r) + (0.587 * in_color.g) + (0.114 * in_color.b) ) / 255;
+
+    if (luminance > 0.5)
+       d = 0; // bright colors - black font
+    else
+       d = 255; // dark colors - white font
+
+    return color2hex({"r":d,"g":d,"b":d});
+
   }
 
   remote struct function getVendor( numeric value ) {
@@ -445,21 +499,9 @@ component accessors=true {
 
   remote string function getVendorColor( numeric value ) {
 
-    var choice = arguments.value MOD 3;
+    var textColor = contrastColor(variables.fc_data['full_stop']);
 
-    // TODO: this really needs to be decided, based on the bg color (if light, choose dark, and vice-versa)
-
-    switch(choice) {
-      case 0:
-        return 'silver';
-        break;
-      case 1:
-        return '##fff';
-        break;
-      case 2:
-        return '##000';
-        break;
-    }
+    return '##' & textColor;
 
   }
 

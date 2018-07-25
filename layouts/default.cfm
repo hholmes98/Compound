@@ -75,7 +75,7 @@
     gtag('js', new Date());
     gtag('config', 'UA-120544683-1');
     <cfif StructKeyExists( session, 'auth' ) && session.auth.isLoggedIn>
-    gtag('set', {'user_id': '<cfoutput>#session.auth.user.getUser_Id()#</cfoutput>'}); // Set the user ID using signed-in user_id.
+    gtag('set', {'user_id': '<cfoutput>#Hash(session.auth.user.getUser_Id())#</cfoutput>'}); // Set the user ID using signed-in user_id.
     </cfif>
   </script>
 

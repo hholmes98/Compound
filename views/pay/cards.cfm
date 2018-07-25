@@ -190,7 +190,7 @@
         <div class="col-md-5"></div>
         <div class="col-md-2">
           <span class="dollar-large" ng-model="selected">
-            <div class="ow-data" style="color: #1c6a3a;">
+            <div class="ow-data light">
               <span ng-bind-html="selected.actual_payment|calculatedPaymentFilter" />
             </div>
           </span>

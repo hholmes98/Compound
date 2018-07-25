@@ -310,6 +310,7 @@ h2 {
   -webkit-text-fill-color: transparent;
   -webkit-text-stroke-width: 2px;
   -webkit-text-stroke-color: #171717;
+  background-clip: text;
   color: #171717;
   position: relative;
   padding-bottom: 6px;
@@ -385,6 +386,8 @@ label {
 
 .btn {
   padding: 10px 10px 10px 10px;
+  font-size: 14px;
+  line-height: 20px;
 }
 
 .btn-default {
@@ -445,6 +448,8 @@ label {
   width: 56px;
   height: 56px;
   min-width: 56px;
+  line-height: 1.1;
+  font-size: .875rem;
 }
 
 .btn-primary.pmd-button-fab > .svg-inline--fa {
@@ -454,6 +459,12 @@ label {
 
 .btn.btn-sm {
   padding: 5px 10px;
+}
+
+.btn.btn-sm.toggle-off {
+  font-size: .4rem;
+  padding-right: 1px;
+  padding-top: 6px;
 }
 
 .btn-tile {
@@ -967,6 +978,10 @@ label {
   -ms-transform: matrix(1.2, 0, -0.404026, 1.8, 116, 44); /* IE 9 */
   -webkit-transform: matrix(1.2, -0.404026, 0, 1.8, 116, 44); /* Safari */
   transform: matrix(1.2, 0, -0.404026, 1.8, 116, 44);
+}
+
+.ow-data.light {
+  color: #1c6a3a;
 }
 
 @media screen and (max-width: 553px) {

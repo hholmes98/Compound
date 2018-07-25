@@ -22,14 +22,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 </div>
 
-<!-- needs to run at </body> -->
-<script src="/assets/js/dd-controller.js"></script>
-
 <!--- this remains in template to bridge cf/js --->
 <script>
   function CF_getUserID() {
     return <cfoutput>#session.auth.user.getUser_Id()#</cfoutput>;
   }
 </script>
+
+<cfoutput>#view('common/func/scripts')#</cfoutput>
 
 </body>
