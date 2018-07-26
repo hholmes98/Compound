@@ -43,6 +43,8 @@ Didact Gothic - alternate to "Graphik" (barely)
 
 */
 
+@import url("pricing.css");
+
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -1092,4 +1094,63 @@ label {
     background: transparent;
   }
 
+}
+
+/* pricing overrides for dark */
+
+#generic_price_table {
+  background-color: #222222;
+}
+
+#generic_price_table .generic_content{
+  background-color: #101010;
+}
+
+
+#generic_price_table .generic_content .generic_head_price{
+  background-color: #101010;
+}
+
+#generic_price_table .generic_content .generic_head_price .generic_price_tag .price .currency{
+    color: #e4e4e4;
+}
+
+#generic_price_table .generic_content .generic_head_price .generic_price_tag .price .sign{
+    color: #e4e4e4;
+}
+
+#generic_price_table .generic_content .generic_head_price .generic_price_tag .price .cent{
+    color: #e4e4e4;
+}
+
+#generic_price_table .generic_content .generic_head_price .generic_price_tag .month{
+    color: #e4e4e4;
+}
+
+#generic_price_table .generic_content .generic_feature_list ul li:hover{
+  background-color: #E4E4E4;
+  border-left: 5px solid #49bfb1;
+  color: #101010;
+}
+
+#generic_price_table .generic_content .generic_price_btn a{
+  border: 1px solid #49bfb1; 
+    color: #49bfb1;
+} 
+
+#generic_price_table .generic_content.active .generic_head_price .generic_head_content .head_bg,
+#generic_price_table .generic_content:hover .generic_head_price .generic_head_content .head_bg{
+  border-color: #49bfb1 rgba(0, 0, 0, 0) rgba(0, 0, 0, 0) #49bfb1;
+  color: #fff;
+  
+}
+
+#generic_price_table .generic_content:hover .generic_price_btn a,
+#generic_price_table .generic_content.active .generic_price_btn a{
+  background-color: #49bfb1;
+  color: #fff;
+} 
+
+select.dd-select {
+  font-family: 'FontAwesome', 'Nunito';
 }

@@ -12,6 +12,9 @@ component accessors=true extends=model.beans.plan_card {
   property balance; // number (8,2)
   property interest_rate; // decimal
   property zero_apr_end_date; // date
+  property code; // string
+  property priority; // numeric
+
   /* end */
 
   /* or this!! */

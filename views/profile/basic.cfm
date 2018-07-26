@@ -12,9 +12,18 @@
   <div class="col-xs-6">Theme</div>
   <div class="col-xs-6">
     <span class="pull-right">
-      <select class="form-control" name="skin" ng-model="skin" ng-change="updateSkin(skin)">
+      <select class="form-control dd-select" name="skin" ng-model="skin" ng-change="updateSkin(skin)">
         <cfloop from="1" to="#ArrayLen(application.skins)#" index="s">
-          <cfoutput><option value="#s#"<cfif COOKIE['dd-skin'] is s> selected</cfif>>#application.skins[s].name#</option></cfoutput>
+          <cfoutput>
+            <option value="#s#"<cfif COOKIE['dd-skin'] is s> selected</cfif>>
+              <cfif s EQ 1>
+                &##xf185;
+              <cfelse>
+                &##xf186;
+              </cfif>
+              #application.skins[s].name#
+            </option>
+          </cfoutput>
         </cfloop>
       </select>
     </span>

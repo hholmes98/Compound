@@ -17,4 +17,8 @@
   <link href="/node_modules/fullcalendar/dist/fullcalendar.css" rel="stylesheet" />
   <link href="/node_modules/angular-tooltips/dist/angular-tooltips.css" rel="stylesheet" />
 
+  <cfif ListFindNoCase( 'profile', getSection() ) AND ListFindNoCase( 'basic', getItem() )>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+  </cfif>
+
   <link id="skin" href="/assets/css/<cfoutput>#application.skins[COOKIE["dd-skin"]].path#</cfoutput>" type="text/css" rel="stylesheet" />

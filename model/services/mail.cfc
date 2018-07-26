@@ -21,7 +21,7 @@ component accessors=true {
 
   }
 
-  public string function sendReminderEmail( string dest_email, struct reminder_cards ) {
+  public string function sendReminderEmail( string dest_email, array reminder_cards ) {
 
     var mailBody = 'It''s time to pay some bills!
 
@@ -29,10 +29,8 @@ Yep. It''s that time again. So, here is a friendly reminder from the folks at ' 
 
 Here is the next batch of cards you''ll want to pay, and when:' & nl & nl;
 
-    for ( var this_card in arguments.reminder_cards ) {
-
+    for ( var this_card=1; this_card <= ArrayLen(reminder_cards); this_card++ ) {
       mailBody = mailBody & '- Pay $' & arguments.reminder_cards[this_card].getCalculated_Payment() & ' to ' & arguments.reminder_cards[this_card].getLabel() & ' on ' & DateFormat(arguments.reminder_cards[this_card].getPay_Date(),"long") & variables.nl;
-
     }
 
     mailBody = mailBody & nl & 'Be sure to head on back to the calculator to update the balances & minimum payments as you go!' & nl & nl;
@@ -208,7 +206,7 @@ Your friends at ' & application.locale[session.auth.locale]['name'];
   1. if (Apr 15th, 2018 == May 30th, 2018)...
 
   *********/
-  remote function processReminders( date for_date, date today=Now() ) {
+  remote function processReminders( date for_date, date today=Now(), boolean dryRun=true ) {
 
     trace( var=GetTickCount(), text="START", type="Information", category="processReminders", inline=false, abort=false );
 
@@ -297,7 +295,8 @@ Your friends at ' & application.locale[session.auth.locale]['name'];
     trace( var=GetTickCount(), text="emailReminders", type="Information", category="processReminders", inline=false, abort=false );
 
     // 6. Batch out all the emails in email_list, logging each email into pEmails (email_id, user_id, email, date_sent, body)
-    emailReminders( email_list );
+    if ( !arguments.dryRun ) 
+      emailReminders( email_list );
 
     trace( var=GetTickCount(), text="END", type="Information", category="processReminders", inline=false, abort=false );
 
@@ -349,17 +348,36 @@ Your friends at ' & application.locale[session.auth.locale]['name'];
 
       if ( ArrayLen(events) ) {
         var event = events[1]; // you only ever want the 1st event: this month's event
-        var cards = event.getEvent_Cards();
+        var non = event.getNonPaidEventCards();
 
-        trace( var=GetTickCount(), text="sendReminderEmail:" & StructKeyList(cards), type="Information", category="emailReminders", inline=false, abort=false );
+        if ( !StructIsEmpty(non) ) {
 
-        // email it
-        var bodyCopy = sendReminderEmail( email, cards );
+          trace( var=GetTickCount(), text="sendReminderEmail:" & StructKeyList(non), type="Information", category="emailReminders", inline=false, abort=false );
 
-        trace( var=GetTickCount(), text="logReminderEmail:" & email, type="Information", category="emailReminders", inline=false, abort=false );
+          // sort the cards into an array (by due date)
+          var a_non = StructKeyArray(non);
 
-        // log it
-        var email_id = logReminderEmail( id, email, bodyCopy );
+          a_non.sort( function(card1, card2) {
+            return DateCompare( non[card1].getPay_Date(), non[card2].getPay_Date() );
+          });
+
+          var s_non = a_non.map(function(v){
+            return non[v];
+          })
+
+          // email it
+          var bodyCopy = sendReminderEmail( email, s_non );
+
+          trace( var=GetTickCount(), text="logReminderEmail:" & email, type="Information", category="emailReminders", inline=false, abort=false );
+
+          // log it
+          var email_id = logReminderEmail( id, email, bodyCopy );
+
+        } else {
+
+          trace( var=GetTickCount(), text="sendReminderEmail(ignored):NO_NON_PAID_CARDS", type="Information", category="emailReminders", inline=false, abort=false );
+
+        }
 
       }
 

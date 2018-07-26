@@ -43,6 +43,8 @@ Didact Gothic - alternate to "Graphik" (barely)
 
 */
 
+@import url("pricing.css");
+
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -1086,4 +1088,8 @@ label {
     background: transparent;
   }
 
+}
+
+select.dd-select {
+  font-family: 'FontAwesome', 'Nunito';
 }

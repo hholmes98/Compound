@@ -1,7 +1,7 @@
 //model/services/event
 component accessors=true {
 
-  public any function init( beanFactory, planService, cardService, preferenceService, knapsackService, pay_periodService, userService ) {
+  public any function init( beanFactory, planService, cardService, preferenceService, knapsackService, pay_periodService, userService, card_paidService ) {
 
     variables.beanFactory = arguments.beanFactory;
     variables.planService = arguments.planService;
@@ -10,6 +10,7 @@ component accessors=true {
     variables.knapsackService = arguments.knapsackService;
     variables.pay_periodService = arguments.pay_periodService;
     variables.userService = arguments.userService;
+    variables.card_paidService = arguments.card_paidService;
 
     variables.defaultOptions = {
       datasource = application.datasource
@@ -72,6 +73,21 @@ component accessors=true {
         card.setPay_Date( result.pay_date );
 
         event.addCard( card );
+
+        if ( Len(result.actual_payment) AND Len(result.actually_paid_on) ) {
+
+          var card_payment = variables.beanFactory.getBean('card_paidBean');
+
+          card_payment.setUser_Id( card.getUser_Id() );
+          card_payment.setCard_Id( card.getCard_Id() );
+          card_payment.setActual_Payment( result.actual_payment );
+          card_payment.setActually_Paid_On( result.actually_paid_on );
+          card_payment.setPayment_For_Month( event.getCalculated_For_Month() );
+          card_payment.setPayment_For_Year( event.getCalculated_For_Year() );
+
+          event.addPaidCard( card_payment );
+
+        }
 
       }
 
@@ -202,6 +218,21 @@ component accessors=true {
         card.setPay_Date( result.pay_date );
 
         event.addCard( card );
+
+        if ( Len(result.actual_payment) AND Len(result.actually_paid_on) ) {
+
+          var card_payment = variables.beanFactory.getBean('card_paidBean');
+
+          card_payment.setUser_Id( card.getUser_Id() );
+          card_payment.setCard_Id( card.getCard_Id() );
+          card_payment.setActual_Payment( result.actual_payment );
+          card_payment.setActually_Paid_On( result.actually_paid_on );
+          card_payment.setPayment_For_Month( event.getCalculated_For_Month() );
+          card_payment.setPayment_For_Year( event.getCalculated_For_Year() );
+
+          event.addPaidCard( card_payment );
+
+        }
 
       }
 
@@ -513,6 +544,16 @@ component accessors=true {
       }
 
     } // if cards remain that need have their pay_date set
+
+    // if the user made any payments, add them here
+
+    var card_payments = variables.card_paidService.list( user_id, month, year ); // array
+
+    if ( ArrayLen( card_payments) ) {
+      cfloop( array=card_payments, index="p" ) {
+        event.addPaidCard( card_payments[p] );
+      }
+    }
 
     // 5. FIXME: Handle any ignored cards (not sure why they should be included at all?) - their absence is probably fucking up forecasting.
 

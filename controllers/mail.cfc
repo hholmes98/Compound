@@ -10,17 +10,13 @@ component accessors=true {
   }
 
   public void function reminders( struct rc ) {
-
-    var i_date = Now();
-
-    if ( StructKeyExists( arguments.rc, 'reminder_date' ) ) {
-      i_date = arguments.rc.reminder_date;
-    }
+    param name="rc.reminder_date" default=Now();
+    param name="rc.dry_run" default="true";
 
     if ( StructKeyExists( arguments.rc, 'today' ) ) {
-      var results = mailService.processReminders( i_date, arguments.rc.today );
+      var results = mailService.processReminders( arguments.rc.reminder_date, arguments.rc.today, rc.dry_run );
     } else {
-      var results = mailService.processReminders( i_date );
+      var results = mailService.processReminders( for_date = arguments.rc.reminder_date, dryRun = rc.dry_run );
     }
 
     variables.fw.renderdata( 'JSON', results );
