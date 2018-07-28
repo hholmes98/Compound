@@ -2238,7 +2238,7 @@ controller/calculate
 controller/pay
 
 ******************/
-.controller( 'ddPay' , function ( $scope, $http, $q, $filter, DDService ) {
+.controller( 'ddPay' , function ( $scope, $http, $q, $filter, $window, DDService ) {
 
   $scope.orderByField = 'pay_date';
   $scope.reverseSort = false;
@@ -2260,6 +2260,30 @@ controller/pay
     $scope.all_cards = response.cards;
 
     if ( Object.keys($scope.all_cards).length ) {
+
+      $('#pan-main').fullpage({
+        licenseKey:'OPEN-SOURCE-GPLV3-LICENSE', //TODO: buy a license
+        animateAnchor: false,
+        controlArrows: false,
+        scrollOverflow: true,
+         scrollOverflowOptions: {
+           scrollbars: false,
+           bounce: false,
+           momentum: false, // allegedly a good perf boost even with them hidden tho?
+           fadeScrollbars: false,
+           disableTouch: true
+         },
+        responsiveWidth: 2000,
+        autoScrolling: true,
+        recordHistory: true,
+        verticalCentered: false,
+        fitToSection: false,
+        keyboardScrolling: false,
+        bigSectionsDestination: "top",
+        anchors:['list'],
+        afterRender: function() {
+
+
 
       DDService.pGetEvent({user_id:CF_getUserID()})
       .then( function onSuccess( response ) {
@@ -2308,29 +2332,6 @@ controller/pay
               $scope.loadingPlan = false;
             }
 
-            $('#pan-main').fullpage({
-              licenseKey:'OPEN-SOURCE-GPLV3-LICENSE', //TODO: buy a license
-              animateAnchor: false,
-              controlArrows: false,
-              scrollOverflow: true,
-              scrollOverflowOptions: {
-                scrollbars: false,
-                bounce: false,
-                momentum: false, // allegedly a good perf boost even with them hidden tho?
-                fadeScrollbars: false,
-                disableTouch: true
-              },
-              autoScrolling: false,
-              verticalCentered: false,
-              fitToSection: false,
-              keyboardScrolling: false,
-              anchors:['pay']
-            });
-
-            //disabling scrolling
-            $.fn.fullpage.setAllowScrolling(false);
-            //fullpage_api.setAllowScrolling(false); // no touch scrolling please
-
           })
           .catch( function onError( result ) { // pGetPreferences
 
@@ -2351,6 +2352,14 @@ controller/pay
           CF_restErrorHandler( result );
 
       });
+
+
+        }
+      }); // end fullpage.js
+
+      //disabling scrolling
+      fullpage_api.setAllowScrolling(false, 'left, right'); // no touch scrolling please
+      fullpage_api.setKeyboardScrolling(false, 'left, right'); // no touch scrolling please
 
     } else {
 
@@ -2412,11 +2421,13 @@ controller/pay
 
   $scope.selectCard = function( card ) {
     $scope.selected = card;
-    location.hash = '#pay/summary';
+    location.hash = '#list/detail';
+    $window.scrollTo(0,0);
   };
 
   $scope.returnToList = function( destIndex ) {
-    location.hash = '#pay/cards';
+    location.hash = '#list/cards';
+    $window.scrollTo(0,0);
   };
 
   $scope.recalculateCard = function( card ) {
@@ -2434,6 +2445,9 @@ controller/pay
       // just update the 1  card
       $scope.cards[key].calculated_payment = response.plan[$scope.selected.card_id].calculated_payment;
       $scope.selected.calculated_payment = $scope.cards[key].calculated_payment;
+
+      $scope.cards = response.plan; // fixme: this still won't fix the pay_dates on the bills list.
+
     });
 
   };

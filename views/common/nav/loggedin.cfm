@@ -6,9 +6,9 @@
     <div class="navbar-header">
       <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
         <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
+        <span class="icon-bar dd-icon-bar"></span>
+        <span class="icon-bar dd-icon-bar"></span>
+        <span class="icon-bar dd-icon-bar"></span>
       </button>
       <span class="navbar-brand">
         <img style="display:inline-block;margin-right:4px;position:relative;top:-2px;" src="assets/img/dd-logo-white-trans-24x24.png" width="24" height="24">
@@ -27,7 +27,7 @@
           <a href="##" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fas fa-bullhorn"></i> <span class="nav-label">What's New?</span> <span class="caret"></span></a>
           <ul class="dropdown-menu">
             <li><a href="https://blog.#application.site_domain#"><i class="far fa-newspaper"></i> <span class="nav-label">News</span></a></li>
-            <li><a href="https://forum.#application.site_domain#"><i class="far fa-comments"></i> <span class="nav-label">Discussion</span></a></li>
+            <li><a href="https://forum.#application.site_domain#"><i class="fab fa-discourse"></i> <span class="nav-label">Discussion</span></a></li>
             <li><a href="#buildUrl('main.top')#"><i class="fas fa-trophy"></i> <span class="nav-label">Top Cards</span></a></li>
           </ul>
         </li>

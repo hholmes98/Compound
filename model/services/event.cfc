@@ -436,7 +436,7 @@ component accessors=true {
     // ================
     // 1. prep defaults
     // ================
-    var plan = arguments.in_plan;
+    var plan = Duplicate( arguments.in_plan );
     var user_id = plan.getUser_Id();
     var user = userService.get(user_id);
     var deck = plan.getPlan_Deck(); // should probably run a verify here - must be a populated plan.
@@ -547,11 +547,11 @@ component accessors=true {
 
     // if the user made any payments, add them here
 
-    var card_payments = variables.card_paidService.list( user_id, month, year ); // array
+    var card_payments = variables.card_paidService.list( user_id, Month(calculated_for), Year(calculated_for) ); // array
 
     if ( ArrayLen( card_payments) ) {
-      cfloop( array=card_payments, index="p" ) {
-        event.addPaidCard( card_payments[p] );
+      cfloop( array=card_payments, index="paid_card" ) {
+        event.addPaidCard( paid_card );
       }
     }
 
@@ -660,7 +660,7 @@ component accessors=true {
     3. start a new events array
     4. get the user's plan
     */
-    var plan = arguments.in_plan;
+    var plan = Duplicate( arguments.in_plan );
     var fp = plan.getFingerprint();
     var user_id = plan.getUser_Id();
     var user = userService.get( user_id );

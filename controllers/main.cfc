@@ -65,11 +65,21 @@ component accessors = true {
 
   /* default (always at the top) */
   public void function default( struct rc ) {
+    param name="rc.demo_open" default=false;
 
     // detect if the user is logged in, and if so, just take them directly to auth_start_page
     if ( StructKeyExists(session, 'auth') && session.auth.isLoggedIn ) {
       variables.fw.redirect( application.auth_start_page );
     }
+
+  }
+
+  public void function demo( struct rc ) {
+
+    rc.demo_open = true;
+    variables.fw.setLayout('main.default');
+    variables.fw.setView('main.default');
+    default( rc );
 
   }
 

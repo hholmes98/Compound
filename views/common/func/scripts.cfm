@@ -38,7 +38,6 @@
 <!-- graphing -->
 <script src="/node_modules/highcharts/highstock.js" type="text/javascript"></script>
 
-
 <!-- payment gateway/fraud detection -->
 <script src="https://js.stripe.com/v3/"></script>
 

@@ -58,6 +58,10 @@ Didact Gothic - alternate to "Graphik" (barely)
     margin: -4px 0px -7px -4px;
 }
 
+.dd-icon-bar {
+  margin: 0 0 0 0;
+}
+
 .icon-large {
     height: 120px;
     width: 120px;
@@ -202,7 +206,7 @@ html, body {
   text-align: center;
   opacity: 0.7;
   width: 155px;
-  transform: rotate(-12deg);
+  transform: rotate(-23deg);
   position: absolute;
 }
 
@@ -314,8 +318,8 @@ h2 {
   background-image: repeating-linear-gradient(
     to bottom,
     #ffffff,
-    #49bfb1 2px,
-    #ffffff 1px
+    #49bfb1 1px,
+    #ffffff 2px
   );
   line-height: 1.2;
   -webkit-background-clip: text;
@@ -327,7 +331,7 @@ h2 {
 }
 
 /* place a solid (screen) copy of the text behind the gradient text; use *that* text as the drop-shadow */
-h2:after {
+.backgroundblendmode h2:after {
   mix-blend-mode: screen;
   transform: translateZ(0); /* fix for Firefox mix-blend-mode: screen, per https://stackoverflow.com/questions/30614329/firefox-mix-blend-mode-bug */
   background: none;
@@ -340,6 +344,11 @@ h2:after {
   right: -2px;
   z-index: -1;
 }
+
+.no-backgroundblendmode h2:after {
+
+}
+
 
 /* H3: the smaller 'The' above 'the united states of america' in the upper right quadrant of the $20 */
 h3 {
@@ -404,6 +413,16 @@ label {
   color: #fff;
   background-color: #333333;
   border-color: #fff;
+}
+
+.btn-fire {
+  color: #fff;
+  background: linear-gradient( to bottom, #00db58 20%, #00ffc4 70%, #000 146% );
+}
+
+.btn-fire:hover, .btn-fire:focus, .btn-fire:hover, .btn-fire:focus, .btn-fire.active:hover, .btn-fire.active:focus {
+  color: #fff;
+  background: linear-gradient( to bottom, #04ff00 20%, #000 70%, #fff 146% );
 }
 
 /* glyphs that specifically show up on buttons */
@@ -767,10 +786,7 @@ label {
   height: 50px;
 }
 
-
-
 /* home styles */
-
 .section-inner {
   display: block;
   padding: 40px;
@@ -788,7 +804,6 @@ label {
 }
 
 /* left-text */
-
 .text {
   vertical-align: middle;
   display: inline-block;
@@ -818,7 +833,6 @@ label {
 }
 
 /* right-text */
-
 .text-other {
   vertical-align: middle;
   display: inline-block;
@@ -886,6 +900,10 @@ label {
 
 .dropdown-menu > li > a {
   color: #fff;
+}
+
+.fire-flame {
+  color: #7bdb00;
 }
 
 @media screen and (max-width: 767px) {
@@ -974,6 +992,12 @@ label {
   -webkit-text-fill-color: transparent;
 }
 
+.ow-header.ow-fire {
+  background: -webkit-linear-gradient(#000, #00db11);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 .ow-data {
   font-family: 'Oswald', sans-serif;
   font-size: 32px;
@@ -1017,7 +1041,6 @@ label {
 @media screen and (max-width: 480px) {
 
   html, body {
-    padding-top: 22px;
     font-size: 18px;
   }
 
@@ -1041,16 +1064,8 @@ label {
     margin-top: 2px;
   }
 
-  .pan-perspective {
-    margin-top: 20px;
-  }
-
   .code {
     font-size: 10px;
-  }
-
-  .container {
-    margin-top: 48px;
   }
 
 }

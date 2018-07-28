@@ -58,6 +58,10 @@ Didact Gothic - alternate to "Graphik" (barely)
     margin: -4px 0px -7px -4px;
 }
 
+.dd-icon-bar {
+  margin: 0 0 0 0;
+}
+
 .icon-large {
     height: 120px;
     width: 120px;
@@ -199,7 +203,7 @@ html, body {
   text-align: center;
   opacity: 0.7;
   width: 155px;
-  transform: rotate(-12deg);
+  transform: rotate(-23deg);
   position: absolute;
 }
 
@@ -305,8 +309,8 @@ h2 {
   background-image: repeating-linear-gradient(
     to bottom,
     #ffffff,
-    #171717 2px,
-    #ffffff 1px);
+    #171717 1px,
+    #ffffff 2px);
   line-height: 1.2;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -335,23 +339,6 @@ h2 {
 .no-backgroundblendmode h2:after {
 
 }
-
-/* place a solid (screen) copy of the text behind the gradient text; use *that* text as the drop-shadow */
-/*
-h2:after {
-  mix-blend-mode: screen;
-  transform: translateZ(0);
-  background: none;
-  display: inline-block;
-  content: attr(shadow-text);
-  position: absolute;
-  text-shadow: 5px 5px 0 rgba(0,0,0,1);
-  top: 0px;
-  left: 0px;
-  right: -2px;
-  z-index: -2;
-}
-*/
 
 /* H3: the smaller 'The' above 'the united states of america' in the upper right quadrant of the $20 */
 h3 {
@@ -409,6 +396,16 @@ label {
   color: #D2691E;
   background-color: #F9Ece3;
   border-color: #4F270B;
+}
+
+.btn-fire {
+  color: #fff;
+  background: linear-gradient( to bottom, #db8f00 20%, #ff0000 70%, #000 146% );
+}
+
+.btn-fire:hover, .btn-fire:focus, .btn-fire:hover, .btn-fire:focus, .btn-fire.active:hover, .btn-fire.active:focus {
+  color: #fff;
+  background: linear-gradient( to bottom, #ff0000 20%, #000 70%, #fff 146% );
 }
 
 .btn > .glyphicon, .btn > .fas-large, .btn > .svg-inline--fa {
@@ -881,6 +878,10 @@ label {
   color: #aab5a8;
 }
 
+.fire-flame {
+  color: #db8f00;
+}
+
 @media screen and (max-width: 767px) {
   .navbar-right .dropdown-menu {
     left: 0;
@@ -967,6 +968,12 @@ label {
   -webkit-text-fill-color: transparent;
 }
 
+.ow-header.ow-fire {
+  background: -webkit-linear-gradient(#000, #db8f00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 .ow-data {
   font-family: 'Oswald', sans-serif;
   font-size: 32px;
@@ -1010,7 +1017,6 @@ label {
 @media screen and (max-width: 480px) {
 
   html, body {
-    padding-top: 22px;
     font-size: 18px;
   }
 
@@ -1034,18 +1040,9 @@ label {
     margin-top: 2px;
   }
 
-  .pan-perspective {
-    margin-top: 20px;
-  }
-
   .code {
     font-size: 10px;
   }
-
-  .container {
-    margin-top: 48px;
-  }
-
 
 }
 

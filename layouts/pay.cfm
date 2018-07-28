@@ -8,9 +8,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <cfoutput>#view('common/nav/loggedin')#</cfoutput>
 <cfoutput>#view('common/banner')#</cfoutput>
 
-<div id="pan-main" class="pan-perspective">
+<div id="pan-main">
 
-  <div class="section">
+  <div class="section fp-auto-height">
 
   <cfoutput>
     #view('common/func/msg')#

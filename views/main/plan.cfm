@@ -13,6 +13,28 @@
       <h3>Your path is now clear.</h3>
     </div>
 
+    <div class="row">
+
+      <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 bottom-buffer" align="center">
+        <cfoutput>
+          <button class="btn button btn-default btn-lg" onClick="location.href='#buildUrl('main.demo')#';">
+            <svg class="icon-dd-calculator">
+              <use xlink:href="/assets/img/icons.svg##icon-dd-calculator"></use>
+            </svg> Run Another Calculation
+          </button>
+        </cfoutput>
+      </div>
+
+      <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 bottom-buffer" align="center">
+        <cfoutput>
+          <button class="btn button btn-primary btn-lg" onClick="location.href='#buildUrl('main.create')#';">
+            <i class="fas fa-save"></i> Save Plan
+          </button>
+        </cfoutput>
+      </div>
+
+    </div>
+
     <div class="panel panel-default form-horizontal">
 
       <ul class="nav nav-tabs" role="tablist">

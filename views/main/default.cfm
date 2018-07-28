@@ -89,22 +89,26 @@
 
       </div>
 
-      <div class="row" ng-show="!try">
+      <cfif !rc.demo_open>
+        <div class="row" ng-show="!try">
 
-        <div class="col-md-2"></div>
-        <div class="col-md-8">
+          <div class="col-md-2"></div>
+          <div class="col-md-8">
+            <hr>
+            <span>
+              <button type="button" class="btn button btn-primary" ng-click="try=true" onClick="location.hash='##try/0'">
+                <svg class="icon-dd-calculator">
+                  <use xlink:href="/assets/img/icons.svg##icon-dd-calculator"></use>
+                </svg> Try it now!
+              </button>
+            </span>
+          </div>
+          <div class="col-md-2"></div>
 
-          <hr>
-
-          <span>
-            <button type="button" class="btn button btn-primary" ng-click="try=true" onClick="location.hash='##try/0'"><i class="fas fa-calculator"></i> Try it now!</button>
-          </span>
         </div>
-        <div class="col-md-2"></div>
+      </cfif>
 
-      </div>
-
-      <div class="row" ng-show="try">
+      <div class="row" ng-show="<cfif rc.demo_open>true<cfelse>try</cfif>">
 
         <div class="col-md-2"></div>
         <div class="col-md-8">
@@ -221,7 +225,11 @@
 
       <div class="row top-buffer bottom-buffer" align="center">
 
-        <button type="button" class="btn button btn-primary btn-submit bottom-buffer" form="entry"><i class="fas fa-calculator"></i> Show Me The Plan</button>
+        <button type="button" class="btn button btn-primary btn-submit bottom-buffer" form="entry">
+          <svg class="icon-dd-calculator">
+            <use xlink:href="/assets/img/icons.svg##icon-dd-calculator"></use>
+          </svg> Calculate the payoff
+        </button>
 
       </div><!-- // row -->
 
