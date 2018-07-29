@@ -99,7 +99,7 @@
   }
 
   function CF_getTheme( i ) {
-    switch(i) {
+    switch(i.toString()) {
       case "1":
         return '<cfoutput>#REQUEST.abs_url#/assets/css/#application.skins[1].path#</cfoutput>';
         break;

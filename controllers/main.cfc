@@ -40,6 +40,13 @@ component accessors = true {
     rc.pageDescription = "Affordable pricing plans for eliminating credit card debt with " & application.app_name;
   }
 
+  function contact( struct rc ) {
+
+    variables.fw.setLayout('main.plan');
+    rc.pageTitle = "Contact the " & application.app_name & " team";
+    rc.pageDescription = "Got more questions! We're standing by with answers!";
+  }
+
   function top( struct rc ) {
 
     if ( session.auth.isLoggedIn )

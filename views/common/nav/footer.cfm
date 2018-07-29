@@ -44,6 +44,14 @@
           </ul>
         </div>
       </div>
+      <div class="top-buffer">
+        &nbsp;
+      </div>
+      <div id="colophon" class="top-buffer">
+        &copy; 2018 <a href="https://firehosefountain.com" target="_blank">Firehose Fountain, LLC</a>, all rights reserved.<br/>
+        Debt Decimator, the stylized calculator logo, and all content herein are trademarks  of Firehose Fountain.<br/>
+        <a href="https://www.youtube.com/watch?v=Xe1TZaElTAs" target="_blank">Built with love, Internet style</a> | <a href="javascript:void(0)" ng-click="skin=(skin==1?2:1);updateSkin(skin)"><i class="fas fa-sun"></i><i class="fas fa-moon"></i></a>
+      </div>
     </footer>
   </div>
 </section>

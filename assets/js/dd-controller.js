@@ -2505,9 +2505,10 @@ controller/pay
 controller/main
 
 *****************/
-.controller( 'ddMain', function ( $scope, $http, $q, $compile, DDService ) {
+.controller( 'ddMain', function ( $scope, $http, $q, $cookies, DDService ) {
 
   $scope.try = false;
+  $scope.skin = $cookies.get( 'DD-SKIN' );
 
   angular.element(document).ready(function(){
 
@@ -2862,6 +2863,16 @@ controller/main
 
   };
 
+  $scope.updateSkin = function( sIndex ) {
+
+    var newPath = CF_getTheme(sIndex).replace(/https?\:/,"");
+    $('#skin').attr( "href", newPath );
+    var prefs = $cookies.get( 'DD-SKIN' );
+    prefs = sIndex;
+    $cookies.put( 'DD-SKIN', prefs );
+
+  };
+
 }) // controller/main
 
 /*****************
@@ -2924,23 +2935,10 @@ controller/profile
 
   $scope.updateSkin = function( sIndex ) {
 
-    //var oldlink = document.getElementsByTagName( 'link' ).item( document.getElementsByTagName( 'link' ).length-1 );
-
     var newPath = CF_getTheme(sIndex).replace(/https?\:/,"");
-
     $('#skin').attr( "href", newPath );
-
-    //var newlink = document.createElement( 'link' );
-    //newlink.setAttribute( 'rel', 'stylesheet' );
-    //newlink.setAttribute( 'type', 'text/css' );
-    //newlink.setAttribute( 'href', newPath );
-
-    //document.getElementsByTagName( 'head' ).item( 0 ).replaceChild( newlink, oldlink );
-
     var prefs = $cookies.get( 'DD-SKIN' );
-
     prefs = sIndex;
-
     $cookies.put( 'DD-SKIN', prefs );
 
   };

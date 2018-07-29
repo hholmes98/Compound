@@ -18,9 +18,13 @@
 
     <div class="collapse navbar-collapse">
       <ul class="nav navbar-nav">
-      </ul>
-      <ul class="nav navbar-nav">
-        <li<cfif REQUEST.item is 'about'> class="active"</cfif>><a href="#buildUrl('main.about')#"><i class="fas fa-question-circle"></i> About</a></li>
+        <li class="dropdown">
+          <a href="##" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fas fa-info-circle"></i> <span class="nav-label">About</span> <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li<cfif REQUEST.item is 'about'> class="active"</cfif>><a href="#buildUrl('main.about')#"><i class="fas fa-question-circle"></i> What is #application.app_name#?</span></a></li>
+            <li<cfif REQUEST.item is 'contact'> class="active"</cfif>><a href="#buildUrl('main.contact')#"><i class="fas fa-envelope"></i> Contact us</a></li>
+          </ul>
+        </li>
         <li<cfif REQUEST.item is 'features'> class="active"</cfif>><a href="#buildUrl('main.features')#"><i class="fas fa-sliders-h"></i> Features</a></li>
         <li<cfif REQUEST.item is 'pricing'> class="active"</cfif>><a href="#buildUrl('main.pricing')#"><i class="fas fa-dollar-sign"></i> Pricing</a></li>
       </ul>

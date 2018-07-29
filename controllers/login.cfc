@@ -309,7 +309,7 @@ component accessors = true {
     StructDelete( session.auth, 'user' );
     session.auth.user = userservice.getTemp();
 
-    rc.message = ["You have safely logged out"];
+    rc.message = ["CALC YOU LATER!! You have safely logged out"];
 
     variables.fw.redirect( 'login', 'message' );
 

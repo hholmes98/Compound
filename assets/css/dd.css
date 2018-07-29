@@ -993,6 +993,15 @@ label {
   color: #1c6a3a;
 }
 
+#colophon {
+  font-size: 12px;
+  text-align: center;
+}
+
+#colophon a {
+  color: #d2691e;
+}
+
 @media screen and (max-width: 553px) {
 
   .ow-header {
