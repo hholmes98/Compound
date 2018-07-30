@@ -318,8 +318,8 @@ h2 {
   background-image: repeating-linear-gradient(
     to bottom,
     #ffffff,
-    #49bfb1 1px,
-    #ffffff 2px
+    #49bfb1 2px,
+    #ffffff 1px
   );
   line-height: 1.2;
   -webkit-background-clip: text;
