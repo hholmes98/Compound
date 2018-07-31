@@ -308,9 +308,9 @@ h2 {
   );
   background-image: repeating-linear-gradient(
     to bottom,
-    #ffffff,
+    #ffffff 1px,
     #171717 2px,
-    #ffffff 1px);
+    #ffffff 3px);
   line-height: 1.2;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;

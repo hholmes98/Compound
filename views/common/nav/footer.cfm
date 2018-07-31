@@ -15,7 +15,6 @@
       });
       </script>
     </cfsavecontent>
-    <cfhtmlhead text="#scrollUp#">
   </cfif>
 </cfsilent>
 <section dir="ltr" class="footer">

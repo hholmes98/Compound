@@ -1,8 +1,8 @@
 <!-- views/pay/cards -->
 
-<div class="spacer" ng-show="!(loaded)"></div>
+<!--- <div class="spacer" ng-cloak="!(loaded)"></div> --->
 
-<div class="pan-page pan-page-2 slide" data-anchor="cards">
+<div class="pan-page pan-page-2 slide" data-anchor="cards" ng-cloak>
   <div class="container">
 
     <div class="page-header">
@@ -47,7 +47,7 @@
   </div>
 </div>
 
-<div class="pan-page pan-page-3 slide" data-anchor="detail">
+<div class="pan-page pan-page-3 slide" data-anchor="detail" ng-cloak>
   <div class="container">
 
     <div class="row">
