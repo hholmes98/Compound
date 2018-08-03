@@ -10,6 +10,7 @@ component accessors=true {
 
   }
 
+/*
   private void function populate( struct rc ) {
 
     // get all events for this user
@@ -43,6 +44,7 @@ component accessors=true {
     variables.fw.renderdata( 'JSON', arguments.rc.events );
 
   }
+*/
 
   public void function detail( struct rc ) {
 
@@ -52,6 +54,7 @@ component accessors=true {
 
   }
 
+/*
   public void function first( struct rc ) {
 
     populate( arguments.rc )
@@ -59,6 +62,7 @@ component accessors=true {
     variables.fw.renderdata( 'JSON', arguments.rc.events[1] );
 
   }
+*/
 
   public void function delete( struct rc ) {
 
@@ -68,14 +72,14 @@ component accessors=true {
 
   }
 
-  public void function purge( struct rc ) {
+  // public void function purge( struct rc ) {
 
-    // delete all events for a user_id
-    var ret = eventService.purge( arguments.rc.user_id );
+  //   // delete all events for a user_id
+  //   var ret = eventService.purge( arguments.rc.user_id );
 
-    variables.fw.renderData( 'JSON', ret );
+  //   variables.fw.renderData( 'JSON', ret );
 
-  }
+  // }
 
   public void function save( struct rc ) {
 
@@ -86,28 +90,10 @@ component accessors=true {
   }
 
   /* Event Functions */
-
+/*
   public void function schedule( struct rc ) {
 
     // return an array of event dates reflecting when each card is paid and by how much
-
-    /* match this format: 
-
-      data = [
-       
-        //month1
-        {id: 1, title: 'Pay $28.72 to card1', start: Wed Nov 30 2017 00:00:00 GMT-0600, balance_remaining: 4.22},
-        {id: 2, title: 'Pay $33.90 to card2', start: Wed Nov 30 2017 00:00:00 GMT-0600, balance_remaining: 1428.4},
-        
-        //month2    
-        {id: 1, title: 'Pay $28.72 to card1', start: Mon Dec 31 2018 00:00:00 GMT-0600, balance_remaining: 0},
-        {id: 2, title: 'Pay $33.90 to card2', start: Mon Dec 31 2018 00:00:00 GMT-0600, balance_remaining: 1389.2},
-
-        etc...
-
-      ];
-
-    */
 
     // populate events into the rc struct
     populate( arguments.rc ); // rc.events should now exist
@@ -132,8 +118,9 @@ component accessors=true {
 
     variables.fw.renderdata( 'JSON', schedule );
 
-  }
+  }*/
 
+  /*
   public void function journey( struct rc ) {
 
     // return an array of elements (each element is technically a month/year) that declare the remaining balance on each card
@@ -141,23 +128,6 @@ component accessors=true {
 
     // format is:
     
-    /*
-    data = [
-
-      // milestone1
-      {
-        name: 'card1',
-        data: [100, 88, 72, 69, 51, 48, 27, 12, 4, 0]   // each value in the array the balance_remaining for that month.
-      },
-
-      // milestone2
-      {
-        name: 'card2',
-        data: [100, 72, 59, 34, 18, 9, 0]       // each value in the array the balance_remaining for that month.
-      }
-
-    ]
-      */
 
     populate( arguments.rc );
     var events = arguments.rc.events;
@@ -196,5 +166,6 @@ component accessors=true {
     variables.fw.renderdata( 'JSON', milestones );
 
   }
+  */
 
 }

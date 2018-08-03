@@ -236,7 +236,7 @@ ddApp
 config
 
 ****************/
-.config(['$uibTooltipProvider', function($uibTooltipProvider) {
+.config(['$uibTooltipProvider','$httpProvider', function($uibTooltipProvider, $httpProvider) {
 
   $uibTooltipProvider.setTriggers({
     'mouseenter': 'mouseleave',
@@ -248,6 +248,9 @@ config
   $uibTooltipProvider.options({
     'popupCloseDelay': 3000
   });
+
+  $httpProvider.defaults.xsrfCookieName = 'XSRF-DD-TOKEN';
+  $httpProvider.defaults.xsrfHeaderName = 'X-XSRF-DD-TOKEN';
 
 }])
 
@@ -369,24 +372,19 @@ filters
 })
 .filter('noPaymentFilter', function() {
 
-  function zeroPayFilter( items, pick_list, all ) {
+  function zeroPayFilter( items, showAll ) {
 
     var filtered = [];
-    var picked = pick_list;
 
-    angular.forEach( items, function( item, key, items ) {
-      if ( !all ) {
-        if ( Object.keys(picked).find(key=>key == item.card_id) ) {
-          item.pay_date = picked[item.card_id];
-          filtered.push( item );
+    if ( showAll )
+      return items;
+    else {
+      angular.forEach( items, function( item ) {
+        if ( item.pay_date != undefined && item.pay_date != "" ) {
+          filtered.push(item);
         }
-      } else {
-        if ( Object.keys(picked).find(key=>key == item.card_id ) ) {
-          item.pay_date = picked[item.card_id];
-        }
-        filtered.push( item );
-      }
-    });
+      });
+    }
 
     return filtered;
 
@@ -400,7 +398,7 @@ filters
 .filter('prettyPayDateFilter', function() {
 
   return function(date) {
-    if (date == undefined)
+    if (date == undefined || date == "")
       return "-";
     else
       return new Date(date);
@@ -481,21 +479,15 @@ services
 
     $http({
       method: 'GET',
-      url: '/index.cfm/deck/list/user_id/' + key,
+      url: '/index.cfm/rest/deckList/user_id/' + key
     })
     .then( function onSuccess( response ) {
 
-      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
-        throw new Error( 'REST Error' );
-      }
-
-      if ( response.data == -1 ) {
-        throw new Error( 'REST GET Error' );
-      }
+      restResponseHandler( response );
 
       deferred.resolve({
         user_id: key,
-        cards: response.data,
+        cards: response.data.DATA,
         chain: data
       });
 
@@ -503,7 +495,7 @@ services
     .catch( function onError( result ) {
 
       deferred.reject({
-        error: result.data,
+        error: result.data.ERROR,
         chain: data
       });
 
@@ -520,27 +512,21 @@ services
 
     $http({
       method: 'GET',
-      url: '/index.cfm/deck/detail/id/' + key,
+      url: '/index.cfm/rest/deckGet/id/' + key,
     })
     .then( function onSuccess( response ) {
 
-      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
-        throw new Error( 'REST Error' );
-      }
-
-      if ( response.data == -1 ) {
-        throw new Error( 'REST GET Error' );
-      }
+      restResponseHandler( response );
 
       deferred.resolve({
-        card: response.data
+        card: response.data.DATA
       });
 
     })
     .catch( function onError( result ) {
 
       deferred.reject({
-        error: result.data,
+        error: result.data.ERROR,
         chain: data
       });
 
@@ -556,7 +542,7 @@ services
 
     $http({
       method: 'POST',
-      url: '/index.cfm/deck/save',
+      url: '/index.cfm/rest/deckSave',
       data: $.param( data ),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -564,16 +550,10 @@ services
     })
     .then( function onSuccess( response ) {
 
-      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
-        throw new Error( 'REST Error' );
-      }
-
-      if ( response.data == -1 ) {
-        throw new Error( 'REST POST Error' );
-      }
+      restResponseHandler( response );
 
       deferred.resolve({
-        card_id: response.data,
+        card_id: response.data.DATA,
         chain: data
       });
 
@@ -581,7 +561,7 @@ services
     .catch( function onError( result ) {
 
       deferred.reject({
-        error: result.data,
+        error: result.data.ERROR,
         chain: data
       });
 
@@ -598,17 +578,11 @@ services
 
     $http({
       method: 'DELETE',
-      url: 'index.cfm/deck/delete/id/' + key
+      url: 'index.cfm/rest/deckDelete/id/' + key
     })
     .then( function onSuccess( response ) {
 
-      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
-        throw new Error( 'REST Error' );
-      }
-
-      if ( response.data == -1 ) {
-        throw new Error( 'REST DELETE Error' );
-      }
+      restResponseHandler( response );
 
       deferred.resolve({
         data: 0,
@@ -619,7 +593,7 @@ services
     .catch( function onError( result ) {
 
       deferred.reject({
-        error: result.data,
+        error: result.data.ERROR,
         chain: data
       });
 
@@ -637,21 +611,15 @@ services
 
     $http({
       method: 'GET',
-      url: '/index.cfm/plans/first/user_id/' + key,
+      url: '/index.cfm/rest/plansFirst/user_id/' + key,
     })
     .then( function onSuccess( response ) {
 
-      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
-        throw new Error( 'REST Error' );
-      }
-
-      if ( response.data == -1 ) {
-        throw new Error( 'REST GET Error' );
-      }
+      restResponseHandler( response );
 
       deferred.resolve({
         user_id: key,
-        plan: response.data,
+        plan: response.data.DATA,
         chain: data
       });
 
@@ -659,7 +627,7 @@ services
     .catch( function onError( result ) {
 
       deferred.reject({
-        error: result.error,
+        error: result.data.ERROR,
         chain: data
       });
 
@@ -679,13 +647,7 @@ services
     })
     .then( function onSuccess( response ) {
 
-      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
-        throw new Error( 'REST Error' );
-      }
-
-      if ( response.data == -1 ) {
-        throw new Error( 'REST GET Error' );
-      }
+      restResponseHandler( response );
 
       deferred.resolve({
         plan: response.data,
@@ -696,7 +658,7 @@ services
     .catch( function onError( result ) {
 
       deferred.reject({
-        error: result.error,
+        error: result.data,
         chain: data
       });
 
@@ -713,17 +675,11 @@ services
 
     $http({
       method: 'DELETE',
-      url: '/index.cfm/plans/purge/user_id/' + key,
+      url: '/index.cfm/rest/plansPurge/user_id/' + key,
     })
     .then( function onSuccess( response ) {
 
-      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
-        throw new Error( 'REST Error' );
-      }
-
-      if ( response.data == -1 ) {
-        throw new Error( 'REST DELETE Error' );
-      }
+      restResponseHandler( response );
 
       deferred.resolve({
         user_id: key,
@@ -734,7 +690,7 @@ services
     .catch( function onError( result ) {
 
       deferred.reject({
-        error: result.data,
+        error: result.data.ERROR,
         chain: data
       });
 
@@ -752,16 +708,14 @@ services
 
     $http({
       method: 'GET',
-      url: '/index.cfm/events/list/user_id/' + key
+      url: '/index.cfm/rest/eventsList/user_id/' + key
     })
     .then( function onSuccess( response ) {
 
-      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
-        throw new Error( 'REST Error' );
-      }
+      restResponseHandler( response );
 
       deferred.resolve({
-        events: response.data,
+        events: response.data.DATA,
         user_id: key,
         chain: data,
       });
@@ -770,7 +724,7 @@ services
     .catch( function onError( result ) {
 
       deferred.reject({
-        error: result.data,
+        error: result.data.ERROR,
         chain: data
       });
 
@@ -787,20 +741,14 @@ services
 
     $http({
       method: 'GET',
-      url: '/index.cfm/events/first/user_id/' + key
+      url: '/index.cfm/rest/eventsFirst/user_id/' + key
     })
     .then( function onSuccess( response ) {
 
-      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
-        throw new Error( 'REST Error' );
-      }
-
-      if ( response.data == -1 ) {
-        throw new Error( 'REST GET Error' );
-      }
+      restResponseHandler( response );
 
       deferred.resolve({
-        event: response.data,
+        event: response.data.DATA,
         user_id: key,
         chain: data
       });
@@ -809,7 +757,7 @@ services
     .catch( function onError( result ) {
 
       deferred.reject({
-        error: result.data,
+        error: result.data.ERROR,
         chain: data
       });
 
@@ -826,29 +774,23 @@ services
 
     $http({
       method: 'GET',
-      url: '/index.cfm/events/schedule/user_id/' + key
+      url: '/index.cfm/rest/eventsSchedule/user_id/' + key
     })
     .then( function onSuccess( response ) {
 
-      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
-        throw new Error( 'REST Error' );
-      }
-
-      if ( response.data == -1 ) {
-        throw new Error( 'REST GET Error' );
-      }
+      restResponseHandler( response );
 
       deferred.resolve({
         user_id: key,
         chain: data,
-        schedule: response.data
+        schedule: response.data.DATA
       });
 
     })
     .catch( function onError( result ) {
 
       deferred.reject({
-        error: result.data,
+        error: result.data.ERROR,
         chain: data
       });
 
@@ -868,13 +810,7 @@ services
     })
     .then( function onSuccess( response ) {
 
-      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
-        throw new Error( 'REST Error' );
-      }
-
-      if ( response.data == -1 ) {
-        throw new Error( 'REST GET Error' );
-      }
+      restResponseHandler( response );
 
       deferred.resolve({
         chain: data,
@@ -900,32 +836,25 @@ services
     var key = deepGet(data,'user_id');
     var deferred = $q.defer();
 
-    // FIXME: this should be $http.jsonp(), whitelist the URL: https://docs.angularjs.org/api/ng/service/$http#jsonp
     $http({
       method: 'GET',
-      url: '/index.cfm/events/journey/user_id/' + key
+      url: '/index.cfm/rest/eventsJourney/user_id/' + key
     })
     .then( function onSuccess( response ) {
 
-      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
-        throw new Error( 'REST Error' );
-      }
-
-      if ( response.data == -1 ) {
-        throw new Error( 'REST GET Error' );
-      }
+      restResponseHandler( response );
 
       deferred.resolve({
         user_id: key,
         chain: data,
-        journey: response.data
+        journey: response.data.DATA
       });
 
     })
     .catch( function onError( result ) {
 
       deferred.reject({
-        error: result.data,
+        error: result.data.ERROR,
         chain: data
       });
 
@@ -942,17 +871,11 @@ services
 
     $http({
       method: 'DELETE',
-      url: '/index.cfm/events/purge/user_id/' + key,
+      url: '/index.cfm/rest/eventsPurge/user_id/' + key,
     })
     .then( function( response ) {
 
-      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
-        throw new Error( 'REST Error' );
-      }
-
-      if ( response.data == -1 ) {
-        throw new Error( 'REST DELETE Error' );
-      }
+      restResponseHandler( response );
 
       deferred.resolve({
         user_id: key,
@@ -964,7 +887,7 @@ services
     .catch( function( result ) {
 
       deferred.reject({
-        error: result.data,
+        error: result.data.ERROR,
         chain: data
       });
 
@@ -981,33 +904,27 @@ services
 
     $http({
       method: 'POST',
-      url: 'index.cfm/deck/emergency',
+      url: 'index.cfm/rest/deckEmergency',
       data: $.param( data ),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
-      } // set the headers so angular passing info as form data (not request payload)
+      }
     })
     .then( function onSuccess( response ) {
 
-      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
-        throw new Error( 'REST Error' );
-      }
-
-      if ( response.data == -1 ) {
-        throw new Error( 'REST POST Error' );
-      }
+      restResponseHandler( response );
 
       deferred.resolve({
         user_id: data.user_id,
         chain: data,
-        data: response.data
+        data: response.data.DATA
       });
 
     })
     .catch( function onError( result ) {
 
       deferred.reject({
-        error: result.data,
+        error: result.data.ERROR,
         chain: data
       });
 
@@ -1024,29 +941,23 @@ services
 
     $http({
       method: 'GET',
-      url: '/index.cfm/preferences/get/user_id/' + key
+      url: '/index.cfm/rest/preferencesGet/user_id/' + key
     })
     .then( function onSuccess( response ) {
 
-      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
-        throw new Error( 'REST Error' );
-      }
-
-      if ( response.data == -1 ) {
-        throw new Error( 'REST GET Error' );
-      }
+      restResponseHandler( response );
 
       deferred.resolve({
-        preferences: response.data,
+        preferences: response.data.DATA,
         user_id: key,
         chain: data
       });
 
     })
-    .catch( function onError( e ) {
+    .catch( function onError( result ) {
 
       deferred.reject({
-        error: e.data,
+        error: result.data.ERROR,
         chain: data
       });
 
@@ -1101,33 +1012,27 @@ services
 
     $http({
       method: 'POST',
-      url: '/index.cfm/preferences/save/',
+      url: '/index.cfm/rest/preferencesSave/',
       data: $.param( data ),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
-      } // set the headers so angular passing info as form data (not request payload)
+      }
     })
     .then( function( response ) {
 
-      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
-        throw new Error( 'REST Error' );
-      }
-
-      if ( response.data == -1 ) {
-        throw new Error( 'REST POST Error' );
-      }
+      restResponseHandler( response );
 
       deferred.resolve({
-        data: response.data,
+        data: response.data.DATA,
         user_id: data.user_id,
         chain: data
       });
 
     })
-    .catch( function( e ) {
+    .catch( function( result ) {
 
       deferred.reject({
-        error: e.data,
+        error: result.data.ERROR,
         chain: data
       });
 
@@ -1145,20 +1050,14 @@ services
 
     $http({
       method: 'GET',
-      url: '/index.cfm/profile/getPaymentInfo/user_id/' + key
+      url: '/index.cfm/rest/profilePaymentInfoGet/user_id/' + key
     })
     .then( function( response ) {
 
-      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
-        throw new Error( 'REST Error' );
-      }
-
-      if ( response.data == -1 ) {
-        throw new Error( 'REST POST Error' );
-      }
+      restResponseHandler( response );
 
       deferred.resolve({
-        payment_info: response.data,
+        payment_info: response.data.DATA,
         user_id: key,
         chain: data
       });
@@ -1167,7 +1066,7 @@ services
     .catch( function ( result ) {
 
       deferred.reject({
-        error:result.data,
+        error:result.data.ERROR,
         chain:data
       });
 
@@ -1183,7 +1082,7 @@ services
 
     $http({
       method: 'POST',
-      url: '/index.cfm/profile/savePaymentInfo',
+      url: '/index.cfm/rest/profilePaymentInfoSave',
       data: $.param( data ),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -1191,25 +1090,19 @@ services
     })
     .then( function(response) {
 
-      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
-        throw new Error( 'REST Error' );
-      }
-
-      if ( response.data == -1 ) {
-        throw new Error( 'REST POST Error' );
-      }
+      restResponseHandler( response );
 
       deferred.resolve({
-        data: response.data,
+        data: response.data.DATA,
         user_id: CF_getUserID(), // don't do this, please. for the love of god.
         chain: data
       });
 
     })
-    .catch( function( e ) {
+    .catch( function( result ) {
 
       deferred.reject({
-        error: e.data,
+        error: result.data.ERROR,
         chain: data
       });
 
@@ -1234,29 +1127,23 @@ services
 
     $http({
         method: 'GET',
-        url: '/index.cfm/deck/getCardPayments/user_id/' + key + '/month/' + month + '/year/' + year
+        url: '/index.cfm/rest/deckCardPaymentsList/user_id/' + key + '/month/' + month + '/year/' + year
     })
     .then( function onSuccess( response ) {
 
-      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
-        throw new Error( 'REST Error' );
-      }
-
-      if ( response.data == -1 ) {
-        throw new Error( 'REST GET Error' );
-      }
+      restResponseHandler( response );
 
       deferred.resolve({
-        card_payments: response.data,
+        card_payments: response.data.DATA,
         user_id: key,
         chain: data
       });
 
     })
-    .catch( function onError( e ) {
+    .catch( function onError( result ) {
 
       deferred.reject({
-        error: e.data,
+        error: result.data.ERROR,
         chain: data
       });
 
@@ -1276,29 +1163,23 @@ services
 
     $http({
         method: 'GET',
-        url: '/index.cfm/deck/getCardPayments/card_id/' + key + '/month/' + month + '/year/' + year
+        url: '/index.cfm/rest/deckCardPaymentGet/card_id/' + key + '/month/' + month + '/year/' + year
     })
     .then( function onSuccess( response ) {
 
-      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
-        throw new Error( 'REST Error' );
-      }
-
-      if ( response.data == -1 ) {
-        throw new Error( 'REST GET Error' );
-      }
+      restResponseHandler( response );
 
       deferred.resolve({
-        card_payment: response.data,
+        card_payment: response.data.DATA,
         user_id: key,
         chain: data
       });
 
     })
-    .catch( function onError( e ) {
+    .catch( function onError( result ) {
 
       deferred.reject({
-        error: e.data,
+        error: result.data.ERROR,
         chain: data
       });
 
@@ -1314,7 +1195,7 @@ services
 
     $http({
       method: 'POST',
-      url: '/index.cfm/deck/saveCardPayment',
+      url: '/index.cfm/rest/deckCardPaymentSave',
       data: $.param( data ),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -1322,25 +1203,19 @@ services
     })
     .then( function(response) {
 
-      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
-        throw new Error( 'REST Error' );
-      }
-
-      if ( response.data == -1 ) {
-        throw new Error( 'REST POST Error' );
-      }
+      restResponseHandler( response );
 
       deferred.resolve({
-        data: response.data,
+        data: response.data.DATA,
         user_id: data.user_id,
         chain: data
       });
 
     })
-    .catch( function( e ) {
+    .catch( function( result ) {
 
       deferred.reject({
-        error: e.data,
+        error: result.data.ERROR,
         chain: data
       });
 
@@ -1351,10 +1226,6 @@ services
   }
 
   service.pGenerateDesign = function( data ) {
-
-    //var key = deepGet(data,'card_id');
-    //var month = deepGet(data,'payment_for_month');
-    //var year = deepGet(data,'payment_for_year');
 
     var dest_url = '/index.cfm/deck/getNewDesign';
     var deferred = $q.defer();
@@ -1368,13 +1239,7 @@ services
     })
     .then( function onSuccess( response ) {
 
-      if ( response.data.toString().indexOf('DOCTYPE') != -1 ) {
-        throw new Error( 'REST Error' );
-      }
-
-      if ( response.data == -1 ) {
-        throw new Error( 'REST GET Error' );
-      }
+      restResponseHandler( response );
 
       deferred.resolve({
         code: response.data.code,
@@ -1433,6 +1298,22 @@ services
 
   }
 
+  function restResponseHandler( httpResponse ) {
+
+    if ( httpResponse.data.DATA.toString().indexOf('DOCTYPE') != -1 ) {
+      throw new Error( 'REST Error' );
+    }
+
+    if ( httpResponse.data.DATA == -1 ) {
+      throw new Error( 'REST GET Error' );
+    }
+
+    if ( httpResponse.data.ERROR.Message != undefined ) {
+      throw new Error ( httpResponse.data.ERROR.Message );
+    }
+
+  }
+
   return service;
 
 })
@@ -1454,21 +1335,6 @@ controller/cards
   $scope.budgetTab = false;
   $scope.pagecheckFrequencyTab = false;
 
-  /*
-  $scope.defaultSlider = {
-    min: 0,
-    options: {
-      floor: 0,
-      ceil: 1,
-      precision: 2,
-      step: 0.01,
-      rightToLeft: true,
-      onChange: function(sliderId, modelValue, highValue, pointerType) {
-        sliderId.getForm().$setPristine(false);
-      }
-    }
-  }*/
-
   // init-start
   DDService.pGetCards({user_id:CF_getUserID()})
   .then( function onSuccess( response ) {
@@ -1477,17 +1343,9 @@ controller/cards
 
     for (var card in $scope.cards) {
       $scope.cards[card]['className'] = 'card' + $scope.cards[card].card_id.toString() + ' small';
-      //$scope.cards[card]['slider'] = $scope.defaultSlider;
-      //$scope.cards[card]['slider']['options']['id'] = 'slider' + $scope.cards[card].card_id.toString();
     }
 
-    //$scope.keylist = Object.keys($scope.cards).sort(function(a, b){return b-a;});
-    
-
     $scope.calculateAll();
-
-    console.log($scope.cards);
-    //console.log($scope.keylist);
 
     DDService.pGetPreferences({user_id:CF_getUserID()})
     .then( function onSuccess( response ) {
@@ -1568,8 +1426,6 @@ controller/cards
     .catch( function onError( result ) {
       CF_restErrorHandler( result );
     });
-
-    console.log( $scope.cards );
 
   };
 
@@ -1682,9 +1538,6 @@ controller/cards
       scrollTop: jQuery('#top-form').offset().top
     }, 'slow');
 
-    console.log( $scope.cards );
-    //console.log( $scope.keylist );
-
   };
 
   /**************
@@ -1725,11 +1578,12 @@ controller/cards
                 .then( function onSuccess( response ) {
 
                   $scope.cards.splice( index, 1 );
-                  //$scope.keylist.splice( $scope.keylist.indexOf(index), 1 );
 
                 })
                 .catch( function onError( result ){
+
                   CF_restErrorHandler( result );
+
                 });
 
                 dialogItself.close();
@@ -1744,9 +1598,6 @@ controller/cards
       });
 
     }
-
-    console.log($scope.cards);
-    //console.log($scope.keylist);
 
   };
 
@@ -1824,7 +1675,6 @@ controller/cards
                 // change the cancel button (if it needs changing)
                 var $cancel = dialogItself.getButton('btn-goback');
                 $cancel[0].innerText = "Revert";
-                //var $cancel.setMessage('Revert');
 
                 var $save = dialogItself.getButton('btn-save');
                 $save.enable();
@@ -1955,19 +1805,6 @@ controller/calculate
         // ********************
         // 1. Populate the Plan
         $scope.plan = response.plan;
-        //$scope.keylist = Object.keys($scope.plan).sort(function(a, b){return b-a;});
-
-        //$scope.selected = Object.keys($scope.plan).find(thisCard => thisCard.is_emergency == 1);
-
-        /*
-        for (var card in $scope.plan) {
-          if ( card.is_emergency ) {
-
-            $scope.selected = $scope.keylist[card];
-          }
-        }
-        */
-
         $scope.cards = $scope.plan; // FIXME: you're duping this var, just to make the ordering work? Don't.
 
         /* ...then, we do the calendar and chart */
@@ -2066,10 +1903,6 @@ controller/calculate
 
           Highcharts.stockChart('milestones', {
 
-            //title: {
-            //  text: 'Payoff Milestones'
-            //},
-
             credits: {
               enabled: false
             },
@@ -2134,7 +1967,6 @@ controller/calculate
                 pointIntervalUnit: 'month',  // every point along the x axis represents 1 month
                 animation: {
                   duration: 6200,
-                  //easing: 'easeOutBounce'
                 },
                 lineWidth: 4
               }
@@ -2224,7 +2056,7 @@ controller/calculate
 
   // Calendar: config object
   $scope.uiConfig = {
-    calendar:{
+    calendar: {
       eventClick: $scope.alertOnEventClick,
       eventAfterAllRender: $scope.eventAfterAllRender,
       timezone: 'UTC'
@@ -2283,78 +2115,76 @@ controller/pay
         anchors:['list'],
         afterRender: function() {
 
-
-
-      DDService.pGetEvent({user_id:CF_getUserID()})
-      .then( function onSuccess( response ) {
-
-        //success
-        $scope.all_cards = response.event.plan.plan_deck.deck_cards; // overwrite the first test call
-        $scope.event_cards = response.event.event_cards;
-        $scope.cards = $filter('cardSorter')($scope.all_cards, $scope.orderByField, $scope.reverseSort);
-        $scope.pay_dates = {};
-
-        for (i = 0; i < Object.keys($scope.event_cards).length; i++ ) {
-          var index =  Object.keys($scope.event_cards)[i];
-          $scope.pay_dates[index] = $scope.event_cards[index].pay_date;
-        }
-
-        $scope.cards = $filter('noPaymentFilter')($scope.all_cards, $scope.pay_dates, $scope.showAllCards);
-        $scope.selected = $scope.cards[Object.keys($scope.cards)[0]]; // by default, just pick the first one.
-
-        // chain into actual payments]
-        var in_data = {
-          user_id: CF_getUserID(),
-          payment_for_month: response.event.calculated_for_month,
-          payment_for_year: response.event.calculated_for_year
-        }
-        
-        DDService.pGetCardPayments( in_data )
-        .then( function onSuccess( response ) {
-
-          for (j = 0; j < Object.keys($scope.event_cards).length; j++ ) {
-            var index =  Object.keys($scope.event_cards)[j];
-            if ( response.card_payments.findIndex(x => x.card_id == $scope.event_cards[index].card_id) != -1 ) {
-              var newIndex = $scope.cards.findIndex(y => y.card_id == $scope.event_cards[index].card_id)
-
-              $scope.cards[newIndex]['actual_payment'] = response.card_payments.find(x => x.card_id == $scope.event_cards[index].card_id).actual_payment;
-              $scope.cards[newIndex]['actually_paid_on'] = response.card_payments.find(x => x.card_id == $scope.event_cards[index].card_id).actually_paid_on;
-            }
-          }
-
-          // chain into the preferences load
-          DDService.pGetPreferences({user_id:CF_getUserID()})
+          DDService.pGetEvent({user_id:CF_getUserID()})
           .then( function onSuccess( response ) {
 
-            $scope.loaded = true;
-            if ($scope.event_cards.length) {
-              $scope.loadingBills = false;
-              $scope.loadingPlan = false;
+            //success
+            $scope.all_cards = response.event.cards; // this is for filter/non-filter
+            $scope.cards = $scope.all_cards;
+            $scope.event_cards = $scope.cards;
+
+            // this will reduce
+            $scope.cards = $filter('noPaymentFilter')($scope.all_cards, $scope.showAllCards);
+
+            // this should stay the same
+            $scope.cards = $filter('cardSorter')($scope.cards, $scope.orderByField, $scope.reverseSort);
+            
+            $scope.selected = $scope.cards[Object.keys($scope.cards)[0]]; // by default, just pick the first one.
+            $scope.calculated_payment_text = $scope.selected.calculated_payment;
+
+            // chain into actual payments]
+            var in_data = {
+              user_id: CF_getUserID(),
+              payment_for_month: response.event.calculated_for_month,
+              payment_for_year: response.event.calculated_for_year
             }
+            
+            DDService.pGetCardPayments( in_data )
+            .then( function onSuccess( response ) {
+
+              for (j = 0; j < Object.keys($scope.event_cards).length; j++ ) {
+                var index =  Object.keys($scope.event_cards)[j];
+                if ( response.card_payments.findIndex(x => x.card_id == $scope.event_cards[index].card_id) != -1 ) {
+                  var newIndex = $scope.cards.findIndex(y => y.card_id == $scope.event_cards[index].card_id)
+
+                  $scope.cards[newIndex]['actual_payment'] = response.card_payments.find(x => x.card_id == $scope.event_cards[index].card_id).actual_payment;
+                  $scope.cards[newIndex]['actually_paid_on'] = response.card_payments.find(x => x.card_id == $scope.event_cards[index].card_id).actually_paid_on;
+                }
+              }
+
+              // chain into the preferences load
+              DDService.pGetPreferences({user_id:CF_getUserID()})
+              .then( function onSuccess( response ) {
+
+                $scope.loaded = true;
+                if ($scope.event_cards.length) {
+                  $scope.loadingBills = false;
+                  $scope.loadingPlan = false;
+                }
+
+              })
+              .catch( function onError( result ) { // pGetPreferences
+
+                CF_restErrorHandler( result );
+
+              });
+
+            })
+            .catch( function onError( result ) { // pGetCardPayments
+
+              CF_restErrorHandler( result );
+
+            });
 
           })
-          .catch( function onError( result ) { // pGetPreferences
+          .catch( function onError( result ) { // pGetEvent
 
-            CF_restErrorHandler( result );
+              CF_restErrorHandler( result );
 
           });
 
-        })
-        .catch( function onError( result ) { // pGetCardPayments
-
-          CF_restErrorHandler( result );
-
-        });
-
-      })
-      .catch( function onError( result ) { // pGetEvent
-
-          CF_restErrorHandler( result );
-
-      });
-
-
         }
+
       }); // end fullpage.js
 
       //disabling scrolling
@@ -2406,9 +2236,10 @@ controller/pay
   }
 
   $scope.filterBy = function() {
-    $scope.cards = $filter('noPaymentFilter')($scope.all_cards, $scope.pay_dates, $scope.showAllCards);
+    $scope.cards = $filter('noPaymentFilter')($scope.all_cards, $scope.showAllCards);
+    // you always re-sort after changing the filter
+    $scope.cards = $filter('cardSorter')($scope.cards, $scope.orderByField, $scope.reverseSort);
   }
-
 
   $scope.resetForm = function( forms ) {
     $scope.card = {};
@@ -2434,19 +2265,25 @@ controller/pay
 
     var key = Object.keys($scope.cards).find(thisIndex => $scope.cards[thisIndex].card_id == card.card_id);
 
-    $scope.selected.calculated_payment = 'Thinking...'; // setting this to a non-number will trigger the || output filter on the display, which is 'Recalculating...'
+    $scope.calculated_payment_text = 'Thinking...'; // setting this to a non-number will trigger the || output filter on the display, which is 'Recalculating...'
 
     DDService.pSaveCard( card )
     .then( DDService.pGetCard )
     .then( DDService.pDeletePlans )
     .then( DDService.pDeleteJourney )
-    .then( DDService.pGetPlan )
+    .then( DDService.pGetEvent )
     .then( function( response ) {
-      // just update the 1  card
-      $scope.cards[key].calculated_payment = response.plan[$scope.selected.card_id].calculated_payment;
-      $scope.selected.calculated_payment = $scope.cards[key].calculated_payment;
 
-      $scope.cards = response.plan; // fixme: this still won't fix the pay_dates on the bills list.
+      $scope.all_cards = response.event.cards;
+      $scope.cards = $scope.all_cards;
+      $scope.event_cards = $scope.cards;
+
+      $scope.selected = $scope.cards[$scope.selected.card_id];
+      $scope.calculated_payment_text = $scope.selected.calculated_payment;
+
+      // and then you have re-filter and re-sort
+      $scope.cards = $filter('noPaymentFilter')($scope.all_cards, $scope.showAllCards);
+      $scope.cards = $filter('cardSorter')($scope.cards, $scope.orderByField, $scope.reverseSort);
 
     });
 
@@ -2468,6 +2305,10 @@ controller/pay
 
     DDService.pSaveCardPayment( in_data )
     .then( function( response ) {
+
+      /******
+      TRIVIA
+      ******/
 
       // TODO: message will be populated with real stats based on the user's performance.
       BootstrapDialog.show({
@@ -2608,70 +2449,6 @@ controller/main
   $scope.navigateTo = function( path ) {
     location.href = path;
   };
-
-  $scope.addAnother = function() {
-
-    var newHed = [
-      'Keep \'em coming!', 
-      'Need more debt!', 
-      'You\'re killing it! (and by "it" we mean "debt")', 
-      'Give us your cards!', 
-      'Somebody set you up the debt!'
-    ];
-    
-    var newMsg = [
-      'The average balance a person carries on a credit card is: $5,047. Let\'s get that down to $0.',
-      'Families with debt carry an average balance of: $15,654. It\'s time to chip that away.',
-      'People born between \'80-\'84 carry approx. $5,689 more credit card debt than their parents, and $8,156 more than their grandparents.',
-      'Credit card debt increased by nearly 8% in 2017. Let\'s reverse that trend. Now.',
-      'But starting today, you\'re paying it off. For great justice.'
-    ];
-
-    var $pan = $( '#pan-main > form' );
-
-    if (!$pan.length) {
-      $pan = $('#pan-main');
-    }
-
-    var $last_div = $('div[id^="page"]:last');
-    var num = parseInt( $last_div.prop('id').match(/\d+/g), 10 ) + 1;
-
-    var $div = $last_div.clone()
-    
-    // re-id it
-    $div.prop('id','page' + num);
-
-    // re-class it.
-    $div.prop('class','pan-page pan-page-' + num);
-
-    // attach data for panning
-    $div.data( 'originalClassList', $div.attr( 'class' ) );
-
-    // re-id the form fields
-    $div.find('input').each( function(index) {
-
-      var tClass = $(this).attr('class'); // the base field name is the class (the actual name already has a number)
-
-      var fieldName = tClass.substring(tClass.indexOf('credit-card'));
-
-      var newFieldId = fieldName + (num-1); // the fields are -1 of the page itself (eg. page-2 has fieldnames named credit-card-label1)
-
-      // re-id it
-      $(this).prop('id', newFieldId);
-
-      // and then re-name it
-      $(this).prop('name', newFieldId);
-
-    });
-
-    $div.find('.card-content h3').text(newHed[tRnd % newHed.length]);
-    $div.find('.card-content p').text(newMsg[tRnd % newHed.length]);
-    tRnd++;
-
-    $pan.append( $div );
-
-    return num;
-  }
 
   /* Chart */
 
@@ -2928,8 +2705,6 @@ controller/profile
       });
 
     });
-
-    console.log( $scope.preferences );
 
   };
 

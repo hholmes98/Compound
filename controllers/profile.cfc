@@ -357,59 +357,59 @@ component accessors=true {
   * REST *
   *******/
 
-  function getPaymentInfo( struct rc ) {
-    param name="rc.user_id" default="";
-    param name="rc.payment" default=StructNew();
+  // function getPaymentInfo( struct rc ) {
+  //   param name="rc.user_id" default="";
+  //   param name="rc.payment" default=StructNew();
 
-    if ( Len(rc.user_id) && rc.user_id == session.auth.user.getUser_Id() && session.auth.user.getStripe_Customer_Id() != '' ) {
+  //   if ( Len(rc.user_id) && rc.user_id == session.auth.user.getUser_Id() && session.auth.user.getStripe_Customer_Id() != '' ) {
 
-      // customer info
-      rc.customer_id = session.auth.user.getStripe_Customer_Id();
-      loadCustomer( arguments.rc );
-      loadCardInfo( arguments.rc );
+  //     // customer info
+  //     rc.customer_id = session.auth.user.getStripe_Customer_Id();
+  //     loadCustomer( arguments.rc );
+  //     loadCardInfo( arguments.rc );
 
-      rc.payment['card'] = rc.card;
-      rc.payment['asterisks'] = rc.asterisks;
+  //     rc.payment['card'] = rc.card;
+  //     rc.payment['asterisks'] = rc.asterisks;
 
-    }
+  //   }
 
-    variables.fw.renderdata( 'JSON', rc.payment );
+  //   variables.fw.renderdata( 'JSON', rc.payment );
 
-  }
+  // }
 
-  function savePaymentInfo( struct rc ) {
+  // function savePaymentInfo( struct rc ) {
 
-    // if this is the very first time you're adding a card, we might not have a Stripe customer_id yet
-    if ( session.auth.user.getStripe_Customer_Id() == '' ) {
+  //   // if this is the very first time you're adding a card, we might not have a Stripe customer_id yet
+  //   if ( session.auth.user.getStripe_Customer_Id() == '' ) {
 
-      // create the actual customer
-      var createObj = rc.stripe.customers.create({
-        email: '#session.auth.user.getEmail()#',
-        source: '#rc.stripeToken#' // this is a payment object (source), via Billing
-      });
+  //     // create the actual customer
+  //     var createObj = rc.stripe.customers.create({
+  //       email: '#session.auth.user.getEmail()#',
+  //       source: '#rc.stripeToken#' // this is a payment object (source), via Billing
+  //     });
 
-      var customer = createObj.content;
+  //     var customer = createObj.content;
 
-      // update bean
-      session.auth.user.setStripe_Customer_Id( customer.id );
+  //     // update bean
+  //     session.auth.user.setStripe_Customer_Id( customer.id );
 
-      // save
-      userService.save( session.auth.user.flatten() );
+  //     // save
+  //     userService.save( session.auth.user.flatten() );
 
-    } else {
+  //   } else {
 
-      // update the customer
-      var updateObj = rc.stripe.customers.update(
-        customer_id = '#session.auth.user.getStripe_Customer_Id()#',
-        source = '#rc.stripeToken#' // see above
-      );
+  //     // update the customer
+  //     var updateObj = rc.stripe.customers.update(
+  //       customer_id = '#session.auth.user.getStripe_Customer_Id()#',
+  //       source = '#rc.stripeToken#' // see above
+  //     );
 
-      var customer = updateObj.content;
+  //     var customer = updateObj.content;
 
-    }
+  //   }
 
-    variables.fw.renderdata( 'JSON', customer );
+  //   variables.fw.renderdata( 'JSON', customer );
 
-  }
+  // }
 
 }

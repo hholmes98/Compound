@@ -4,7 +4,11 @@
 <!-- CDNs -->
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
-<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.6.7/angular.min.js" type="text/javascript"></script>
+<cfif getEnvironment() is 'development'>
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.6.7/angular.js" type="text/javascript"></script>
+<cfelse>
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.6.7/angular.min.js" type="text/javascript"></script>
+</cfif>
 
 <cfif getEnvironment() is 'development'>
   <script src="/node_modules/bootstrap/dist/js/bootstrap.js"></script>

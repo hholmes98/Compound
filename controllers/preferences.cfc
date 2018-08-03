@@ -10,29 +10,29 @@ component accessors=true {
 
   }
 
-  public void function get( struct rc ) {
+  // public void function get( struct rc ) {
 
-    var prefbean = preferenceService.get( rc.user_id );
+  //   var prefbean = preferenceService.get( rc.user_id );
 
-    variables.fw.renderdata( "JSON" , prefbean );
+  //   variables.fw.renderdata( "JSON" , prefbean );
 
-  }
+  // }
 
-  public void function save( struct rc ) {
-    param name="rc.user_id" default=0;
+  // public void function save( struct rc ) {
+  //   param name="rc.user_id" default=0;
 
-    rc.preferences = preferenceService.get( rc.user_id );
+  //   rc.preferences = preferenceService.get( rc.user_id );
 
-    variables.fw.populate( cfc = rc.preferences, trim = true );
+  //   variables.fw.populate( cfc = rc.preferences, trim = true );
 
-    // flatten bean to struct, pass to save service
-    ret = preferenceService.save( rc.preferences.flatten() );
+  //   // flatten bean to struct, pass to save service
+  //   ret = preferenceService.save( rc.preferences.flatten() );
 
-    session.auth.user.setPreferences( preferenceService.get( session.auth.user.getUser_Id() ) );
+  //   session.auth.user.setPreferences( preferenceService.get( session.auth.user.getUser_Id() ) );
 
-    variables.fw.renderdata( "JSON", ret );
+  //   variables.fw.renderdata( "JSON", ret );
 
-  }
+  // }
 
   public void function export( struct rc ) {
 

@@ -99,8 +99,33 @@
   <script>
   function CF_restErrorHandler( e ) {
     <cfif getEnvironment() == "development">
-    alert(e);
-    console.log(e);
+
+    if ( e.message != undefined ) {
+      // possible jscript error
+      alert(e.message);
+      console.log(e.stack);
+    }
+
+    if ( e.error != undefined ) {
+      // possible CF error
+      alert(e.error.Message)
+
+      if (e.error.Detail.length > 0)
+        console.log(e.error.Detail);
+
+      console.log(e.error.TagContext);
+    }
+
+    if ( e.error != undefined && e.error.ERROR != undefined ) {
+      // possible server/REST error
+      alert(e.error.ERROR.Message);
+
+      if (e.error.ERROR.Detail.length > 0)
+        console.log(e.error.ERROR.Detail);
+
+      console.log(e.error.ERROR.TagContext);
+    }
+
     <cfelse>
     // by default, we throw the user back to the login page.
     window.location.href = '/index.cfm/login.oops';

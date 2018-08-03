@@ -32,7 +32,7 @@
           <tbody>
             <tr class="align-top" ng-form name="billsForm" ng-repeat="card in cards track by $index"><!-- take this off so no jumpy  | cardSorter:orderByField:reverseSort | noPaymentFilter:pay_dates:showAllCards -->
               <td align="center">
-                <cfoutput><button ng-class="{'btn-fire': card.is_hot==1}" class="btn button btn-default btn-block" ng-click="selectCard(card)">{{card.label}}</button></cfoutput>
+                <cfoutput><button ng-class="{'btn button btn-default btn-block btn-fire': card.is_hot, 'btn button btn-default btn-block': !card.is_hot}" ng-click="selectCard(card)">{{card.label}}</button></cfoutput>
               </td>
               <td>
                 <span ng-show="card.actual_payment!=null" class="rubber">Paid</span>
@@ -52,7 +52,7 @@
 
     <div class="row">
       <div class="col-md-12">
-          <div ng-class="{'ow-fire': selected.is_hot==1}" class="ow-header">Card Summary</div>
+          <div ng-class="{'ow-header ow-fire': selected.is_hot,'ow-header': !selected.is_hot}">Card Summary</div>
           <h2 shadow-text="{{selected.label}}"><cfoutput>{{selected.label}}</cfoutput></h2>
       </div>
     </div>
@@ -113,7 +113,7 @@
         <div class="col-md-2">
           <span class="dollar-large" ng-model="selected">
             <div class="ow-data">
-              <span uib-tooltip-html="'<cfoutput>#application.locale[session.auth.locale]['name']#</cfoutput> recommends you do not make a payment on this card this month. Instead, call the company to request a deferral. If you need help with this, <a href=\'<cfoutput>#application.static_urls.call#</cfoutput>\'>follow this guide</a>.'" tooltip-enable="{{selected.calculated_payment < 0}}" ng-bind-html="selected.calculated_payment|calculatedPaymentFilter">
+              <span uib-tooltip-html="'<cfoutput>#application.locale[session.auth.locale]['name']#</cfoutput> recommends you do not make a payment on this card this month. Instead, call the company to request a deferral. If you need help with this, <a href=\'<cfoutput>#application.static_urls.call#</cfoutput>\'>follow this guide</a>.'" tooltip-enable="{{selected.calculated_payment < 0}}" ng-bind-html="calculated_payment_text|calculatedPaymentFilter">
               </span>
             </div>
           </span>
@@ -125,7 +125,7 @@
       <div class="row">
         <div class="col-md-5"></div>
         <div class="col-md-2">
-          <div ng-show="selected.calculated_payment=='Thinking...'" class='loader'></div>
+          <div ng-show="calculated_payment_text=='Thinking...'" class='loader'></div>
         </div>
         <div class="col-md-5"></div>
       </div>
@@ -136,11 +136,11 @@
           <span class="col-md-2"></span>
           <span class="col-md-8">
             <cfoutput>
-              <button class="btn button btn-default" ng-show="!customAmount" ng-click="selected.actual_payment=selected.calculated_payment;makePayment()" ng-disabled="selected.calculated_payment=='Thinking...'">
+              <button class="btn button btn-default" ng-show="!customAmount" ng-click="selected.actual_payment=selected.calculated_payment;makePayment()" ng-disabled="calculated_payment_text=='Thinking...'">
                 <i class="fas fa-check"></i> Mark as Paid: {{selected.calculated_payment|currency}}
               </button>
               &nbsp;
-              <button class="btn button btn-default" ng-show="!customAmount" ng-disabled="selected.calculated_payment=='Thinking...'" ng-click="customAmount=true">
+              <button class="btn button btn-default" ng-show="!customAmount" ng-disabled="calculated_payment_text=='Thinking...'" ng-click="customAmount=true">
                 <i class="fas fa-check-circle"></i> Let Me Mark a Custom Amount
               </button>
               <span ng-show="customAmount">
@@ -152,13 +152,13 @@
                       <input type="text" name="actual_payment" class="form-control" ng-model="selected.actual_payment" dollar-input>
                     </div>
 
-                    <span ng-show="customAmountForm.actual_payment.$invalid" ng-disabled="selected.calculated_payment=='Thinking...'" class="help-block">Must be a valid dollar amount.</span>
+                    <span ng-show="customAmountForm.actual_payment.$invalid" ng-disabled="calculated_payment_text=='Thinking...'" class="help-block">Must be a valid dollar amount.</span>
 
-                    <button class="btn button btn-link" type="button" ng-disabled="selected.calculated_payment=='Thinking...'" ng-click="customAmount=false">
+                    <button class="btn button btn-link" type="button" ng-disabled="calculated_payment_text=='Thinking...'" ng-click="customAmount=false">
                       <i class="fas fa-times-circle"></i> Cancel
                     </button>
 
-                    <button class="btn button btn-default" ng-click="makePayment()" ng-disabled="(selected.calculated_payment=='Thinking...'||customAmountForm.actual_payment.$invalid)">
+                    <button class="btn button btn-default" ng-click="makePayment()" ng-disabled="(calculated_payment_text=='Thinking...'||customAmountForm.actual_payment.$invalid)">
                       <i class="fas fa-check"></i> Record Payment
                     </button>
                   </div>
@@ -189,7 +189,7 @@
         <div class="col-md-2">
           <span class="dollar-large" ng-model="selected">
             <div class="ow-data">
-              <span uib-tooltip-html="'<cfoutput>#application.locale[session.auth.locale]['name']#</cfoutput> recommends you do not make a payment on this card this month. Instead, call the company to request a deferral. If you need help with this, <a href=\'<cfoutput>#application.static_urls.call#</cfoutput>\'>follow this guide</a>.'" tooltip-enable="{{selected.calculated_payment < 0}}" ng-bind-html="selected.calculated_payment|calculatedPaymentFilter"></span>
+              <span uib-tooltip-html="'<cfoutput>#application.locale[session.auth.locale]['name']#</cfoutput> recommends you do not make a payment on this card this month. Instead, call the company to request a deferral. If you need help with this, <a href=\'<cfoutput>#application.static_urls.call#</cfoutput>\'>follow this guide</a>.'" tooltip-enable="{{selected.calculated_payment < 0}}" ng-bind-html="calculated_payment_text|calculatedPaymentFilter"></span>
             </div>
           </span>
         </div>
@@ -221,7 +221,7 @@
       <div class="col-md-12" align="center">
         <span>
           <cfoutput>
-            <button class="btn button btn-link" ng-disabled="selected.calculated_payment=='Thinking...'" ng-click="returnToList(1);cardPaymentForm.$setPristine(true);cardBalanceForm.$setPristine(true)">
+            <button class="btn button btn-link" ng-disabled="calculated_payment_text=='Thinking...'" ng-click="returnToList(1);cardPaymentForm.$setPristine(true);cardBalanceForm.$setPristine(true)">
               <span class="glyphicon glyphicon-circle-arrow-left"></span> Return to Cards
             </button>
           </cfoutput>

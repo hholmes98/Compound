@@ -11,11 +11,36 @@ component accessors=true {
 
   }
 
+  /*
+  private function validateToken( struct rc ) {
+
+    rc.clientToken = DeserializeJSON( getHTTPRequestData().headers['X-XSRF-DD-TOKEN'] );
+    rc.serverToken = SESSION.CFID & SESSION.CFTOKEN;
+    rc.expected = Hash( Trim( rc.serverToken ) & Trim( rc.clientToken.salt ), "SHA-512" );
+
+    rc.token_is_valid = !Compare( rc.expected, rc.clientToken.hash );
+  }
+
+
   public void function list( struct rc ) {
 
-    var deck = cardService.deck( arguments.rc.user_id );
+    validateToken( arguments.rc );
 
-    variables.fw.renderdata( 'JSON', deck.getDeck_Cards() );
+    if ( rc.token_is_valid ) {
+
+      var deck = cardService.deck( arguments.rc.user_id );
+
+      variables.fw.renderdata( 'JSON', deck.getDeck_Cards() );
+
+    } else {
+
+      variables.fw.renderdata( 'JSON', {
+        error:true,
+        expected: rc.expected,
+        received: rc.clientToken.hash
+      } );
+
+    }
 
   }
 
@@ -26,9 +51,11 @@ component accessors=true {
     variables.fw.renderdata( 'JSON', card );
 
   }
+  */
 
   /* public void function first() */
 
+/*
   public void function delete( struct rc ) {
 
     var ret = cardService.delete( arguments.rc.id );
@@ -36,9 +63,10 @@ component accessors=true {
     variables.fw.renderdata( 'JSON', ret );
 
   }
+*/
 
   /* public void function purge() */
-
+/*
   public void function save( struct rc ) {
 
     ret = cardService.save( arguments.rc );
@@ -46,7 +74,7 @@ component accessors=true {
     variables.fw.renderdata( 'JSON', ret );
 
   }
-
+*/
   /*
   public void function create( struct rc ) {
 
@@ -55,38 +83,38 @@ component accessors=true {
 
   /* extras */
 
-  public void function emergency( struct rc ) {
+  // public void function emergency( struct rc ) {
 
-    var ret = cardService.setEmergencyCard( arguments.rc.card_id );
+  //   var ret = cardService.setEmergencyCard( arguments.rc.card_id );
 
-    variables.fw.renderdata( 'JSON', ret );
+  //   variables.fw.renderdata( 'JSON', ret );
 
-  }
+  // }
 
-  public void function getCardPayments( struct rc ) {
+  // public void function getCardPayments( struct rc ) {
 
-    var ret = card_paidService.list( arguments.rc.user_id, arguments.rc.month, arguments.rc.year );
+  //   var ret = card_paidService.list( arguments.rc.user_id, arguments.rc.month, arguments.rc.year );
 
-    variables.fw.renderdata( 'JSON', ret );
+  //   variables.fw.renderdata( 'JSON', ret );
 
-  }
+  // }
 
-  public void function getCardPayment( struct rc ) {
+  // public void function getCardPayment( struct rc ) {
 
-    var ret = card_paidService.get( arguments.rc.card_id, arguments.rc.month, arguments.rc.year );
+  //   var ret = card_paidService.get( arguments.rc.card_id, arguments.rc.month, arguments.rc.year );
 
-    variables.fw.renderdata( 'JSON', ret );
+  //   variables.fw.renderdata( 'JSON', ret );
 
-  }
+  // }
 
-  public void function saveCardPayment( struct rc ) {
-    param name="rc.actually_paid_on" default=Now();
+  // public void function saveCardPayment( struct rc ) {
+  //   param name="rc.actually_paid_on" default=Now();
 
-    var ret = card_paidService.save( arguments.rc );
+  //   var ret = card_paidService.save( arguments.rc );
 
-    variables.fw.renderdata( 'JSON', ret );
+  //   variables.fw.renderdata( 'JSON', ret );
 
-  }
+  // }
 
   public void function css( struct rc ) {
 

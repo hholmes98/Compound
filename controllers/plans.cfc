@@ -30,6 +30,7 @@ component accessors=true {
   }
 
   /* get the 1st plan for a user (will populate calculate.future) */
+  /*
   public void function first( struct rc ) {
 
     // get all plans for this user.
@@ -46,6 +47,7 @@ component accessors=true {
     variables.fw.renderdata( 'JSON', plan.getPlan_Deck().getDeck_Cards() );
 
   }
+  */
 
   // kill a plan
   public void function delete( struct rc ) {
@@ -57,6 +59,7 @@ component accessors=true {
   }
 
   // kill all plans for a user
+  /*
   public void function purge( struct rc ) {
 
     var ret = planService.purge( arguments.rc.user_id );
@@ -64,6 +67,7 @@ component accessors=true {
     variables.fw.renderdata( 'JSON', ret );
 
   }
+  */
 
   /* public void function save() {
   

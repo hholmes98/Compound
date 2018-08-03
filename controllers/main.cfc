@@ -7,6 +7,7 @@ component accessors = true {
   property mailService;
   property cardService;
   property fantabulousCardService;
+  property tokenService;
 
   function init( fw, beanFactory ) {
 
@@ -18,6 +19,12 @@ component accessors = true {
   function before( struct rc ) {
 
     rc.robots = "index,follow,archive";
+  }
+
+  private function createPayload( struct rc ) {
+
+    rc.payload = tokenService.createToken();
+
   }
 
   function about( struct rc ) {
@@ -53,6 +60,7 @@ component accessors = true {
       variables.fw.setLayout('deck');
     else
       variables.fw.setLayout('main.plan');
+
     rc.pageTitle = application.app_name & " top ranked cards";
     rc.pageDescription = "Check out the most popular custom credit card designs in use at " & application.app_name;
 
@@ -224,6 +232,36 @@ component accessors = true {
 
     // email the admins before displaying anything nice to the user.
     mailservice.sendError( application.admin_email, request.exception, the_url );
+
+  }
+
+  public void function ping( struct rc ) {
+
+    var ip = "";
+
+    if ( StructKeyExists( CGI, "REMOTE_ADDR" ) ) {
+      ip = " " & CGI.REMOTE_ADDR;
+    }
+
+    var msg = "HELO" & ip;
+
+    var payload = tokenService.createPayload();
+
+    cfcookie( name="XSRF-DD-TOKEN", value=SerializeJSON( payload ), path="/", domain=".debtdecimator.com", httpOnly=false );
+
+    variables.fw.renderdata( 'JSON', {response:msg} );
+
+  }
+
+  function after( struct rc ) {
+
+    if ( !StructKeyExists( COOKIE, 'XSRF-DD-TOKEN' ) ) {
+
+      var payload = tokenService.createPayload();
+
+      cfcookie( name="XSRF-DD-TOKEN", value=SerializeJSON( payload ), path="/", domain=".debtdecimator.com", httpOnly=false );
+
+    }
 
   }
 
