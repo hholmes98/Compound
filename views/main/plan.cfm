@@ -80,6 +80,7 @@
 
             <tr class="align-top" ng-form name="myForm" ng-repeat="card in plan">
               <td>
+                <span ng-show="card.is_hot==1" tooltip-enable="card.is_hot==1" uib-tooltip-html="'YOW!! Don\'t touch! This is a <font color=\'#db8f00\'><b>hot card</b></font> and is being paid off at maximum velocity!'"><i class="fas fa-fire fire-flame"></i> </span>
                 {{card.label}}
               </td>
               <td>

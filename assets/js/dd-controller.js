@@ -800,7 +800,7 @@ services
 
   };
 
-  service.pGetTempSchedule = function ( data ) {
+  service.pGetTempJourney = function ( data ) {
 
     var deferred = $q.defer();
 
@@ -814,7 +814,7 @@ services
 
       deferred.resolve({
         chain: data,
-        schedule: response.data
+        journey: response.data
       });
 
     })
@@ -1300,16 +1300,30 @@ services
 
   function restResponseHandler( httpResponse ) {
 
-    if ( httpResponse.data.DATA.toString().indexOf('DOCTYPE') != -1 ) {
+    // temp services
+    if ( httpResponse.data.toString().indexOf('DOCTYPE') != -1 ) {
       throw new Error( 'REST Error' );
     }
 
-    if ( httpResponse.data.DATA == -1 ) {
+    if ( httpResponse.data == -1 ) {
       throw new Error( 'REST GET Error' );
     }
 
-    if ( httpResponse.data.ERROR.Message != undefined ) {
-      throw new Error ( httpResponse.data.ERROR.Message );
+    // rest services
+    if ( httpResponse.data.DATA != undefined ) {
+      if ( httpResponse.data.DATA.toString().indexOf('DOCTYPE') != -1 ) {
+        throw new Error( 'REST Error' );
+      }
+
+      if ( httpResponse.data.DATA == -1 ) {
+        throw new Error( 'REST GET Error' );
+      }
+    }
+
+    if ( httpResponse.data.ERROR != undefined ) {
+      if ( httpResponse.data.ERROR.Message != undefined ) {
+        throw new Error ( httpResponse.data.ERROR.Message );
+      }
     }
 
   }
@@ -1830,10 +1844,12 @@ controller/calculate
 
           // **************************************
           // 3. Populate the Journey (-> Highchart)
-          var wins = [];
           result = response.journey;
+          var wins = [];
+          var maxMonths = 0;
+          var yearBands = [];
 
-          for (i=0; i<result.length;i++) {
+          for ( var i = 0; i < result.length; i++ ) {
 
             // inject id
             result[i].id = 'id_' + i;
@@ -1843,6 +1859,10 @@ controller/calculate
 
             // if this card has elements...
             if ( result[i].data.length > 0 ) {
+
+            // track the card with the longest payoff.
+            if ( maxMonths < result[i].data.length )
+              maxMonths = result[i].data.length;
 
               // ..it needs one more element to indicate $0.00
               result[i].data.push(0);
@@ -1868,7 +1888,7 @@ controller/calculate
 
               win.data.push({
                 color: getColor(i),
-                x: endMoment.toDate(),
+                x: endMoment.valueOf(),
                 title: 'CHECKPOINT!!',
                 text: (result[i].name + ' paid off in: <b>' + endMoment.format('MMMM') + ' of ' + endMoment.format('YYYY') + '</b>' ),
               });
@@ -1880,8 +1900,43 @@ controller/calculate
           }
 
           // cat the two arrays together
-          result = result.concat(wins);
+          if ( result.length )  // changed
+            result = result.concat(wins);
 
+          // prep the year bands
+          // 1. add the # of Max Months to the chart's starting date
+          var startYear = moment(new Date(y,0,1));
+          var startMonth = moment(new Date(y,m,1));
+          var endMonth = moment(startMonth).add( maxMonths, 'months');
+
+          // 2. is the year of the end date greater than the year of the start date? (NOTE! this is expliclity NOT the same as 'whats the different in years between the two dates?')
+          if (endMonth.year() > startMonth.year()) {
+            var numYears = endMonth.year() - startMonth.year();
+
+            for (var k=1; k <= numYears; k++) {
+              var thisYearData = moment(startYear).add(k, 'years');
+              yearBands.push({
+                value: thisYearData.valueOf(),
+                color: '#839178',
+                dashStyle: 'longDash',
+                width: 2,
+                zIndex: 1,
+                label: {
+                  text: thisYearData.year(),
+                  align: 'center',
+                  verticalAlign: 'middle',
+                  style: {
+                    color: '#839178',
+                    fontWeight: 'bold',
+                    fontFamily: '\'Ultra\', serif',
+                    fontSize: '24px'
+                  }
+                }
+              });
+            }
+          }
+
+          // prep the navigator handles
           Highcharts.SVGRenderer.prototype.symbols.doublearrow = function(x, y, w, h) {
             return [
               // right arrow
@@ -1918,6 +1973,9 @@ controller/calculate
             // this is the visual display of the spline graph, and will only visibly show a smaller, selected range of the full timeline
             xAxis: {
               type: 'datetime',
+              title: 'Cards/Balance',
+              gridZIndex: -1,
+              plotLines: yearBands,
               ordinal: false,
               min: Date.UTC(y,m,1),     // note: initial range start (today)
               max: Date.UTC(y,m+4,1),    // TODO: calculate this range to be 1/5th of the complete timeline (so that the initial selection 1/5th of the navigator bar)
@@ -1956,15 +2014,17 @@ controller/calculate
               split: true,
               distance: 70, // undocumented, distance in pixels away from the point (calculated either + or -, based on best positioning of cursor)
               padding: 5,
-              pointFormatter: function() {
-                return '<span style="color:' + this.color + '">\u25CF</span> ' + this.series.name + '\'s Balance: <b>$' + currencyFormatter.format(this.y) + '</b><br/>';
-              }
             },
 
             plotOptions: {
               series: {
-                pointStart: Date.UTC(y,m,1), // we begin plotting on the 1st of the current month
+                pointStart: Date.UTC( y, m, 1 ), // we begin plotting on the 1st of the current month
                 pointIntervalUnit: 'month',  // every point along the x axis represents 1 month
+                tooltip: {
+                  pointFormatter: function() {
+                    return '<span style="color:' + this.color + '">\u25CF</span> ' + this.series.name + '\'s Balance: <b>$' + currencyFormatter.format(this.y) + '</b><br/>';
+                  }
+                },
                 animation: {
                   duration: 6200,
                 },
@@ -2367,8 +2427,10 @@ controller/main
         anchors:['try']
       });
 
-      //methods
-      $.fn.fullpage.setAllowScrolling(false);
+      //
+      //disabling scrolling
+      $.fn.fullpage.setAllowScrolling(false, 'left, right'); // no touch scrolling please
+      $.fn.fullpage.setKeyboardScrolling(false, 'left, right'); // no touch scrolling please
 
       // setup the submit button
       $('#pan-main').on('click', '.btn-submit', function() {
@@ -2489,16 +2551,18 @@ controller/main
 
   // Chart: main()
   // Intended Step 3
-  // FIXME: this should be $http.jsonp(), whitelist the URL: https://docs.angularjs.org/api/ng/service/$http#jsonp
 
   $scope.getTempSchedule = function() {
 
-    DDService.pGetTempSchedule({})
+    DDService.pGetTempJourney({})
     .then( function onSuccess( response ) {
 
-      var result = response.schedule;
+      var result = response.journey;
       var wins = [];
+      var maxMonths = 0;
+      var yearBands = [];
 
+      // for every card...
       for ( var i = 0; i < result.length; i++ ) {
 
         // inject id
@@ -2507,8 +2571,12 @@ controller/main
         // inject color
         result[i].color = getColor(i);
 
-        // if this card has elements...
+        // if this card has elements (ie. payments)...
         if ( result[i].data.length > 0 ) {
+
+          // track the card with the longest payoff.
+          if ( maxMonths < result[i].data.length )
+            maxMonths = result[i].data.length;
 
           // ..it needs one more element to indicate $0.00
           result[i].data.push(0);
@@ -2525,18 +2593,18 @@ controller/main
                 return this.text;
               }
             },
+            lineWidth: 2, // changed
             data: []
           };
 
-          payOffDate = Date.UTC(y,m,1) + ( (30 * 24 * 3600 * 1000) * (result[i].data.length-1) ); // fixme: couldn't i use the actual plan's payoff date, and convert this, since it is going to change for certain folks, based on their pay periods?
-
-          dateReadable = new Date(payOffDate);
+          var startMoment = moment(new Date(y,m,1));
+          var endMoment = moment(startMoment).add( result[i].data.length-1, 'months');
 
           win.data.push({
             color: getColor(i),
-            x: payOffDate,
+            x: endMoment.valueOf(),
             title: 'CHECKPOINT!!',
-            text: (result[i].name + ' paid off on: <b>' + monthNames[dateReadable.getMonth()] + ' ' + dateReadable.getDate() + ', ' + dateReadable.getFullYear() + '</b>' )
+            text: (result[i].name + ' paid off in: <b>' + endMoment.format('MMMM') + ' of ' + endMoment.format('YYYY') + '</b>' ),
           });
 
           wins.push(win);
@@ -2549,10 +2617,63 @@ controller/main
       if ( result.length )
         result = result.concat( wins );
 
+      // prep the year bands
+      // 1. add the # of Max Months to the chart's starting date
+      var startYear = moment(new Date(y,0,1));
+      var startMonth = moment(new Date(y,m,1));
+      var endMonth = moment(startMonth).add( maxMonths, 'months');
+
+      // 2. is the year of the end date greater than the year of the start date? (NOTE! this is expliclity NOT the same as 'whats the different in years between the two dates?')
+      if (endMonth.year() > startMonth.year()) {
+        var numYears = endMonth.year() - startMonth.year();
+
+        for (var k=1; k <= numYears; k++) {
+          var thisYearData = moment(startYear).add(k, 'years');
+          yearBands.push({
+            value: thisYearData.valueOf(),
+            color: '#839178',
+            dashStyle: 'longDash',
+            width: 2,
+            zIndex: 1,
+            label: {
+              text: thisYearData.year(),
+              align: 'center',
+              verticalAlign: 'middle',
+              style: {
+                color: '#839178',
+                fontWeight: 'bold',
+                fontFamily: '\'Ultra\', serif',
+                fontSize: '24px'
+              }
+            }
+          });
+        }
+      }
+
+      // prep the navigator handles
+      Highcharts.SVGRenderer.prototype.symbols.doublearrow = function(x, y, w, h) {
+        return [
+          // right arrow
+          'M', x + w / 2 + 1, y,
+          'L', x + w / 2 + 1, y + h,
+          x + w + w / 2 + 1, y + h / 2,
+          'Z',
+          // left arrow
+          'M', x + w / 2 - 1, y,
+          'L', x + w / 2 - 1, y + h,
+          x - w / 2 - 1, y + h / 2,
+          'Z'
+        ];
+      };
+
+      if (Highcharts.VMLRenderer) {
+        Highcharts.VMLRenderer.prototype.symbols.doublearrow = Highcharts.SVGRenderer.prototype.symbols.doublearrow;
+      }
+
       Highcharts.stockChart('milestones', {
 
-        title: {
-          text: 'Payoff Milestones'
+        credits: {
+          enabled: false
         },
 
         chart: {
@@ -2566,19 +2687,34 @@ controller/main
         // this is the visual display of the spline graph, and will only visibly show a smaller, selected range of the full timeline
         xAxis: {
           type: 'datetime',
+          title: 'Cards/Balance',
+          gridZIndex: -1,
+          plotLines: yearBands,
           ordinal: false,
           min: Date.UTC(y,m,1),     // note: initial range start (today)
           max: Date.UTC(y,m+4,1),    // TODO: calculate this range to be 1/5th of the complete timeline (so that the initial selection 1/5th of the navigator bar)
           //tickInterval: 30 * 24 * 3600 * 1000 // a tick every month
         },
 
-        // this start and end should be equal-to-or-longer than the visual display of the spline (set above in xAxis)
         navigator: {
+          height: 80,
+          maskFill: 'rgba(131,145,120,0.6)', //'#839178',
+          maskInside: false,
+          outlineColor: '#000',
+          outlineWidth: 1,
           xAxis: {
             type: 'datetime',
             ordinal: false,
             min: Date.UTC(y,m,1), // full range start (today)
             tickInterval: 2 * 30 * 24 * 3600 * 1000 // a tick every 2 month
+          },
+          handles: {
+            symbols: ['doublearrow','doublearrow'],
+            height: 20,
+            width: 12,
+            lineWidth: 1,
+            backgroundColor: '#d2691e',
+            borderColor: '#000'
           }
         },
 
@@ -2604,8 +2740,8 @@ controller/main
             },
             animation: {
               duration: 6200,
-              //easing: 'easeOutBounce'
-            }
+            },
+            lineWidth: 4  // changed
           }
         },
 
