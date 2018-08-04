@@ -20,7 +20,7 @@ component accessors=true {
     param name="rc.result" default=StructNew();
     param name="rc.result['ERROR']" default=StructNew();
 
-    validateToken( arguments.rc );
+    //validateToken( arguments.rc );
   }
 
   /********************
@@ -282,13 +282,14 @@ component accessors=true {
     try {
 
       if ( rc.statusCode == 200 ) {
-        eventsPopulate( arguments.rc )
 
+        eventsPopulate( arguments.rc )
 
         var event_card_ids = StructKeyList(arguments.rc.events[1].getEvent_Cards());
 
         var cards = {}
         var data = {};
+
         // loop over all the cards
         for ( var id in arguments.rc.events[1].getPlan().getPlan_Deck().getDeck_Cards() ) {
 
@@ -586,7 +587,11 @@ component accessors=true {
 
   public function after( struct rc ) {
 
-    variables.fw.renderdata( type='JSON', data=rc.result, header=rc.validatedHeader, statusCode=rc.statusCode );
+    variables.fw.renderdata()
+      .data( rc.result )
+      .type( 'JSON' )
+      .header( rc.validatedHeader.name, rc.validatedHeader.value )
+      .statusCode( rc.statusCode );
 
     if ( !StructKeyExists( COOKIE, 'XSRF-DD-TOKEN' ) ) {
       var payload = tokenService.createPayload();

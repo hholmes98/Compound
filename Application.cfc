@@ -4,6 +4,7 @@ component extends = "framework.one" {
   this.sessionManagement = true;
   this.sessionTimeout = CreateTimeSpan(0, 0, 20, 0);
   this.applicationTimeout = CreateTimeSpan(1, 0, 0, 0);
+  this.setClientCookies = false;
 
   variables.framework = {
 
@@ -186,6 +187,11 @@ component extends = "framework.one" {
   }
 
   function setupSession() {
+
+    if ( !IsDefined('COOKIE.CFID') || !IsDefined('COOKIE.CFTOKEN') || (COOKIE.CFID != SESSION.CFID) || (COOKIE.CFTOKEN != SESSION.CFTOKEN) ) {
+      cfcookie( name="CFID", value="#SESSION.CFID#", domain=".debtdecimator", httpOnly=true );
+      cfcookie( name="CFTOKEN", value="#SESSION.CFTOKEN#", domain=".debtdecimator", httpOnly=true );
+    }
 
     controller( 'security.session' );
 
