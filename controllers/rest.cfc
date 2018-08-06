@@ -20,7 +20,7 @@ component accessors=true {
     param name="rc.result" default=StructNew();
     param name="rc.result['ERROR']" default=StructNew();
 
-    //validateToken( arguments.rc );
+    validateToken( arguments.rc );
   }
 
   /********************
@@ -54,15 +54,16 @@ component accessors=true {
 
           } else {
 
+            rc.validatedHeader.value = false;
             Throw( message="Invalid token detected.", 
               detail="The X-XSRF-DD-TOKEN is invalid (expected: " & v_token.expected & ", received: " & v_token.received & ")." );
 
           }
 
-        } else {
+         } else {
 
-          Throw( message="Token not found.", 
-            detail="The X-XSRF-DD-TOKEN is missing." );
+           Throw( message="Token not found.", 
+             detail="The X-XSRF-DD-TOKEN is missing." );
 
         }
 
@@ -593,6 +594,9 @@ component accessors=true {
       .header( rc.validatedHeader.name, rc.validatedHeader.value )
       .statusCode( rc.statusCode );
 
+    /* the cookie won't exist if ______
+       the headers won't exist if it is the first call
+    */
     if ( !StructKeyExists( COOKIE, 'XSRF-DD-TOKEN' ) ) {
       var payload = tokenService.createPayload();
 

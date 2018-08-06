@@ -235,34 +235,4 @@ component accessors = true {
 
   }
 
-  public void function ping( struct rc ) {
-
-    var ip = "";
-
-    if ( StructKeyExists( CGI, "REMOTE_ADDR" ) ) {
-      ip = " " & CGI.REMOTE_ADDR;
-    }
-
-    var msg = "HELO" & ip;
-
-    var payload = tokenService.createPayload();
-
-    cfcookie( name="XSRF-DD-TOKEN", value=SerializeJSON( payload ), path="/", domain=".debtdecimator.com", httpOnly=false );
-
-    variables.fw.renderdata( 'JSON', {response:msg} );
-
-  }
-
-  function after( struct rc ) {
-
-    if ( !StructKeyExists( COOKIE, 'XSRF-DD-TOKEN' ) ) {
-
-      var payload = tokenService.createPayload();
-
-      cfcookie( name="XSRF-DD-TOKEN", value=SerializeJSON( payload ), path="/", domain=".debtdecimator.com", httpOnly=false );
-
-    }
-
-  }
-
 }

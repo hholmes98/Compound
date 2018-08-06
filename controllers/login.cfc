@@ -6,6 +6,7 @@ component accessors = true {
   property preferenceService;
   property cardService;
   property paymentService;
+  property tokenService;
 
   function init( fw ) {
 
@@ -49,6 +50,19 @@ component accessors = true {
       apiKey = '#application.stripe_secret_key#',
       config = {}
     );
+
+  }
+
+  /* landing on the login page is what instatiates the XSRF-TOKEN */
+  function default( struct rc ) {
+
+    if ( !StructKeyExists( COOKIE, 'XSRF-DD-TOKEN' ) ) {
+
+      var payload = tokenService.createPayload();
+
+      cfcookie( name="XSRF-DD-TOKEN", value=SerializeJSON( payload ), path="/", domain=".debtdecimator.com", httpOnly=false );
+
+    }
 
   }
 

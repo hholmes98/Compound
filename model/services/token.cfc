@@ -15,11 +15,11 @@ component accessors=true {
 
   public function getServerToken() {
 
-    if ( StructKeyExists( SESSION, 'CFID') && StructKeyExists( SESSION, 'CFTOKEN') ) {
-      return SESSION.CFID & SESSION.CFTOKEN;
+    if ( StructKeyExists( SESSION, 'CFID') ) {
+      return SESSION.CFID;
     } else {
       Throw( message="Cannot create new token", 
-        detail="A request to createToken() cannot be fulfilled, as the SESSION.CFID and/or SESSION.CFTOKEN are inacessible or do not exist.");
+        detail="A request to createToken() cannot be fulfilled, as the SESSION.CFID is inacessible or does not exist.");
     }
 
   }

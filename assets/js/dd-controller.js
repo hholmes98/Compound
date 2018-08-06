@@ -1877,7 +1877,8 @@ controller/calculate
                 tooltip: {
                   pointFormatter: function() {
                     return this.text;
-                  }
+                  },
+                  headerFormat: '',
                 },
                 lineWidth: 2,
                 data: []
@@ -2591,7 +2592,8 @@ controller/main
             tooltip: {
               pointFormatter: function() {
                 return this.text;
-              }
+              },
+              headerFormat: '',
             },
             lineWidth: 2, // changed
             data: []
