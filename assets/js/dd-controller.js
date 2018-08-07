@@ -1801,7 +1801,7 @@ controller/calculate
   $scope.all_cards = {};
 
   DDService.pGetCards({user_id:CF_getUserID()})
-  .then( function onSucess( response ) {
+  .then( function onSuccess( response ) {
 
     $scope.all_cards = response.cards;
 
@@ -2148,7 +2148,7 @@ controller/pay
   /* main  */
   /*********/
   DDService.pGetCards({user_id:CF_getUserID()})
-  .then( function onSucess( response ) {
+  .then( function onSuccess( response ) {
 
     $scope.all_cards = response.cards;
 

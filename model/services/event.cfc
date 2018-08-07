@@ -598,15 +598,8 @@ component accessors=true {
           // split pay
           var splitArray = knapsackService.knapsack( calc_cards, pay_frequency_capacity );
 
-          // if nothing was splittable...
-          if ( !ArrayLen(splitArray) ) {
-
-            // put everything into the 1st index of the array (???? that's not what this is!)
-            ArrayAppend( pay_days, StructNew() );
-            calc_cards = StructNew();
-
-          // something was splittable...
-          } else {
+          // if it was splittable...
+          if ( ArrayLen(splitArray) ) {
 
             // TODO: any list should suffice, but will we ever want to *prefer* one?
             // grab the 1st list of split payments

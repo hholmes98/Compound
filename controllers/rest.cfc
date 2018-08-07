@@ -7,6 +7,7 @@ component accessors=true {
   property eventService;
   property preferenceService;
   property tokenService;
+  property paymentService;
 
   function init( fw ) {
 
@@ -19,6 +20,11 @@ component accessors=true {
     param name="rc.statusCode" default=200;
     param name="rc.result" default=StructNew();
     param name="rc.result['ERROR']" default=StructNew();
+
+    rc.stripe = new stripe_cfml.stripe(
+      apiKey = '#application.stripe_secret_key#',
+      config = {}
+    );
 
     validateToken( arguments.rc );
   }
@@ -101,6 +107,52 @@ component accessors=true {
     }
 
     arguments.rc.events = events;
+
+  }
+
+  /***********/
+  /* private */
+  /***********/
+
+  private function loadCustomer( struct rc ) {
+    param name="rc.customer" default=StructNew();
+
+    var custObj = rc.stripe.customers.retrieve( arguments.rc.customer_id );
+
+    if ( !StructKeyExists( custObj.content, 'error' ) )
+      rc.customer = custObj.content;
+
+  }
+
+  private function loadCardInfo( struct rc ) {
+    param name="rc.card" default=StructNew();
+    param name="rc.asterisks" default=StructNew();
+
+    // credit card info
+    if ( StructKeyExists( rc.customer, 'default_source' ) &&
+        rc.customer.default_source != '' && 
+        StructKeyExists( rc.customer, 'sources' ) &&
+        ArrayLen( rc.customer.sources.data ) && 
+        rc.customer.sources.data[1].id == rc.customer.default_source ) {
+
+      rc.card = rc.customer.sources.data[1];
+      rc.asterisks = variables.paymentService.getAsterisks( rc.card.brand );
+
+    }
+
+    //TODO: else, add a specific call to stripe to retrieve the card info (if needed)
+
+  }
+
+  private function loadInvoices( struct rc ) {
+    param name="rc.invoices" default=ArrayNew(1);
+
+    var invObj = rc.stripe.invoices.list({
+      customer:arguments.rc.customer_id
+    });
+
+    if ( !StructKeyExists( invObj.content, 'error' ) )
+      rc.invoices = invObj.content.data;
 
   }
 
