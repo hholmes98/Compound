@@ -134,8 +134,12 @@ component accessors=true {
       out = out & Chr(13) & Chr(10) & "/* " & class & " */" & Chr(13) & Chr(10) & cardObj.getCSS();
     }
 
-    // kind of a hack, but it works because all the cards should be the same size
-    out = cardObj.getHolderCSS() & out;
+    if ( IsObject(cardObj) ) {
+
+      // kind of a hack, but it works because all the cards should be the same size
+      out = cardObj.getHolderCSS() & out;
+
+    }
 
     // deliver it
     variables.fw.renderdata().data( out ).type( function( outData ) {
