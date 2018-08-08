@@ -249,6 +249,18 @@ component accessors=true {
 
     if ( arguments.event.getEvent_Id() == 0 ) {
 
+      var params = {
+        pid = {
+          value = arguments.event.getPlan_Id(), sqltype = 'integer'
+        },
+        month = {
+          value = arguments.event.getCalculated_For_Month(), sqltype = 'integer'
+        },
+        year = {
+          value = arguments.event.getCalculated_For_Year(), sqltype = 'integer'
+        }
+      }
+
       // create plan
       var sql = '
       INSERT INTO "pEvents" (
@@ -256,16 +268,18 @@ component accessors=true {
         calculated_for_month,
         calculated_for_year
       ) VALUES (
-        #arguments.event.getPlan_Id()#,
-        #arguments.event.getCalculated_For_Month()#,
-        #arguments.event.getCalculated_For_Year()#
+        :pid,
+        :month,
+        :year
       ) returning event_id AS pkey_out;
       ';
 
-      var result = QueryExecute( sql, {}, variables.defaultOptions );
+      var result = QueryExecute( sql, params, variables.defaultOptions );
       var event_id = result.pkey_out;
 
-      var params = {
+      StructClear(params); // just in case
+
+      params = {
         eid = {
           value = event_id, sqltype = 'integer'
         }
@@ -310,6 +324,15 @@ component accessors=true {
       var params = {
         eid = {
           value = event_id, sqltype = 'integer'
+        },
+        pid = {
+          value = arguments.event.getPlan_Id(), sqltype = 'integer'
+        },
+        month = {
+          value = arguments.event.getCalculated_For_Month(), sqltype = 'integer'
+        },
+        year = {
+          value = arguments.event.getCalculated_For_Year(), sqltype = 'integer'
         }
       };
 
@@ -317,9 +340,9 @@ component accessors=true {
       var sql = '
       UPDATE "pEvents"
       SET 
-        plan_id = #arguments.event.getPlan_Id()#,
-        calculated_for_month = #arguments.event.getCalculated_For_Month()#,
-        calculated_for_year = #arguments.event.getCalculated_For_Year()#
+        plan_id = :pid,
+        calculated_for_month = :month,
+        calculated_for_year = :year
       WHERE 
         event_id = :eid;
       ';
