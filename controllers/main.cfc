@@ -153,7 +153,7 @@ component accessors = true {
     param name="rc.budget" default=0;
 
     /* shut down direct access */
-    if ( !rc.budget )
+    if ( !(IsNumeric(rc.budget) && rc.budget > 0) ) 
       variables.fw.redirect( application.start_page );
 
     var cardcount = 0;
