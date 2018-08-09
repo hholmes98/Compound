@@ -35,13 +35,15 @@
           <div class="footer-column"></div>
           <div class="footer-column"></div>
         </div>
+        <!--- 
+        //TODO: localization support
         <div class="footer-language-options">
           <h3>Site Language</h3>
           <ul>
             <li>English</li>
             <li>Spanish</li>
           </ul>
-        </div>
+        </div> --->
       </div>
       <div class="top-buffer">
         &nbsp;

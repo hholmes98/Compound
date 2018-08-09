@@ -1,4 +1,4 @@
-<cfsilent><cfparam name="rc.cache" default=0 /></cfsilent><cfif rc.cache><cfcache action="optimal" 
+<cfsilent><cfparam name="rc.cache" default=0 /></cfsilent><cfif rc.cache AND getEnvironment() NEQ 'development'><cfcache action="optimal" 
       directory="C:\Workspace\development\ddcache" 
       timespan="#CreateTimeSpan( 1, 0, 0, 0 )#" 
       idletime="#CreateTimeSpan( 0, 12, 0, 0 )#"
