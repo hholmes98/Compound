@@ -968,6 +968,45 @@ services
 
   };
 
+  service.pValidateBudget = function( data ) {
+
+    var deferred = $q.defer();
+
+    if (data.budget >= data.floor_min_payment) {
+      deferred.resolve(data); // passthrough
+    } else {
+      BootstrapDialog.show({
+          size: BootstrapDialog.SIZE_LARGE,
+          type: BootstrapDialog.TYPE_DANGER,
+          closable: false,
+          closeByBackdrop: false,
+          closeByKeyboard: false,
+          title: 'TO INFINITY AND BEYOND!!',
+          message: 'You\'ve entered a budget ($'+ currencyFormatter.format(data.budget) +') that\'s less than the lowest minimum payment in your stack of cards.<br><br>Your budget must be <b>at least</b> as much as your lowest minimum payment. Otherwise, your payments will carry on into infinity...and your debt <em>will never end</em>.<br><br><b>How should we fix the budget?</b>',
+          buttons: [{
+              label: 'Use lowest min. payment',
+              cssClass: 'btn-link pull-left',
+              action: function( dialogItself ) {
+                data.budget = data.floor_min_payment;
+                deferred.resolve( data );
+                dialogItself.close();
+              }
+          }, {
+              label: 'Let me enter a new budget',
+              cssClass: 'btn-success',
+              action: function( dialogItself ) {
+                deferred.reject( data );
+                dialogItself.close();
+              }
+          }]
+      });
+
+    }
+
+    return deferred.promise;
+
+  }
+
   service.pValidatePreferences = function( data ) {
 
     var deferred = $q.defer();
@@ -976,13 +1015,16 @@ services
       deferred.resolve(data); // passthrough
     } else {
 
+      //TODO: If they've just been warned via pValidatePreferences, the 2nd button shouldn't be "Go back to what it was",
+      // it should be "Let me enter a new value"
+
       BootstrapDialog.show({
           size: BootstrapDialog.SIZE_LARGE,
           type: BootstrapDialog.TYPE_WARNING,
           closable: false,
           closeByBackdrop: false,
           closeByKeyboard: false,
-          title: 'A matter needs your immediate attention!!',
+          title: 'OPTIMIZATION DETECTED!!',
           message: 'You\'ve entered a budget ($'+ currencyFormatter.format(data.budget) +') that\'s smaller than the total of all your minimum payments. If you do this, your payoff schedule will be much longer than it needs to be!\n\n<b>Should we keep it like this?<\/b>',
           buttons: [{
               label: 'Yes, keep my budget at $' + currencyFormatter.format(data.budget),
@@ -1477,37 +1519,65 @@ controller/cards
   setBudget
 
   ***************/
-  $scope.setBudget = function( id, val ) {
+  $scope.setBudget = function( val ) {
+
+    var tMinPayment = Object.keys($scope.cards) // [1,3,15,22,24]
+      .filter(thisIndex => $scope.cards[thisIndex].balance > 0) // [1,15,24]
+      .reduce((accumulator, myIndex) => 
+        accumulator + $scope.cards[myIndex].min_payment,
+        0);   // 100.00
+
+    var fMinPayment = Object.keys($scope.cards)
+      .filter(thisIndex => $scope.cards[thisIndex].balance > 0)
+      .reduce((acc, ind) => { 
+        return ($scope.cards[ind].min_payment < acc && $scope.cards[ind].min_payment > 0) ? $scope.cards[ind].min_payment : acc;
+      },
+      100000);
+
+    // trap
+    if (fMinPayment == 100000)
+      fMinPayment = 0;
 
     var data = {
-      user_id: id,
+      user_id: CF_getUserID(),
       budget: val,
-      total_min_payment: $scope.totalMinPayment
+      total_min_payment: tMinPayment,
+      floor_min_payment: fMinPayment
     };
 
-    DDService.pValidatePreferences( data )
-    .then( DDService.pSetPreferences )
-    .then( DDService.pDeletePlans )
-    .then( DDService.pDeleteJourney )
+    DDService.pValidateBudget( data )
     .then( function onSuccess( response ) {
 
-      // update budget in view
-      $scope.preferences.budget = val;
-
-    })
-    .catch( function onError( e ) {
-
-      DDService.pGetPreferences( e )
+      DDService.pValidatePreferences( response )
+      .then( DDService.pSetPreferences )
+      .then( DDService.pDeletePlans )
+      .then( DDService.pDeleteJourney )
       .then( function onSuccess( response ) {
 
-        $scope.preferences = response.preferences;
+        // update budget in view
+        $scope.preferences.budget = val;
 
       })
-      .catch( function onError( result ) {
-        CF_restErrorHandler( result );
+      .catch( function onError( e ) {
+
+        DDService.pGetPreferences( e )
+        .then( function onSuccess( response ) {
+
+          $scope.preferences = response.preferences;
+
+        })
+        .catch( function onError( result ) {
+          CF_restErrorHandler( result );
+        });
+
       });
 
-    });
+    })
+    .catch( function onError( result ) {
+
+      // do nothing
+
+    }); // pValidateBudget
 
   };
 

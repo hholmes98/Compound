@@ -251,7 +251,7 @@
             a month to decimating my debt.
           </div>
           <div class="col-md-2">
-            <button class="btn button btn-default" ng-class="{'btn-success': !cardsForm3.$pristine }" ng-disabled="cardsForm3.$pristine" ng-click="setBudget(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>, preferences.budget);cardsForm3.$setPristine(true)"><span class="glyphicon glyphicon-ok"></span> Save Changes</button>
+            <button class="btn button btn-default" ng-class="{'btn-success': !cardsForm3.$pristine }" ng-disabled="cardsForm3.$pristine" ng-click="setBudget(preferences.budget);cardsForm3.$setPristine(true)"><span class="glyphicon glyphicon-ok"></span> Save Changes</button>
           </div>
         </div>
 
