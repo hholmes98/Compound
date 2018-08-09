@@ -35,9 +35,39 @@ component accessors = true {
 
   }
 
+  private void function populate( struct rc ) {
+
+    // get al levents for this user
+    var plan = tempService.createPlan( session.auth.user.getUser_Id() );
+    var events = tempService.fillEvents( plan );
+
+    arguments.rc.events = events;
+
+  }
+
   private function createPayload( struct rc ) {
 
     rc.payload = tokenService.createToken();
+
+  }
+
+  function default( struct rc ) {
+    param name="rc.demo_open" default=false;
+
+    // detect if the user is logged in, and if so, just take them directly to auth_start_page
+    if ( StructKeyExists(session, 'auth') && session.auth.isLoggedIn ) {
+      variables.fw.redirect( application.auth_start_page );
+    }
+
+  }
+
+  /* alias of default, but with demo drawer already open */
+  function demo( struct rc ) {
+
+    rc.demo_open = true;
+    variables.fw.setLayout('main.default');
+    variables.fw.setView('main.default');
+    default( rc );
 
   }
 
@@ -72,36 +102,6 @@ component accessors = true {
 
     rc.codes = cardService.getCardCodes( limit=10 );
     rc.fantabulous = fantabulousCardService;
-  }  
-
-  private void function populate( struct rc ) {
-
-    // get al levents for this user
-    var plan = tempService.createPlan( session.auth.user.getUser_Id() );
-    var events = tempService.fillEvents( plan );
-
-    arguments.rc.events = events;
-
-  }
-
-  /* default (always at the top) */
-  public void function default( struct rc ) {
-    param name="rc.demo_open" default=false;
-
-    // detect if the user is logged in, and if so, just take them directly to auth_start_page
-    if ( StructKeyExists(session, 'auth') && session.auth.isLoggedIn ) {
-      variables.fw.redirect( application.auth_start_page );
-    }
-
-  }
-
-  public void function demo( struct rc ) {
-
-    rc.demo_open = true;
-    variables.fw.setLayout('main.default');
-    variables.fw.setView('main.default');
-    default( rc );
-
   }
 
   /* raw json methods */
@@ -222,6 +222,7 @@ component accessors = true {
 
   }
 
+  /* error handling */
   public void function oops( struct rc ) {
 
     var the_url = 'Unknown';
