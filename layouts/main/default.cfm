@@ -5,7 +5,11 @@
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 
-<cfoutput>#view('common/nav/loggedout')#</cfoutput>
+<cfif session.auth.isLoggedIn>
+  <cfoutput>#view('common/nav/loggedin')#</cfoutput>
+<cfelse>
+  <cfoutput>#view('common/nav/loggedout')#</cfoutput>
+</cfif>
 <cfoutput>#view('common/banner')#</cfoutput>
 
 <div id="pan-main" class="pan-perspective">

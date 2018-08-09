@@ -19,6 +19,20 @@ component accessors = true {
   function before( struct rc ) {
 
     rc.robots = "index,follow,archive";
+
+    switch( variables.fw.getItem() ) {
+
+      case 'default':
+      case 'demo':
+      case 'about':
+      case 'features':
+      case 'pricing':
+      case 'contact':
+        rc.cache = 1;
+        break;
+
+    }
+
   }
 
   private function createPayload( struct rc ) {
@@ -29,37 +43,29 @@ component accessors = true {
 
   function about( struct rc ) {
 
-    variables.fw.setLayout('main.plan');
     rc.pageTitle = "What is " & application.app_name & "?";
   }
 
   function features( struct rc ) {
 
-    variables.fw.setLayout('main.plan');
     rc.pageTitle = application.app_name & " features";
     rc.pageDescription = application.app_name & " features that make it the only credit card caluclator you'll ever need.";
   }
 
   function pricing( struct rc ) {
 
-    variables.fw.setLayout('main.plan');
+
     rc.pageTitle = application.app_name & " pricing";
     rc.pageDescription = "Affordable pricing plans for eliminating credit card debt with " & application.app_name;
   }
 
   function contact( struct rc ) {
 
-    variables.fw.setLayout('main.plan');
     rc.pageTitle = "Contact the " & application.app_name & " team";
     rc.pageDescription = "Got more questions! We're standing by with answers!";
   }
 
   function top( struct rc ) {
-
-    if ( session.auth.isLoggedIn )
-      variables.fw.setLayout('deck');
-    else
-      variables.fw.setLayout('main.plan');
 
     rc.pageTitle = application.app_name & " top ranked cards";
     rc.pageDescription = "Check out the most popular custom credit card designs in use at " & application.app_name;
