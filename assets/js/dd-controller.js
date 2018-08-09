@@ -2419,6 +2419,7 @@ controller/pay
 
   $scope.selectCard = function( card ) {
     $scope.selected = card;
+    $scope.calculated_payment_text = $scope.selected.calculated_payment;
     location.hash = '#list/detail';
     $window.scrollTo(0,0);
   };
