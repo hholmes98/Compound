@@ -46,7 +46,8 @@ function getColor(index) {
 // https://stackoverflow.com/questions/149055/how-can-i-format-numbers-as-dollars-currency-string-in-javascript
 var currencyFormatter = new Intl.NumberFormat('en-US', {
   style: 'decimal',
-  minimumFractionDigits: 2
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
 });
 
 function round( value, precision ) {
@@ -1848,6 +1849,7 @@ controller/calculate
           var wins = [];
           var maxMonths = 0;
           var yearBands = [];
+          var longestCard = 0;
 
           for ( var i = 0; i < result.length; i++ ) {
 
@@ -1860,9 +1862,11 @@ controller/calculate
             // if this card has elements...
             if ( result[i].data.length > 0 ) {
 
-            // track the card with the longest payoff.
-            if ( maxMonths < result[i].data.length )
-              maxMonths = result[i].data.length;
+              // track the card with the longest payoff.
+              if ( maxMonths < result[i].data.length ) {
+                maxMonths = result[i].data.length;
+                longestCard = i;
+              }
 
               // ..it needs one more element to indicate $0.00
               result[i].data.push(0);
@@ -1903,6 +1907,18 @@ controller/calculate
           // cat the two arrays together
           if ( result.length )  // changed
             result = result.concat(wins);
+
+          var freedom = [];
+          // create a new series that is 1 month longer than the longest card (to extend the display out) and push it on.
+          if ( longestCard ) {
+            var endMomentPlus = moment(new Date(y,m,1)).add( result[longestCard].data.length, 'months' );
+            var freedomMoment = {
+              data: []
+            };
+            freedomMoment.data.push({x:endMomentPlus.valueOf()});
+            freedom.push( freedomMoment );
+            result = result.concat(freedom);
+          }
 
           // prep the year bands
           // 1. add the # of Max Months to the chart's starting date
@@ -2582,6 +2598,7 @@ controller/main
       var wins = [];
       var maxMonths = 0;
       var yearBands = [];
+      var longestCard = 0;
 
       // for every card...
       for ( var i = 0; i < result.length; i++ ) {
@@ -2596,12 +2613,12 @@ controller/main
         if ( result[i].data.length > 0 ) {
 
           // track the card with the longest payoff.
-          if ( maxMonths < result[i].data.length )
+          if ( maxMonths < result[i].data.length ) {
             maxMonths = result[i].data.length;
+            longestCard = i;
+          }
 
           // ..it needs one more element to indicate $0.00
-          result[i].data.push(0);
-          // ..and one more element to show (the finish line + a debt-free life)
           result[i].data.push(0);
 
           // ..and it needs a partner series to display a milestone flag
@@ -2640,6 +2657,18 @@ controller/main
       // cat the two arrays together
       if ( result.length )
         result = result.concat( wins );
+
+      var freedom = [];
+      // create a new series that is 1 month longer than the longest card (to extend the display out) and push it on.
+      if ( longestCard ) {
+        var endMomentPlus = moment(new Date(y,m,1)).add( result[longestCard].data.length, 'months' );
+        var freedomMoment = {
+          data: []
+        };
+        freedomMoment.data.push({x:endMomentPlus.valueOf()});
+        freedom.push( freedomMoment );
+        result = result.concat(freedom);
+      }
 
       // prep the year bands
       // 1. add the # of Max Months to the chart's starting date

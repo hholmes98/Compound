@@ -108,9 +108,8 @@
                     The worst part of credit card debt is never knowing where it ends. Not knowing ends <strong><em>today</em></strong>.
                   </p>
                   <p>
-                    Your plan comes with a visual graph that shows you the date you'll be debt free,
-                    marked with CHECKPOINTS as each card is paid off. And, when your plan updates, so too, does this
-                    visual path to the finish line.
+                    Your plan comes with a visual graph that shows you the date you'll be debt free, along with every single
+                    date you'll DECIMATE DEBT on each card. And when you update your cards each month, this plan and path to the finish line updates as well.
                   </p>
                 </th>
               </tr>
