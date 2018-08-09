@@ -84,6 +84,27 @@ component accessors=true {
 
   }
 
+  private void function eventPopulate( struct rc ) {
+    param name="rc.month" default="#Month(Now())#";
+    param name="rc.year" default="#Year(Now())#";
+
+    var event = eventService.getByMonthAndYear( arguments.rc.user_id, arguments.rc.month, arguments.rc.year );
+
+    if ( event.getEvent_ID() == 0 ) {
+      eventsPopulate( arguments.rc ); // you now have arguments.rc.events
+
+      for ( var event in arguments.rc.events ) {
+        if ( event.getCalculated_For_Month() == arguments.rc.month && 
+            event.getCalculated_For_Year() == arguments.rc.year ) {
+          arguments.rc.event = event;
+        }
+      }
+    } else {
+      arguments.rc.event = event;
+    }
+
+  }
+
   private void function eventsPopulate( struct rc ) {
 
     // get all events for this user
@@ -336,22 +357,22 @@ component accessors=true {
 
       if ( rc.statusCode == 200 ) {
 
-        eventsPopulate( arguments.rc )
+        eventPopulate( arguments.rc ); // you now have arguments.rc.event (and *maybe* arguments.rc.events, not a given!!)
 
-        var event_card_ids = StructKeyList(arguments.rc.events[1].getEvent_Cards());
+        var event_card_ids = StructKeyList(arguments.rc.event.getEvent_Cards());
 
         var cards = {}
         var data = {};
 
         // loop over all the cards
-        for ( var id in arguments.rc.events[1].getPlan().getPlan_Deck().getDeck_Cards() ) {
+        for ( var id in arguments.rc.event.getPlan().getPlan_Deck().getDeck_Cards() ) {
 
           // get the pay_date
-          var card = arguments.rc.events[1].getPlan().getCard( id );
+          var card = arguments.rc.event.getPlan().getCard( id );
           var data[id] = card;
 
           if ( ListFind(event_card_ids, id) ) {
-            data[id]['pay_date'] = arguments.rc.events[1].getCard( id ).getPay_Date();
+            data[id]['pay_date'] = arguments.rc.event.getCard( id ).getPay_Date();
           } else {
             data[id]['pay_date'] = '';
           }
@@ -359,8 +380,8 @@ component accessors=true {
         }
 
         rc.result.data['cards'] = data;
-        rc.result.data['calculated_for_month'] = arguments.rc.events[1].getCalculated_For_Month();
-        rc.result.data['calculated_for_year'] = arguments.rc.events[1].getCalculated_For_Year();
+        rc.result.data['calculated_for_month'] = arguments.rc.event.getCalculated_For_Month();
+        rc.result.data['calculated_for_year'] = arguments.rc.event.getCalculated_For_Year();
 
       }
 

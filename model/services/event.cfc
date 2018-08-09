@@ -242,6 +242,114 @@ component accessors=true {
 
   }
 
+  public any function getByMonthAndYear( string user_id, number month, number year ) {
+
+    var sql = '
+      SELECT 
+        e.event_id, e.plan_id, e.calculated_for_month, e.calculated_for_year, 
+        CONCAT(e.calculated_for_year, ''-'', e.calculated_for_month) AS calculated_for, 
+        ec.balance, ec.is_hot, ec.calculated_payment, ec.pay_date,
+        c.card_id, c.credit_limit, c.due_on_day, c.user_id, c.card_label, c.min_payment, 
+        c.is_emergency, c.interest_rate, c.zero_apr_end_date, c.code, c.priority, ucp.actual_payment, ucp.actually_paid_on
+      FROM 
+        "pEvents" e
+      INNER JOIN 
+        "pEventCards" ec ON e.event_id = ec.event_id
+      INNER JOIN 
+        "pCards" c ON ec.card_id = c.card_id
+      LEFT JOIN "pUserCardsPaid" ucp ON (
+          e.calculated_for_month = ucp.payment_for_month
+        AND
+          e.calculated_for_year = ucp.payment_for_year
+        AND
+          c.card_id = ucp.card_id
+      )
+      WHERE 
+        c.user_id = :uid
+      AND
+        e.calculated_for_month = :month
+      AND
+        e.calculated_for_year = :year
+      ORDER BY 
+        ec.pay_date;
+    ';
+
+    var params = {
+      uid = {
+        value = arguments.user_id, sqltype = 'integer'
+      },
+      month = {
+        value = arguments.month, sqltype = 'integer'
+      },
+      year = {
+        value = arguments.year, sqltype = 'integer'
+      }
+    };
+
+    var result = QueryExecute( sql, params, variables.defaultOptions );
+    var event = variables.beanFactory.getBean('eventBean');
+
+    cfloop( query=result, group="event_id" ) { // NOTE: the group is only for base property setter efficiency; this query should never return more than 1 event_id
+
+      event.setEvent_Id( result.event_id );
+      event.setPlan_Id( result.plan_id );
+
+      event.setCalculated_For_Month( result.calculated_for_month );
+      event.setCalculated_For_Year( result.calculated_for_year );
+
+      var plan = planService.get( result.plan_id );
+      event.setPlan( plan );
+
+      cfloop() {
+
+        var card = variables.beanFactory.getBean('event_CardBean');
+
+        // card
+        card.setCard_Id(result.card_id);
+        card.setCredit_Limit(result.credit_limit);
+        card.setDue_On_Day(result.due_on_day);
+        card.setUser_Id(result.user_id);
+        card.setLabel(result.card_label);
+        card.setMin_Payment(result.min_payment);
+        card.setIs_Emergency(result.is_emergency);
+        card.setBalance(result.balance);
+        card.setInterest_Rate(result.interest_rate);
+        card.setZero_APR_End_Date(result.zero_apr_end_date);
+
+        // plan_card
+        card.setPlan_Id(result.plan_id);
+        card.setIs_Hot(result.is_hot);
+        card.setCalculated_Payment(result.calculated_payment);
+
+        // event_card
+        card.setEvent_Id( result.event_id );
+        card.setPay_Date( result.pay_date );
+
+        event.addCard( card );
+
+        if ( Len(result.actual_payment) AND Len(result.actually_paid_on) ) {
+
+          var card_payment = variables.beanFactory.getBean('card_paidBean');
+
+          card_payment.setUser_Id( card.getUser_Id() );
+          card_payment.setCard_Id( card.getCard_Id() );
+          card_payment.setActual_Payment( result.actual_payment );
+          card_payment.setActually_Paid_On( result.actually_paid_on );
+          card_payment.setPayment_For_Month( event.getCalculated_For_Month() );
+          card_payment.setPayment_For_Year( event.getCalculated_For_Year() );
+
+          event.addPaidCard( card_payment );
+
+        }
+
+      }
+
+    }
+
+    return event;
+
+  }
+
   /*
   save() = save the contents of a single event (for a user)
   */
