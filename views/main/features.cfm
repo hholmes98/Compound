@@ -103,6 +103,10 @@
 
         <div class="col-md-8">
           Become an <strong>Ad Blocker</strong> and disable all advertisements.
+          <br/>
+          <ul>
+            <li>(Sure, you could use an ad blocker. But if you wanted to support an independent small business, this would be the way to do it!)
+          </ul>
         </div>
 
       </div>
