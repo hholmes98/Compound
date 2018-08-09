@@ -1872,7 +1872,7 @@ controller/calculate
                 id: 'milestone_' + i,
                 type: 'flags',
                 shape: 'squarepin',
-                width: 82,
+                width: 104,
                 onSeries: 'id_' + i,
                 tooltip: {
                   pointFormatter: function() {
@@ -1890,7 +1890,7 @@ controller/calculate
               win.data.push({
                 color: getColor(i),
                 x: endMoment.valueOf(),
-                title: 'CHECKPOINT!!',
+                title: 'DEBT DECIMATED!!',
                 text: (result[i].name + ' paid off in: <b>' + endMoment.format('MMMM') + ' of ' + endMoment.format('YYYY') + '</b>' ),
               });
 
@@ -1936,6 +1936,26 @@ controller/calculate
               });
             }
           }
+
+          // finally, THE FINISH LINE
+          yearBands.push({
+            value: endMonth.valueOf(),
+            color: '#000',
+            dashStyle: 'longDash',
+            width: 4,
+            zIndex: 1,
+            label: {
+              text: 'THE FINISH LINE',
+              align: 'center',
+              verticalAlign: 'middle',
+              style: {
+                color: '#000',
+                fontWeight: 'bold',
+                fontFamily: '\'Ultra\', serif',
+                fontSize: '18px'
+              }
+            }
+          });
 
           // prep the navigator handles
           Highcharts.SVGRenderer.prototype.symbols.doublearrow = function(x, y, w, h) {
@@ -2581,13 +2601,15 @@ controller/main
 
           // ..it needs one more element to indicate $0.00
           result[i].data.push(0);
+          // ..and one more element to show (the finish line + a debt-free life)
+          result[i].data.push(0);
 
           // ..and it needs a partner series to display a milestone flag
           var win = {
             id: 'milestone_' + i,
             type: 'flags',
             shape: 'squarepin',
-            width: 82,
+            width: 104,
             onSeries: 'id_' + i,
             tooltip: {
               pointFormatter: function() {
@@ -2605,7 +2627,7 @@ controller/main
           win.data.push({
             color: getColor(i),
             x: endMoment.valueOf(),
-            title: 'CHECKPOINT!!',
+            title: 'DEBT DECIMATED!!',
             text: (result[i].name + ' paid off in: <b>' + endMoment.format('MMMM') + ' of ' + endMoment.format('YYYY') + '</b>' ),
           });
 
@@ -2651,6 +2673,26 @@ controller/main
           });
         }
       }
+
+      // finally, THE FINISH LINE
+      yearBands.push({
+        value: endMonth.valueOf(),
+        color: '#000',
+        dashStyle: 'longDash',
+        width: 4,
+        zIndex: 1,
+        label: {
+          text: 'THE FINISH LINE',
+          align: 'center',
+          verticalAlign: 'middle',
+          style: {
+            color: '#000',
+            fontWeight: 'bold',
+            fontFamily: '\'Ultra\', serif',
+            fontSize: '18px'
+          }
+        }
+      });
 
       // prep the navigator handles
       Highcharts.SVGRenderer.prototype.symbols.doublearrow = function(x, y, w, h) {

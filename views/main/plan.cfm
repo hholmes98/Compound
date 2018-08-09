@@ -84,7 +84,7 @@
                 {{card.label}}
               </td>
               <td>
-                {{card.calculated_payment | currency}}
+                <span ng-bind-html="card.calculated_payment|calculatedPaymentFilter" tooltip-enable="{{card.calculated_payment < 0}}" uib-tooltip-html="'<cfoutput>#application.locale[session.auth.locale]['name']#</cfoutput> recommends you do not make a payment on this card this month. Instead, call the company to request a deferral.<br><br>If you need help with this, <a href=\'<cfoutput>#application.static_urls.call#</cfoutput>\'>follow this guide</a>.'" />
               </td>
             </tr>
             </tbody>
