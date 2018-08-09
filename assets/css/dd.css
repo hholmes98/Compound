@@ -181,6 +181,11 @@ Didact Gothic - alternate to "Graphik" (barely)
   color: #171717;
 }
 
+.dropdown-menu>.active>a, .dropdown-menu>.active>a:focus, .dropdown-menu>.active>a:hover {
+  color: #000;
+  background-color: #fff;
+}
+
 html, body {
   background-color: #f7fff7;
   color: #171717;
