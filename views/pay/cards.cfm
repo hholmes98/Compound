@@ -35,7 +35,7 @@
                 <cfoutput><button ng-class="{'btn button btn-default btn-block btn-fire': card.is_hot, 'btn button btn-default btn-block': !card.is_hot}" ng-click="selectCard(card)">{{card.label}}</button></cfoutput>
               </td>
               <td>
-                <span ng-show="card.actual_payment!=null" class="rubber">Paid</span>
+                <span ng-show="card.actual_payment!=''" class="rubber">Paid</span>
                 {{card.pay_date | prettyPayDateFilter | date: 'MMM d' }}
               </td>
             </tr>
@@ -58,7 +58,7 @@
     </div>
 
     <!-- ** NOT PAID VIEW ** -->
-    <div ng-show="selected.actual_payment==null">
+    <div ng-show="selected.actual_payment==''">
 
       <div class="row">
         <div class="col-md-6">
@@ -145,20 +145,21 @@
               </button>
               <span ng-show="customAmount">
 
-                <form name="customAmountForm" id="customAmountForm" class="form-inline">
+                <form name="customAmountForm" id="customAmountForm" class="form-inline" ng-class="{'has-error': customAmountForm.$invalid }">
+                  <input type="hidden" name="actual_payment" ng-model="selected.actual_payment" />
                   <div class="col-md-12">
                     <div class="input-group" ng-class="{'has-error': customAmountForm.actual_payment.$invalid }">
                       <span class="input-group-addon">$</span>
-                      <input type="text" name="actual_payment" class="form-control" ng-model="selected.actual_payment" dollar-input>
+                      <input type="text" name="custom_payment" ng-model="custom_payment" class="form-control" dollar-input>
                     </div>
 
-                    <span ng-show="customAmountForm.actual_payment.$invalid" ng-disabled="calculated_payment_text=='Thinking...'" class="help-block">Must be a valid dollar amount.</span>
+                    <span ng-show="customAmountForm.custom_payment.$invalid" ng-disabled="calculated_payment_text=='Thinking...'" class="help-block">Must be a valid dollar amount.</span>
 
                     <button class="btn button btn-link" type="button" ng-disabled="calculated_payment_text=='Thinking...'" ng-click="customAmount=false">
                       <i class="fas fa-times-circle"></i> Cancel
                     </button>
 
-                    <button class="btn button btn-default" ng-click="makePayment()" ng-disabled="(calculated_payment_text=='Thinking...'||customAmountForm.actual_payment.$invalid)">
+                    <button class="btn button btn-default" ng-click="selected.actual_payment=custom_payment;makePayment()" ng-disabled="(calculated_payment_text=='Thinking...'||customAmountForm.custom_payment.$invalid)">
                       <i class="fas fa-check"></i> Record Payment
                     </button>
                   </div>
@@ -175,7 +176,7 @@
 
     <!--- ** PAID VIEW ** --->
 
-    <div ng-show="selected.actual_payment!=null">
+    <div ng-show="selected.actual_payment!=''">
 
       <div class="row bottom-buffer">
         <div class="col-md-12" align="center">

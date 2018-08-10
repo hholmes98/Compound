@@ -360,6 +360,7 @@ component accessors=true {
         eventPopulate( arguments.rc ); // you now have arguments.rc.event (and *maybe* arguments.rc.events, not a given!!)
 
         var event_card_ids = StructKeyList(arguments.rc.event.getEvent_Cards());
+        var paid_card_ids = StructKeyList(arguments.rc.event.getCards_Paid());
 
         var cards = {}
         var data = {};
@@ -367,14 +368,24 @@ component accessors=true {
         // loop over all the cards
         for ( var id in arguments.rc.event.getPlan().getPlan_Deck().getDeck_Cards() ) {
 
-          // get the pay_date
           var card = arguments.rc.event.getPlan().getCard( id );
+
           var data[id] = card;
 
+          // event card: get the pay_date
           if ( ListFind(event_card_ids, id) ) {
             data[id]['pay_date'] = arguments.rc.event.getCard( id ).getPay_Date();
           } else {
             data[id]['pay_date'] = '';
+          }
+
+          // paid_card: get the actual payment amount / date
+          if ( ListFind(paid_card_ids, id) ) {
+            data[id]['actually_paid_on'] = arguments.rc.event.getPaidCard( id ).getActually_Paid_On();
+            data[id]['actual_payment'] = arguments.rc.event.getPaidCard( id ).getActual_Payment();
+          } else {
+            data[id]['actually_paid_on'] = '';
+            data[id]['actual_payment'] = '';
           }
 
         }

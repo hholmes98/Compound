@@ -2243,7 +2243,9 @@ controller/pay
   $scope.reverseSort = false;
   $scope.showAllCards = false;
   $scope.loaded = false;
+
   $scope.customAmount = false;
+  $scope.custom_payment = 0;
 
   $scope.loadingBills = true;
   $scope.loadingPlan = true;
@@ -2286,62 +2288,19 @@ controller/pay
           .then( function onSuccess( response ) {
 
             //success
-            $scope.all_cards = response.event.cards; // this is for filter/non-filter
-            $scope.cards = $scope.all_cards;
-            $scope.event_cards = $scope.cards;
+            $scope.all_cards = response.event.cards; // this is for resets after pruning through noPaymentFilter
 
             // this will reduce
             $scope.cards = $filter('noPaymentFilter')($scope.all_cards, $scope.showAllCards);
 
             // this should stay the same
             $scope.cards = $filter('cardSorter')($scope.cards, $scope.orderByField, $scope.reverseSort);
-            
-            $scope.selected = $scope.cards[Object.keys($scope.cards)[0]]; // by default, just pick the first one.
+
+            // by default, just pick the first one.
+            $scope.selected = $scope.cards[Object.keys($scope.cards)[0]];
+
+            // we keep the calculated payment text that displays on the screen separate from the actual numeric val.
             $scope.calculated_payment_text = $scope.selected.calculated_payment;
-
-            // chain into actual payments]
-            var in_data = {
-              user_id: CF_getUserID(),
-              payment_for_month: response.event.calculated_for_month,
-              payment_for_year: response.event.calculated_for_year
-            }
-            
-            DDService.pGetCardPayments( in_data )
-            .then( function onSuccess( response ) {
-
-              for (j = 0; j < Object.keys($scope.event_cards).length; j++ ) {
-                var index =  Object.keys($scope.event_cards)[j];
-                if ( response.card_payments.findIndex(x => x.card_id == $scope.event_cards[index].card_id) != -1 ) {
-                  var newIndex = $scope.cards.findIndex(y => y.card_id == $scope.event_cards[index].card_id)
-
-                  $scope.cards[newIndex]['actual_payment'] = response.card_payments.find(x => x.card_id == $scope.event_cards[index].card_id).actual_payment;
-                  $scope.cards[newIndex]['actually_paid_on'] = response.card_payments.find(x => x.card_id == $scope.event_cards[index].card_id).actually_paid_on;
-                }
-              }
-
-              // chain into the preferences load
-              DDService.pGetPreferences({user_id:CF_getUserID()})
-              .then( function onSuccess( response ) {
-
-                $scope.loaded = true;
-                if ($scope.event_cards.length) {
-                  $scope.loadingBills = false;
-                  $scope.loadingPlan = false;
-                }
-
-              })
-              .catch( function onError( result ) { // pGetPreferences
-
-                CF_restErrorHandler( result );
-
-              });
-
-            })
-            .catch( function onError( result ) { // pGetCardPayments
-
-              CF_restErrorHandler( result );
-
-            });
 
           })
           .catch( function onError( result ) { // pGetEvent
@@ -2444,7 +2403,6 @@ controller/pay
 
       $scope.all_cards = response.event.cards;
       $scope.cards = $scope.all_cards;
-      $scope.event_cards = $scope.cards;
 
       $scope.selected = $scope.cards[$scope.selected.card_id];
       $scope.calculated_payment_text = $scope.selected.calculated_payment;
@@ -2460,8 +2418,8 @@ controller/pay
   $scope.makePayment = function() {
 
     var in_card = $scope.selected;
-    var m = moment($scope.event_cards[$scope.selected.card_id].pay_date).month() + 1;
-    var y = moment($scope.event_cards[$scope.selected.card_id].pay_date).year();
+    var m = moment(in_card.pay_date).month() + 1; // js months are 0 based
+    var y = moment(in_card.pay_date).year();
 
     var in_data = {
       card_id: in_card.card_id,
@@ -2473,6 +2431,9 @@ controller/pay
 
     DDService.pSaveCardPayment( in_data )
     .then( function( response ) {
+
+      $scope.custom_payment = 0; // reset
+      $scope.customAmount = false;
 
       /******
       TRIVIA

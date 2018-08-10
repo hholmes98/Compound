@@ -38,7 +38,7 @@
   <!--- only needed on pages that use the toggle
   profile.basic
   --->
-  <cfif sectionDetection( 'profile.basic' )>
+  <cfif sectionDetection( 'profile.basic,pay.default,pay.cards' )>
     <link href="//ziscloud.github.io/angular-bootstrap-toggle/css/angular-bootstrap-toggle.min.css" rel="stylesheet" />
   </cfif>
 

@@ -52,7 +52,7 @@
 <!--- only needed on pages that use the toggle
 profile.basic
 --->
-<cfif sectionDetection( 'profile.basic' )>
+<cfif sectionDetection( 'profile.basic,pay.default,pay.cards' )>
   <script src="//ziscloud.github.io/angular-bootstrap-toggle/js/angular-bootstrap-toggle.min.js"></script>
 </cfif>
 
@@ -157,7 +157,7 @@ calculate.default
 <cfif sectionDetection( 'main.plan,calculate.default' )>    'ui.calendar', </cfif>
     'ui.bootstrap', 
     '720kb.tooltips', 
-<cfif sectionDetection( 'profile.basic' )>    'ui.toggle', </cfif>
+<cfif sectionDetection( 'profile.basic,pay.default,pay.cards' )>    'ui.toggle', </cfif>
 <cfif sectionDetection( 'deck.manage' )>    'rzModule',</cfif>
     'ngSanitize', 
     'ngCookies'
