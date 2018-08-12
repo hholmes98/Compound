@@ -13,4 +13,8 @@ component accessors=true {
 
   }
 
+  function flatten() {
+    return variables;
+  }
+
 }

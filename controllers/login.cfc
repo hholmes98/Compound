@@ -53,8 +53,7 @@ component accessors = true {
 
   }
 
-  /* landing on the login page is what instatiates the XSRF-TOKEN */
-  function default( struct rc ) {
+  private function createCookie( struct rc ) {
 
     if ( !StructKeyExists( COOKIE, 'XSRF-DD-TOKEN' ) ) {
 
@@ -66,8 +65,17 @@ component accessors = true {
 
   }
 
+  /* landing on the login page is what instatiates the XSRF-TOKEN */
+  function default( struct rc ) {
+
+    createCookie( arguments.rc );
+
+  }
+
   function create( struct rc ) {
     param name="rc.at_id" default="1";
+
+    createCookie( arguments.rc );
 
     if ( IsNumeric(rc.at_id) && (rc.at_id < 1 || rc.at_id > 4) )
       rc.at_id = 3;
