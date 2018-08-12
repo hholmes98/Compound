@@ -45,13 +45,13 @@
     <div class="col-xs-6"></div>
     <div class="col-xs-6">
       <span class="pull-right">
-        <input type="button" class="btn button btn-default btn-primary col-xs-12" value="Upgrade to paid" tooltip="Paid accounts disable advertisements!" />
+        <cfoutput><button class="btn button btn-default" onClick="location.href='#buildUrl('profile.upgrade')#';"> <i class="fas fa-shopping-cart" uib-tooltip="Paid accounts disable advertisements!"></i> Upgrade to paid</button></cfoutput>
       </span>
     </div>
   </div>
 
   <!-- Coupon Codes -->
-  <div class="strike">
+  <!--- <div class="strike">
     <span><h3>Coupon Codes</h3></span>
   </div>
 
@@ -69,7 +69,7 @@
       <button class="btn button btn-default col-xs-12" form="disableMeForNowForm"><span class="glyphicon glyphicon-check"></span> Redeem Coupon (NYI)</button>
     </div>
   </div>
-  </cfform>
+  </cfform> --->
 
 </cfif>
 
@@ -95,7 +95,7 @@
   <div class="col-xs-6">Bill reminder frequency</div>
   <div class="col-xs-6">
     <span class="pull-right">
-      <select<cfif session.auth.user.getAccount_Type_Id() LT 2> disabled tooltip="Upgrade to customize when you receive reminders!"</cfif> class="form-control" name="email_frequency" ng-model="preferences.email_frequency" ng-change="savePreferences(preferences);" convert-to-number>
+      <select<cfif session.auth.user.getAccount_Type_Id() LT 2> disabled uib-tooltip="Upgrade to customize when you receive reminders!"</cfif> class="form-control" name="email_frequency" ng-model="preferences.email_frequency" ng-change="savePreferences(preferences);" convert-to-number>
         <option value="0">None</option>
         <option value="1"<cfif session.auth.user.getAccount_Type_Id() LT 2> selected</cfif>>1 a month</option><!-- this is the default -->
         <cfif session.auth.user.getPreferences().getPay_Frequency() GT 0><option value="2">On pay schedule</option><!-- don't show this option if "its complicated" --></cfif>
