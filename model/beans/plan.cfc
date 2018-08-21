@@ -135,8 +135,13 @@ component accessors=true {
     var sorted = sortHotCards( cards );
 
     if ( ArrayLen(sorted) ) {
-      var hot_card_id = sorted[1];
-      return hot_card_id;
+      for ( var a=1; a <= ArrayLen( sorted ); a++ ) {
+        // return the next card that is not within the 30-day rule
+        if ( variables.plan_deck.getCard( sorted[a] ).getMin_Payment() > 0 ) {
+          var hot_card_id = sorted[a];
+          return hot_card_id;    
+        }
+      }
     }
 
     return 0;
@@ -470,7 +475,6 @@ component accessors=true {
   function getFingerprint() {
 
     //https://stackoverflow.com/questions/9813206/fastest-method-for-fingerprinting-an-array-calculating-a-unique-hash-from-an-ar
-
     var cards = variables.plan_deck.getDeck_Cards();
 
     var calc_cards = cards.map( function(key, value) {  // convert struct of beans to struct of calculated_payments

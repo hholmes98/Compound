@@ -254,7 +254,7 @@ component extends = "framework.one" {
       abs_url = "http://" & abs_url;
     }
 
-    if ( CGI.SERVER_PORT <> 80 ) {
+    if ( CGI.SERVER_PORT != 80 && CGI.SERVER_PORT != 443 ) {
       abs_url = abs_url & ":" & CGI.SERVER_PORT;
     }
 

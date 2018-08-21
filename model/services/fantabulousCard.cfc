@@ -85,14 +85,14 @@ component accessors=true {
 
     [Character Position: What it is used for]
      1: Primary color; Final stop color for gradients
-     7: Secondary color
+     7: Border color;
     13: Border style
-    15: Thickness of either radial gradients or repeating line gradients (each modified differently/via static const)
-    17: Starting color for gradients
-    23: Initial stop color for gradients
-    29: Type of gradient to deploy
-    31: Angle of linear gradients; Shape of radial gradient
-    33: Offset position for linear gradients; Destination position (ie. "Shape" at "Position") for radial gradients; always displays as a percentage (but can go over 100%)
+    15: GIRTH (WIDTH or HEIGHT) (n%, 100% limit) of either radial gradients or repeating line gradients (each modified differently/via static const)
+    17: Secondary Color; Starting color for gradients
+    23: Tertiary Color; Initial stop color for gradients
+    29: Type of background pattern to deploy
+    31: ANGLE (0-360) of linear gradients; Shape of radial gradient
+    33: POSITION offset (n%, no limit) for linear gradients; Destination position (ie. "Shape" at "Position") for radial gradients; always displays as a percentage (but can go over 100%)
     35: Display security chip (yes/no)
     37: Security chip color (silver/gold)
     39: Security chip position (middle-right/upper-left)
@@ -100,20 +100,20 @@ component accessors=true {
     43: Vendor name text color (white/gray/black) // TO-DO: scan primary color, determine if it is light; set text dark (or vice-versa)
     45: Vendor position (upper-left/upper-right/lower-left/lower-right)
     47: Vendor text display details (ie. name, transform, line-height, width, text-shadow, etc. )
-    49: UNUSED COLOR
+    49: UNUSED COLOR (Quaternary color, if needed)
     55: UNUSED BYTE
     --- SHA-244 / SHA-256 bridge ---
-    57: UNUSED COLOR
+    57: UNUSED COLOR (Quintentary color, if needed)
     63: UNUSED BYTE
     */
 
     variables.fc_data = {
-      'full_stop': Left( arguments.c, 6 ),
-      'border-color': Mid( arguments.c, 7, 6 ),
-      'border-style': hex2dec( Mid( arguments.c, 13, 2 ) ),
+      'primary_color': Left( arguments.c, 6 ),
+      'border_color': Mid( arguments.c, 7, 6 ),
+      'border_style': hex2dec( Mid( arguments.c, 13, 2 ) ),
       'girth': hex2dec( Mid( arguments.c, 15, 2 ) ),
-      'start': Mid( arguments.c, 17, 6 ),
-      'stop': Mid( arguments.c, 23, 6 ),
+      'secondary_color': Mid( arguments.c, 17, 6 ),
+      'tertiary_color': Mid( arguments.c, 23, 6 ),
       'background': hex2dec( Mid( arguments.c, 29, 2 ) ),
       'shape': hex2dec( Mid( arguments.c, 31, 2 ) ), // TODO: fix this dupe
       'angle': hex2dec( Mid( arguments.c, 31, 2 ) ),
@@ -132,8 +132,8 @@ component accessors=true {
   remote function initProperties( struct fc_data ) {
 
     variables.properties = {
-      'border-color': arguments.fc_data['border-color'],
-      'border-style': getBorderStyle( arguments.fc_data['border-style'] ),
+      'border-color': arguments.fc_data['border_color'],
+      'border-style': getBorderStyle( arguments.fc_data['border_style'] ),
       'background': buildBackground( arguments.fc_data['background'] ),
       'hasChip': hasChip( arguments.fc_data['hasChip'] ),
       'chipColor': getChipColor( arguments.fc_data['chipColor'] ),
@@ -163,12 +163,77 @@ component accessors=true {
 
   }
 
+  remote string function buildBackground( numeric value ) {
+
+    var choice = arguments.value MOD 13;
+
+    switch(choice) {
+      case 0:
+      case 1:
+      case 2:
+      case 3:
+        return 'background: ' & getGradient( arguments.value );
+        break;
+      case 4:
+        return buildMarrakesh();
+        break;
+      case 5:
+        return buildZigZag();
+        break;
+      case 6:
+        return buildStairs();
+        break;
+      case 7:
+        return buildRainbowBokeh();
+        break;
+      case 8:
+        return buildMicrobialMat();
+        break;
+      case 9:
+        return buildSegaiha();
+        break;
+      case 10:
+        return buildTartan();
+        break;
+      case 11:
+        return buildCarbon();
+        break;
+      case 12:
+        return buildWaves();
+        break;
+
+    }
+
+  }
+
+  remote string function getGradient( numeric value ) {
+
+    var choice = arguments.value MOD 4;
+
+    switch(choice) {
+      case 0:
+        return 'linear-gradient(' & buildLinearGradient() & ')';
+        break;
+      case 1:
+        return buildRepeatingLinearGradient();
+        break;
+      case 2:
+        return 'radial-gradient(' & buildRadialGradient() & ')';
+        break;
+      case 3:
+        return 'repeating-radial-gradient(' & buildRadialGradient() & ')';
+        break;
+
+    }
+
+  }
+
   remote string function buildRadialGradient() {
 
     var shape = getShape(variables.fc_data['shape']);
-    var start = variables.fc_data['start'];
-    var stop = variables.fc_data['stop'];
-    var full_stop = variables.fc_data['full_stop'];
+    var start = variables.fc_data['secondary_color'];
+    var stop = variables.fc_data['tertiary_color'];
+    var full_stop = variables.fc_data['primary_color'];
     var position = getPercentage(variables.fc_data['position']);
     var girth = getPercentage(variables.fc_data['girth']);
 
@@ -179,9 +244,9 @@ component accessors=true {
   remote string function buildRepeatingLinearGradient() {
 
     var angle = getAngle(variables.fc_data['angle']);
-    var start = variables.fc_data['start'];
-    var stop = variables.fc_data['stop'];
-    var full_stop = variables.fc_data['full_stop'];
+    var start = variables.fc_data['secondary_color'];
+    var stop = variables.fc_data['tertiary_color'];
+    var full_stop = variables.fc_data['primary_color'];
     var position = getPercentage(variables.fc_data['position']);
     var girth = getPercentage(variables.fc_data['girth']);
 
@@ -195,85 +260,22 @@ component accessors=true {
       txt = txt & 'repeating-linear-gradient(' & angle+(i*8) & 'deg, ' & RepeatString('transparent ' & i*2 & 'px,', i) & ' ##' & start & ' ' & ordered[1]*i & '%, ##' & stop & ' ' & ordered[2]*i & '%, ##' & full_stop & ' ' & ordered[3]*i & '%)';
       if (i < repeat-1) {
         txt = txt & ',' & Chr(13) & Chr(10);
-      } else {
-        //txt = txt & ';';
-      } 
+      }
     }
 
     return txt;
-
-
-    //return 'repeating-linear-gradient(' & angle & 'deg, ##' & start & ' ' & ordered[1] & '%, ##' & stop & ' ' & ordered[2] & '%, ##' & full_stop & ' ' & ordered[3] & '%)';
-
-    /*
-    var txt = '
-    repeating-linear-gradient(
-      transparent, 
-      transparent 50px, 
-      rgba(0,255,255, .25) 50px,
-      rgba(0,255,255, .25) 100px
-    ),
-    repeating-linear-gradient(
-      90deg, 
-      rgba(0,255,255, .25), 
-      rgba(0,255,255, .25) 50px, 
-      transparent 50px, 
-      transparent 100px
-    ),
-    repeating-linear-gradient(
-      135deg, 
-      transparent, 
-      transparent 4px, 
-      rgba(255,255,255,.1) 4px, 
-      rgba(255,255,255,.1) 8px
-    ),
-    repeating-linear-gradient(
-      45deg, 
-      transparent, 
-      transparent 4px, 
-      rgba(255,255,255,.1) 4px, 
-      rgba(255,255,255,.1) 8px
-    ),
-    repeating-linear-gradient(
-      transparent, 
-      transparent 20px, 
-      rgba(100,250,250, .2) 20px, 
-      rgba(100,250,250, .2) 21px, 
-      transparent 21px,
-      transparent 29px, 
-      rgba(100,250,250, .2) 29px, 
-      rgba(100,250,250, .2) 30px, 
-      transparent 30px, 
-      transparent 50px
-    ),
-    repeating-linear-gradient(
-      90deg, 
-      transparent, 
-      transparent 20px, 
-      rgba(100,250,250, .2) 20px, 
-      rgba(100,250,250, .2) 21px, 
-      transparent 21px, 
-      transparent 29px, 
-      rgba(100,250,250, .2) 29px, 
-      rgba(100,250,250, .2) 30px,
-      transparent 30px, 
-      transparent 50px
-    );';
-
-    return txt;
-    */
-
   }
 
   remote string function buildLinearGradient() {
 
     var angle = getAngle(variables.fc_data['angle']);
-    var start = variables.fc_data['start'];
-    var stop = variables.fc_data['stop'];
-    var full_stop = variables.fc_data['full_stop'];
-    var position = getPercentage(variables.fc_data['position']);
+    var start = variables.fc_data['secondary_color'];
+    var stop = variables.fc_data['tertiary_color'];
+    var full_stop = variables.fc_data['primary_color'];
+    var position = getPercentage(variables.fc_data['position'], 5, 40);
 
     return angle & 'deg, ##' & start & ' ' & position & '%, ##' & stop & ', ##' & full_stop;
+
   }
 
   remote string function buildMarrakesh() {
@@ -290,10 +292,10 @@ component accessors=true {
     };
     
     var data = {
-      'background-color': '##' & variables.fc_data['start'],
+      'background-color': '##' & variables.fc_data['secondary_color'],
       'background-image': {
-        'radial-gradient': '##' & variables.fc_data['stop'] & ' 40%, transparent 30%',
-        'repeating-radial-gradient': '##' & variables.fc_data['stop'] &' 0%, ' & '##' & variables.fc_data['stop'] & ' 13%, transparent 13%, transparent 31%, ' & '##' & variables.fc_data['stop'] & ' 26%, ' & '##' & variables.fc_data['stop'] & ' 39%, transparent 40%, transparent 75%',
+        'radial-gradient': '##' & variables.fc_data['tertiary_color'] & ' 40%, transparent 30%',
+        'repeating-radial-gradient': '##' & variables.fc_data['tertiary_color'] &' 0%, ' & '##' & variables.fc_data['tertiary_color'] & ' 13%, transparent 13%, transparent 31%, ' & '##' & variables.fc_data['tertiary_color'] & ' 26%, ' & '##' & variables.fc_data['tertiary_color'] & ' 39%, transparent 40%, transparent 75%',
       },
       'background-size': size.x1 & ' ' & size.y1 & ', ' & size.x2 & ' ' & size.y2,
       'background-position':'0 0'
@@ -309,13 +311,13 @@ component accessors=true {
   remote string function buildZigZag() {
 
     var nl = chr(13) & chr(10);
-    var start = variables.fc_data['start'];
-    var full_stop = variables.fc_data['full_stop'];
+    var start = variables.fc_data['secondary_color'];
+    var full_stop = variables.fc_data['primary_color'];
     var perc1 = getPercentage(variables.fc_data['position']);
     var perc2 = getPercentage(variables.fc_data['girth']);
 
-    var txt = 'background: linear-gradient(135deg, ##' & start & ' 25%, transparent 25%) -50px 0,' & nl &
-        '  linear-gradient(225deg, ##' & start & ' 25%, transparent 25%) -50px 0,' & nl &
+    var txt = 'background: linear-gradient(135deg, ##' & start & ' 25%, transparent 25%) -50% 0,' & nl &
+        '  linear-gradient(225deg, ##' & start & ' 25%, transparent 25%) -50% 0,' & nl &
         '  linear-gradient(315deg, ##' & start & ' 25%, transparent 25%), ' & nl &
         '  linear-gradient(45deg, ##' & start & ' 25%, transparent 25%); ' & nl &
         '  background-size: ' & perc1 & '% ' & perc2 & '%; ' & nl &
@@ -328,10 +330,10 @@ component accessors=true {
   remote string function buildStairs() {
 
     var nl = chr(13) & chr(10);
-    var start = variables.fc_data['start'];
-    var full_stop = variables.fc_data['full_stop'];
-    var angle = getPercentage(variables.fc_data['angle']);
-    var step = getPercentage(variables.fc_data['girth']);
+    var start = variables.fc_data['secondary_color'];
+    var full_stop = variables.fc_data['primary_color'];
+    var angle = getPercentage(variables.fc_data['angle'], 5, 8);
+    var step = getPercentage(variables.fc_data['girth'], 10, 50);
 
     var txt = 'background: linear-gradient(63deg, ##' & full_stop & ' 25%, transparent 23%) 7px 0, ' & nl &
         '  linear-gradient(63deg, transparent 74%, ##' & full_stop & ' 78%),' & nl &
@@ -348,18 +350,148 @@ component accessors=true {
     var perc1 = getPercentage(variables.fc_data['position']);
     var perc2 = getPercentage(variables.fc_data['girth']);
     var perc3 = getPercentage(variables.fc_data['angle']);
-    var full_stop = variables.fc_data['full_stop'];
+    var full_stop = variables.fc_data['primary_color'];
     var girth = getAngle(variables.fc_data['girth']);
 
     var txt = '
     background: 
     radial-gradient(rgba(255,255,255,0) 0, rgba(255,255,255,.15) 30%, rgba(255,255,255,.3) 32%, rgba(255,255,255,0) 33%) 0 0,
-    radial-gradient(rgba(255,255,255,0) 0, rgba(255,255,255,.2) 17%, rgba(255,255,255,.43) 19%, rgba(255,255,255,0) 20%) 0 110px,
-    radial-gradient(rgba(255,255,255,0) 0, rgba(255,255,255,.2) 11%, rgba(255,255,255,.4) 13%, rgba(255,255,255,0) 14%) 130px 370px,
+    radial-gradient(rgba(255,255,255,0) 0, rgba(255,255,255,.2) 17%, rgba(255,255,255,.43) 19%, rgba(255,255,255,0) 20%) 0 ' & perc1 & '%,
+    radial-gradient(rgba(255,255,255,0) 0, rgba(255,255,255,.2) 11%, rgba(255,255,255,.4) 13%, rgba(255,255,255,0) 14%) ' & perc2 & '% ' & perc3 & '%,
     linear-gradient(' & buildLinearGradient() & ');
     background-size: ' & perc1 & '% ' & (perc1*2) & '%, ' & perc2 & '% ' & (perc2*2) & '%, ' & perc3 & '% ' & (perc3*2) & '%, 100% ' & girth & '%;
     background-color: ##' & full_stop & ';';
 
+    return txt;
+
+  }
+
+  remote string function buildMicrobialMat() {
+
+    var size1 = getPercentage(variables.fc_data['position'], 4, 25);
+    var size2 = getPercentage(variables.fc_data['girth'], 10, 50);
+    var size3 = getPercentage(variables.fc_data['angle'], 1, 15);
+    var size4 = getPercentage(variables.fc_data['position'], 18, 100)
+    var color1 = variables.fc_data['primary_color'];
+    var color2 = variables.fc_data['secondary_color'];
+
+    var txt = 'background:
+  radial-gradient(circle at 0% 50%, rgba(96, 16, 48, 0) ' & size3 & '%, ##' & color2 & ' ' & size4 & '%, rgba(96, 16, 48, 0) ' & size4 & '%) 0% 10%,
+  radial-gradient(at 100% 100%, rgba(96, 16, 48, 0) 1%, ##' & color2 & ' ' & size3 & '%, rgba(96, 16, 48, 0) ' & size4 & '%),
+  ##' & color1 & ';
+  background-size: ' & size1 & '% ' & size2 & '%';
+
+    return txt;
+  }
+
+  remote string function buildSegaiha() {
+
+    var color1 = variables.fc_data['primary_color'];
+    var color2 = variables.fc_data['secondary_color'];
+
+    var size = getPercentage(variables.fc_data['girth'], 12, 100);
+
+    var txt = 'background-color:##' & color1 & ';
+  background-image: 
+  radial-gradient(circle at 100% 150%, ##' & color1 & ' 24%, ##' & color2 & ' 25%, ##' & color2 & ' 28%, ##' & color1 & ' 29%, ##' & color1 & ' 36%, ##' & color2 & ' 36%, ##' & color2 & ' 40%, transparent 40%, transparent),
+  radial-gradient(circle at 0 150%, ##' & color1 & ' 24%, ##' & color2 & ' 25%, ##' & color2 & ' 28%, ##' & color1 & ' 29%, ##' & color1 & ' 36%, ##' & color2 & ' 36%, ##' & color2 & ' 40%, transparent 40%, transparent),
+  radial-gradient(circle at 50% 100%, ##' & color2 & ' 10%, ##' & color1 & ' 11%, ##' & color1 & ' 23%, ##' & color2 & ' 24%, ##' & color2 & ' 30%, ##' & color1 & ' 31%, ##' & color1 & ' 43%, ##' & color2 & ' 44%, ##' & color2 & ' 50%, ##' & color1 & ' 51%, ##' & color1 & ' 63%, ##' & color2 & ' 64%, ##' & color2 & ' 71%, transparent 71%, transparent),
+  radial-gradient(circle at 100% 50%, ##' & color2 & ' 5%, ##' & color1 & ' 6%, ##' & color1 & ' 15%, ##' & color2 & ' 16%, ##' & color2 & ' 20%, ##' & color1 & ' 21%, ##' & color1 & ' 30%, ##' & color2 & ' 31%, ##' & color2 & ' 35%, ##' & color1 & ' 36%, ##' & color1 & ' 45%, ##' & color2 & ' 46%, ##' & color2 & ' 49%, transparent 50%, transparent),
+  radial-gradient(circle at 0 50%, ##' & color2 & ' 5%, ##' & color1 & ' 6%, ##' & color1 & ' 15%, ##' & color2 & ' 16%, ##' & color2 & ' 20%, ##' & color1 & ' 21%, ##' & color1 & ' 30%, ##' & color2 & ' 31%, ##' & color2 & ' 35%, ##' & color1 & ' 36%, ##' & color1 & ' 45%, ##' & color2 & ' 46%, ##' & color2 & ' 49%, transparent 50%, transparent);
+  background-size:' & size & '% ' & size & '%';
+
+    return txt;
+
+  }
+
+  remote string function buildTartan() {
+
+    var color = variables.fc_data['primary_color'];
+    var width1 = getPercentage(variables.fc_data['girth'], 50, 182);
+
+    var txt = 'background-color: ##' & color & ';
+  background-image: repeating-linear-gradient(transparent, transparent ' & width1 & '%, rgba(0,0,0,.4) ' & width1 & '%, 
+    rgba(0,0,0,.4) ' & Round(width1+(width1*.06)) & '%, 
+    transparent ' & Round(width1+(width1*.06)) & '%, 
+    transparent ' & Round(width1+(width1*.18)) & '%, rgba(0,0,0,.4) ' & Round(width1+(width1*.18)) & '%, 
+    rgba(0,0,0,.4) ' & Round(width1+(width1*.22)) & '%, 
+    transparent ' & Round(width1+(width1*.22)) & '%, 
+    transparent ' & Round(width1+(width1*.57)) & '%, rgba(0,0,0,.5) ' & Round(width1+(width1*.55)) & '%, 
+    rgba(0,0,0,.5) ' & Round(width1+(width1*.57)) & '%, 
+    rgba(255,255,255,.2) ' & Round(width1+(width1*.57)) & '%, 
+    rgba(255,255,255,.2) ' & Round(width1+(width1*.71)) & '%, 
+    rgba(0,0,0,.5) ' & Round(width1+(width1*.71)) & '%, 
+    rgba(0,0,0,.5) ' & Round(width1+(width1*.73)) & '%, 
+    rgba(255,255,255,.2) ' & Round(width1+(width1*.73)) & '%, 
+    rgba(255,255,255,.2) ' & Round(width1+(width1*.73)) & '%, 
+    rgba(0,0,0,.5) ' & Round(width1+(width1*.73)) & '%, 
+    rgba(0,0,0,.5) ' & Round(width1+(width1*.80)) & '%, 
+    transparent ' & Round(width1+(width1*.80)) & '%),
+  repeating-linear-gradient(270deg, transparent, transparent ' & width1 & '%, rgba(0,0,0,.4) ' & width1 & '%, 
+    rgba(0,0,0,.4) ' & Round(width1+(width1*.06)) & '%, 
+    transparent ' & Round(width1+(width1*.06)) & '%, 
+    transparent ' & Round(width1+(width1*.18)) & '%, 
+    rgba(0,0,0,.4) ' & Round(width1+(width1*.18)) & '%, 
+    rgba(0,0,0,.4) ' & Round(width1+(width1*.18)) & '%, 
+    transparent ' & Round(width1+(width1*.18)) & '%, 
+    transparent ' & Round(width1+(width1*.22)) & '%, 
+    rgba(0,0,0,.5) ' & Round(width1+(width1*.22)) & '%, 
+    rgba(0,0,0,.5) ' & Round(width1+(width1*.57)) & '%, 
+    rgba(255,255,255,.2) ' & Round(width1+(width1*.57)) & '%, 
+    rgba(255,255,255,.2) ' & Round(width1+(width1*.71)) & '%, 
+    rgba(0,0,0,.5) ' & Round(width1+(width1*.71)) & '%, 
+    rgba(0,0,0,.5) ' & Round(width1+(width1*.73)) & '%, 
+    rgba(255,255,255,.2) ' & Round(width1+(width1*.73)) & '%, 
+    rgba(255,255,255,.2) ' & Round(width1+(width1*.79)) & '%, 
+    rgba(0,0,0,.5) ' & Round(width1+(width1*.79)) & '%, 
+    rgba(0,0,0,.5) ' & Round(width1+(width1*.80)) & '%, 
+    transparent ' & Round(width1+(width1*.80)) & '%),
+  repeating-linear-gradient(125deg, transparent, transparent 1%, 
+    rgba(0,0,0,.2) 1%, 
+    rgba(0,0,0,.2) 2%, 
+    transparent 3%, 
+    transparent 5%, 
+    rgba(0,0,0,.2) 5%);';
+
+   return txt;
+
+  }
+
+  remote string function buildCarbon() {
+
+    var color = variables.fc_data['primary_color'];
+    var hsl_color = color2hsl( hex2color( color ) );
+
+    var bg = lightenHSL( hsl_color, -6 );
+    var bar1 = lightenHSL( hsl_color, -5 );
+    var bar3 = lightenHSL( hsl_color, -3 );
+    var bar2 = lightenHSL( hsl_color, -2 );
+    var bar4 = lightenHSL( hsl_color, 1 );
+
+    var txt = 'background:
+linear-gradient(27deg, ' & formatHSL(bar1) & ' 20%, transparent 20%) 0 4%,
+linear-gradient(207deg, ' & formatHSL(bar1) & ' 20%, transparent 20%) 48% 0,
+linear-gradient(27deg, ' & formatHSL(hsl_color) & ' 20%, transparent 20%) 0 45%,
+linear-gradient(207deg, ' & formatHSL(hsl_color) & ' 20%, transparent 20%) 48% 4%,
+linear-gradient(90deg, ' & formatHSL(bar2) & ' 55%, transparent 55%),
+linear-gradient(' & formatHSL(bar2) & ' 25%, ' & formatHSL(bar3) & ' 25%, ' & formatHSL(bar3) & ' 50%, transparent 50%, transparent 75%, ' & formatHSL(bar4) & ' 75%, ' & formatHSL(bar4) & ');
+background-color: ' & formatHSL(bg) & ';
+background-size: 8% 11%;';
+
+    return txt;
+
+  }
+
+  remote string function buildWaves() {
+
+    var color = variables.fc_data['primary_color'];
+    var pos = getFrequency(variables.fc_data['position'], 4);
+
+    var txt = 'background: 
+  radial-gradient(circle at 100% 50%, transparent 20%, rgba(255,255,255,.3) 21%, rgba(255,255,255,.3) 34%, transparent 35%, transparent),
+  radial-gradient(circle at 0% 50%, transparent 20%, rgba(255,255,255,.3) 21%, rgba(255,255,255,.3) 34%, transparent 35%, transparent) 0 ' & pos.z & '%;
+  background-color: ##' & color &';
+  background-size:' & pos.x & '% ' & pos.y & '%;';
     return txt;
 
   }
@@ -377,6 +509,105 @@ component accessors=true {
     }
 
     return tmp;
+  }
+
+  remote string function formatHSL( struct in_hsl ) {
+
+    return 'hsl(' & Round(arguments.in_hsl.h) & ', ' & Round(arguments.in_hsl.s * 100) & '%, ' & Round(arguments.in_hsl.l * 100) & '%)';
+
+  }
+
+  remote struct function lightenHSL( struct in_hsl, numeric factor ) {
+
+    var old_l = in_hsl.l;
+    var fac = arguments.factor / 100;
+
+    // pass in negative values to darken
+    old_l += fac;
+
+    if (old_l < 0)
+      old_l = 0;
+
+    if (old_l > 1)
+      old_l = 1;
+
+    return {
+      h: arguments.in_hsl.h,
+      s: arguments.in_hsl.s,
+      l: old_l
+    };
+
+  }
+
+  remote struct function color2hsl( struct in_color ) {
+
+    var rgb = ArrayNew(1);
+    var r = in_color.r;
+    var g = in_color.g;
+    var b = in_color.b;
+
+    rgb[1] = r / 255;
+    rgb[2] = g / 255;
+    rgb[3] = b / 255;
+
+    var min = rgb[1];
+    var max = rgb[1];
+    var maxcolor = 1;
+    var h = '';
+    var l = 0;
+    var s = 0;
+
+    for (var i = 1; i <= ArrayLen(rgb); i++) {
+
+      if (rgb[i] <= min) {
+        min = rgb[i];
+      }
+
+      if (rgb[i] >= max) {
+        max = rgb[i];
+        maxcolor = i;
+      }
+
+    }
+
+    if (maxcolor == 1) {
+      h = (rgb[2] - rgb[3]) / (max - min);
+    }
+
+    if (maxcolor == 2) {
+      h = 2 + (rgb[3] - rgb[1]) / (max - min);
+    }
+
+    if (maxcolor == 3) {
+      h = 4 + (rgb[1] - rgb[2]) / (max - min);
+    }
+
+    if (!IsNumeric(h)) {
+      h = 0;
+    }
+
+    h = h * 60;
+
+    if (h < 0) {
+      h = h + 360; 
+    }
+
+    l = (min + max) / 2;
+
+    if (min == max) {
+      s = 0;
+    } else {
+      if (l < 0.5) {
+        s = (max - min) / (max + min);
+      } else {
+        s = (max - min) / (2 - max - min);
+      }
+    }
+
+    return {
+      h : h, s : s, l : l
+    };
+
   }
 
   remote string function color2hex( struct in_color ) {
@@ -499,7 +730,7 @@ component accessors=true {
 
   remote string function getVendorColor( numeric value ) {
 
-    var textColor = contrastColor(variables.fc_data['full_stop']);
+    var textColor = contrastColor(variables.fc_data['primary_color']);
 
     return '##' & textColor;
 
@@ -601,9 +832,14 @@ component accessors=true {
 
   }
 
-  remote numeric function getPercentage( numeric value ) {
+  remote numeric function getPercentage( numeric value, numeric min=0, numeric max=0 ) {
 
     var choice = Round( 100 / 256 * arguments.value );
+
+    if ( arguments.min > 0 && choice < arguments.min )
+      choice = arguments.min;
+    else if ( max > 0 && choice > max )
+      choice = arguments.max;
 
     return choice;
 
@@ -617,56 +853,49 @@ component accessors=true {
 
   }
 
-  remote string function getGradient( numeric value ) {
+  remote struct function getFrequency( numeric value, numeric stages ) {
 
-    var choice = arguments.value MOD 4;
+    var choice = arguments.value MOD arguments.stages;
 
-    switch(choice) {
+    switch (choice) {
       case 0:
-        return 'linear-gradient(' & buildLinearGradient() & ')';
+        return {
+          x: 30,
+          y: 69,
+          z: -111
+        }
         break;
       case 1:
-        return buildRepeatingLinearGradient();
+        return {
+          x: 27,
+          y: 62,
+          z: -80
+        }
         break;
       case 2:
-        return 'radial-gradient(' & buildRadialGradient() & ')';
+        return {
+          x: 14,
+          y: 32,
+          z: -70
+        }
         break;
       case 3:
-        return 'repeating-radial-gradient(' & buildRadialGradient() & ')';
+        return {
+          x: 9,
+          y: 14,
+          z: -43
+        }
+      default:
+        return {
+          x: 31,
+          y: 71,
+          z: -122
+        }
         break;
-
     }
 
   }
 
-  remote string function buildBackground( numeric value ) {
-
-    var choice = arguments.value MOD 8;
-
-    switch(choice) {
-      case 0:
-      case 1:
-      case 2:
-      case 3:
-        return 'background: ' & getGradient( arguments.value );
-        break;
-      case 4:
-        return buildMarrakesh();
-        break;
-      case 5:
-        return buildZigZag();
-        break;
-      case 6:
-        return buildStairs();
-        break;
-      case 7:
-        return buildRainbowBokeh();
-        break;
-
-    }
-
-
-  }
 
   remote string function getBorderStyle( numeric value ) {
 
