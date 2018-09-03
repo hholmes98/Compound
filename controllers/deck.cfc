@@ -127,11 +127,12 @@ component accessors=true {
 
       if ( cards[card].getCode() == "" ) {
         cardObj = fantabulousCardService.fantabulousCard( cardName=cards[card].getLabel(), cardClass=class ); // should never happen
+        out = out & Chr(13) & Chr(10) & "/* " & class & " */" & Chr(13) & Chr(10) & cardObj.getCardCSS( cardName=cards[card].getLabel(), cardClass=class );
       } else {
         cardObj = fantabulousCardService.fantabulousCard( cardName=cards[card].getLabel(), cardClass=class, hash=cards[card].getCode() );
+        out = out & Chr(13) & Chr(10) & "/* " & class & " */" & Chr(13) & Chr(10) & cardObj.getCardCSS( cardName=cards[card].getLabel(), cardClass=class, hash=cards[card].getCode() );
       }
 
-      out = out & Chr(13) & Chr(10) & "/* " & class & " */" & Chr(13) & Chr(10) & cardObj.getCSS();
     }
 
     if ( IsObject(cardObj) ) {

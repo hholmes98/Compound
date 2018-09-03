@@ -1048,7 +1048,11 @@ background-size: 8% 11%;';
 
   }
 
-  private string function getHolderCSS( string size="all" ) {
+  /*****************
+      PUBLIC
+  *****************/
+
+  public string function getHolderCSS( string size="all" ) {
 
     var holderCSS = '
 .holder {
@@ -1084,7 +1088,7 @@ background-size: 8% 11%;';
 
   }
 
-  private string function getCardCSS( string size="all" ) {
+  public string function getCardCSS( string size="all" ) {
 
     var cssString = '
 .' & variables.cardClass & ' {
