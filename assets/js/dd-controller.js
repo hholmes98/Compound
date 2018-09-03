@@ -1325,6 +1325,7 @@ controller/cards
   $scope.reverseSort = false;
   $scope.totalDebtLoad = 0;
   $scope.totalMinPayment = 0;
+  $scope.budgetPercent = 0;
 
   $scope.cardManagerTab = true;
   $scope.emergencyTab = false;
@@ -1341,12 +1342,11 @@ controller/cards
       $scope.cards[card]['className'] = 'card' + $scope.cards[card].card_id.toString() + ' small';
     }
 
-    $scope.calculateAll();
-
     DDService.pGetPreferences({user_id:CF_getUserID()})
     .then( function onSuccess( response ) {
 
       $scope.preferences = response.preferences;
+      $scope.calculateAll();
 
     })
 
@@ -1383,6 +1383,8 @@ controller/cards
       }
 
     }
+
+    $scope.budgetPercent = ($scope.totalMinPayment / $scope.preferences.budget) * 100;
 
   };
 
@@ -1479,6 +1481,7 @@ controller/cards
 
         // update budget in view
         $scope.preferences.budget = val;
+        $scope.calculateAll();
 
       })
       .catch( function onError( e ) {
@@ -1487,6 +1490,7 @@ controller/cards
         .then( function onSuccess( response ) {
 
           $scope.preferences = response.preferences;
+          $scope.calculateAll();
 
         });
 
