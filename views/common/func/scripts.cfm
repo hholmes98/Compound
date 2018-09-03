@@ -149,6 +149,15 @@ calculate.default
   <script src="/node_modules/highcharts/highstock.js" type="text/javascript"></script>
 </cfif>
 
+<!-- screenshots -->
+<cfif sectionDetection( 'card.show,main.card' )>
+  <cfif getEnvironment() is 'development'>
+    <script src="/node_modules/html2canvas/dist/html2canvas.js" type="text/javascript"></script>
+  <cfelse>
+    <script src="/node_modules/html2canvas/dist/html2canvas.min.js" type="text/javascript"></script>
+  </cfif>
+</cfif>
+
 <!-- payment gateway/fraud detection (everywhere) -->
 <script src="https://js.stripe.com/v3/"></script>
 

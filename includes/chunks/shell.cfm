@@ -8,6 +8,8 @@
     <cfparam name="rc.pageTitle" default="" />
     <cfparam name="rc.pageDescription" default="#application.locale[session.auth.locale]['description']#" />
     <cfparam name="rc.robots" default="noarchive" />
+    <cfparam name="rc.productType" default="" />
+    <cfparam name="rc.inlineStyle" default="" />
   </cfsilent>
   <!-- layouts/default -->
   <base href="/">
@@ -33,6 +35,7 @@
     <meta property="og:url" content="#request.abs_url##request._fw1.CgiPathInfo#" />
     <meta property="og:site_name" content="#rc.title#" />
     <meta property="og:image" content="#request.abs_url#/assets/img/#application.skins[COOKIE["dd-skin"]].favicon#" />
+    <cfif Len(rc.productType)><meta property="og:type" content="#rc.productType#" /></cfif>
 
     <script type="application/ld+json">
     {
@@ -89,6 +92,7 @@
   .x-ng-cloak {
     display: none !important;
   }
+  <cfoutput>#rc.inlineStyle#</cfoutput>
   </style>
 
   <!-- styles -->
@@ -98,34 +102,64 @@
   <cfinclude template="/includes/scripts/scripts.cfm">
 
   <script>
+  // I dunno how i feel about this
+  function deepGet(source, key) {
+
+    // 1. look at any/all the keys of the base obj - eg. try to find source.key (data.user_id)
+    var io = Object.keys(source);
+
+    for (var iobj in io) {  // for all the keys in the source
+
+      // is this key the same as the key we're looking for? (eg. 'user_id')
+      if (io[iobj] == key) {
+        if (source[io[iobj]] != null) { // does this key actually have a value in source? (eg. source.user_id)
+          return source[io[iobj]];
+        }
+      } else {
+        // if its not the key looking for, is this a key an object with its own keys, one of which matching?
+        var ikeys = Object.keys(source[io[iobj]]);
+
+        if (ikeys.length && source[io[iobj]][key] != null) { // eg. source.card.user_id
+          return source[io[iobj]][key];
+        }
+      }
+
+    }
+
+    // 3. if nothing yet, is there a chain?
+    if (source.chain != null) {
+
+      return deepGet(source.chain, key);
+
+    } else if (source.error != null) {
+
+      return deepGet(source.error, key);
+
+    } else if (source.ERROR != null) {
+
+      return deepGet(source.ERROR, key);
+
+    }
+
+    // 4. nothing found
+    return null;
+
+  }
+
   function CF_restErrorHandler( e ) {
     <cfif getEnvironment() == "development">
 
-    if ( e.message != undefined ) {
-      // possible jscript error
-      alert(e.message);
-      console.log(e.stack);
-    }
+    var msg = deepGet(e, 'Message');
+    if (msg != null)
+      alert(msg);
 
-    if ( e.error != undefined ) {
-      // possible CF error
-      alert(e.error.Message)
+    var detail = deepGet(e, 'Detail');
+    if (detail != null)
+      console.log(detail);
 
-      if (e.error.Detail.length > 0)
-        console.log(e.error.Detail);
-
-      console.log(e.error.TagContext);
-    }
-
-    if ( e.error != undefined && e.error.ERROR != undefined ) {
-      // possible server/REST error
-      alert(e.error.ERROR.Message);
-
-      if (e.error.ERROR.Detail.length > 0)
-        console.log(e.error.ERROR.Detail);
-
-      console.log(e.error.ERROR.TagContext);
-    }
+    var tc = deepGet(e, 'TagContext');
+    if (tc != null)
+      console.log(tc);
 
     <cfelse>
     // by default, we throw the user back to the login page.

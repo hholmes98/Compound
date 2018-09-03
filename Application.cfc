@@ -37,7 +37,8 @@ component extends = "framework.one" {
       { "$GET/pay/bills" = "/pay/cards" },
       { "$GET/manage/budget" = "/deck/manage" },
       { "$GET/calculate/future" = "/calculate/default" },
-      { "$GET/pay/reg/" = "/pay" }
+      { "$GET/pay/reg" = "/pay" },
+      { "$GET/card/show" = "/main/card" }
 
       // manage is an alias for controller.cards
       /*

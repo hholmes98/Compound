@@ -349,12 +349,14 @@ component accessors=true {
         c.code, COUNT(DISTINCT c.code) AS total
       FROM 
         "pCards" c
+      WHERE
+        c.code <> ''''
       GROUP BY
         c.code
       ORDER BY
         total DESC';
 
-    if ( limit > 0 ) {
+    if ( arguments.limit > 0 ) {
       sql = sql & '
   LIMIT ' & arguments.limit;
     }

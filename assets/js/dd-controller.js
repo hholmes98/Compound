@@ -253,6 +253,55 @@ config
   $httpProvider.defaults.xsrfCookieName = 'XSRF-DD-TOKEN';
   $httpProvider.defaults.xsrfHeaderName = 'X-XSRF-DD-TOKEN';
 
+  $httpProvider.interceptors.push(function($q) {
+    return {
+      'response': function(httpResponse) {
+
+        // ignore tooltips that are fake http calls
+        if ( httpResponse.config.url.indexOf("tooltip-html-popup.html") != -1 )
+          return httpResponse;        
+
+        // temp services
+        if ( httpResponse.data.toString().indexOf('DOCTYPE') != -1 ) {
+          $q.reject({error:'REST Error'});
+        }
+
+        if ( httpResponse.data == -1 ) {
+          $q.reject({error:'REST GET Error'});
+        }
+
+        // rest services
+        if ( httpResponse.data.DATA != undefined ) {
+          if ( httpResponse.data.DATA.toString().indexOf('DOCTYPE') != -1 ) {
+            $q.reject({error:'REST Error'});
+          }
+
+          if ( httpResponse.data.DATA == -1 ) {
+            $q.reject({error:'REST GET Error'});
+          }
+        }
+
+        if ( httpResponse.data.ERROR != undefined ) {
+          if ( httpResponse.data.ERROR.Message != undefined ) {
+            $q.reject({error:httpResponse.data.ERROR.Message});
+          }
+        }
+
+        // no errors, return the response
+        return httpResponse;
+
+      },
+
+      'responseError': function(rejection) {
+
+        return CF_restErrorHandler({error:rejection.data});
+
+      }
+
+    };
+
+  });
+
 }])
 
 /****************
@@ -484,8 +533,6 @@ services
     })
     .then( function onSuccess( response ) {
 
-      restResponseHandler( response );
-
       deferred.resolve({
         user_id: key,
         cards: response.data.DATA,
@@ -516,8 +563,6 @@ services
       url: '/index.cfm/rest/deckGet/id/' + key,
     })
     .then( function onSuccess( response ) {
-
-      restResponseHandler( response );
 
       deferred.resolve({
         card: response.data.DATA
@@ -551,8 +596,6 @@ services
     })
     .then( function onSuccess( response ) {
 
-      restResponseHandler( response );
-
       deferred.resolve({
         card_id: response.data.DATA,
         chain: data
@@ -582,8 +625,6 @@ services
       url: 'index.cfm/rest/deckDelete/id/' + key
     })
     .then( function onSuccess( response ) {
-
-      restResponseHandler( response );
 
       deferred.resolve({
         data: 0,
@@ -616,8 +657,6 @@ services
     })
     .then( function onSuccess( response ) {
 
-      restResponseHandler( response );
-
       deferred.resolve({
         user_id: key,
         plan: response.data.DATA,
@@ -648,8 +687,6 @@ services
     })
     .then( function onSuccess( response ) {
 
-      restResponseHandler( response );
-
       deferred.resolve({
         plan: response.data,
         chain: data
@@ -679,8 +716,6 @@ services
       url: '/index.cfm/rest/plansPurge/user_id/' + key,
     })
     .then( function onSuccess( response ) {
-
-      restResponseHandler( response );
 
       deferred.resolve({
         user_id: key,
@@ -713,8 +748,6 @@ services
     })
     .then( function onSuccess( response ) {
 
-      restResponseHandler( response );
-
       deferred.resolve({
         events: response.data.DATA,
         user_id: key,
@@ -745,8 +778,6 @@ services
       url: '/index.cfm/rest/eventsFirst/user_id/' + key
     })
     .then( function onSuccess( response ) {
-
-      restResponseHandler( response );
 
       deferred.resolve({
         event: response.data.DATA,
@@ -779,8 +810,6 @@ services
     })
     .then( function onSuccess( response ) {
 
-      restResponseHandler( response );
-
       deferred.resolve({
         user_id: key,
         chain: data,
@@ -810,8 +839,6 @@ services
       url: '/index.cfm/main/journey/'
     })
     .then( function onSuccess( response ) {
-
-      restResponseHandler( response );
 
       deferred.resolve({
         chain: data,
@@ -843,8 +870,6 @@ services
     })
     .then( function onSuccess( response ) {
 
-      restResponseHandler( response );
-
       deferred.resolve({
         user_id: key,
         chain: data,
@@ -875,8 +900,6 @@ services
       url: '/index.cfm/rest/eventsPurge/user_id/' + key,
     })
     .then( function( response ) {
-
-      restResponseHandler( response );
 
       deferred.resolve({
         user_id: key,
@@ -913,8 +936,6 @@ services
     })
     .then( function onSuccess( response ) {
 
-      restResponseHandler( response );
-
       deferred.resolve({
         user_id: data.user_id,
         chain: data,
@@ -945,8 +966,6 @@ services
       url: '/index.cfm/rest/preferencesGet/user_id/' + key
     })
     .then( function onSuccess( response ) {
-
-      restResponseHandler( response );
 
       deferred.resolve({
         preferences: response.data.DATA,
@@ -1063,8 +1082,6 @@ services
     })
     .then( function( response ) {
 
-      restResponseHandler( response );
-
       deferred.resolve({
         data: response.data.DATA,
         user_id: data.user_id,
@@ -1096,8 +1113,6 @@ services
       url: '/index.cfm/rest/profilePaymentInfoGet/user_id/' + key
     })
     .then( function( response ) {
-
-      restResponseHandler( response );
 
       deferred.resolve({
         payment_info: response.data.DATA,
@@ -1132,8 +1147,6 @@ services
       }
     })
     .then( function(response) {
-
-      restResponseHandler( response );
 
       deferred.resolve({
         data: response.data.DATA,
@@ -1174,8 +1187,6 @@ services
     })
     .then( function onSuccess( response ) {
 
-      restResponseHandler( response );
-
       deferred.resolve({
         card_payments: response.data.DATA,
         user_id: key,
@@ -1209,8 +1220,6 @@ services
         url: '/index.cfm/rest/deckCardPaymentGet/card_id/' + key + '/month/' + month + '/year/' + year
     })
     .then( function onSuccess( response ) {
-
-      restResponseHandler( response );
 
       deferred.resolve({
         card_payment: response.data.DATA,
@@ -1246,8 +1255,6 @@ services
     })
     .then( function(response) {
 
-      restResponseHandler( response );
-
       deferred.resolve({
         data: response.data.DATA,
         user_id: data.user_id,
@@ -1282,8 +1289,6 @@ services
     })
     .then( function onSuccess( response ) {
 
-      restResponseHandler( response );
-
       deferred.resolve({
         code: response.data.code,
         css: response.data.css,
@@ -1302,72 +1307,6 @@ services
     });
 
     return deferred.promise;
-
-  }
-
-  // I dunno how i feel about this
-  function deepGet(source, key) {
-
-    // 1. look at any/all the keys of the base obj - eg. try to find source.key (data.user_id)
-    var io = Object.keys(source);
-
-    for (var iobj in io) {  // for all the keys in the source
-
-      // is this key the same as the key we're looking for? (eg. 'user_id')
-      if (io[iobj] == key) {
-        if (source[io[iobj]] != null) { // does this key actually have a value in source? (eg. source.user_id)
-          return source[io[iobj]];
-        }
-      } else {
-        // if its not the key looking for, is this a key an object with its own keys, one of which matching?
-        var ikeys = Object.keys(source[io[iobj]]);
-
-        if (ikeys.length && source[io[iobj]][key] != null) { // eg. source.card.user_id
-          return source[io[iobj]][key];
-        }
-      }
-
-    }
-
-    // 3. if nothing yet, is there a chain?
-    if (source.chain != null) {
-
-      return deepGet(source.chain, key);
-
-    }
-
-    // 4. nothing found
-    return null;
-
-  }
-
-  function restResponseHandler( httpResponse ) {
-
-    // temp services
-    if ( httpResponse.data.toString().indexOf('DOCTYPE') != -1 ) {
-      throw new Error( 'REST Error' );
-    }
-
-    if ( httpResponse.data == -1 ) {
-      throw new Error( 'REST GET Error' );
-    }
-
-    // rest services
-    if ( httpResponse.data.DATA != undefined ) {
-      if ( httpResponse.data.DATA.toString().indexOf('DOCTYPE') != -1 ) {
-        throw new Error( 'REST Error' );
-      }
-
-      if ( httpResponse.data.DATA == -1 ) {
-        throw new Error( 'REST GET Error' );
-      }
-    }
-
-    if ( httpResponse.data.ERROR != undefined ) {
-      if ( httpResponse.data.ERROR.Message != undefined ) {
-        throw new Error ( httpResponse.data.ERROR.Message );
-      }
-    }
 
   }
 
@@ -1410,16 +1349,6 @@ controller/cards
       $scope.preferences = response.preferences;
 
     })
-    .catch( function onError( result ) {
-
-      CF_restErrorHandler( result );
-
-    });
-
-  })
-  .catch ( function onError( result ) {
-
-    CF_restErrorHandler( result );
 
   }); // init-end
 
@@ -1479,9 +1408,6 @@ controller/cards
       // really only needs to update when it is a brand new card; safe to update on key otherwise
       data.card_id = resultOne.card_id;
 
-    })
-    .catch( function onError( result ) {
-      CF_restErrorHandler( result );
     });
 
   };
@@ -1507,9 +1433,6 @@ controller/cards
 
       $scope.cards[idx].is_emergency = 1;
 
-    })
-    .catch( function onError( result ) {
-      CF_restErrorHandler( result );
     });
 
   };
@@ -1565,17 +1488,9 @@ controller/cards
 
           $scope.preferences = response.preferences;
 
-        })
-        .catch( function onError( result ) {
-          CF_restErrorHandler( result );
         });
 
       });
-
-    })
-    .catch( function onError( result ) {
-
-      // do nothing
 
     }); // pValidateBudget
 
@@ -1601,9 +1516,6 @@ controller/cards
       // actually set the pay frequency
       $scope.preferences.pay_frequency = freq;
 
-    })
-    .catch( function onError( result ) {
-      CF_restErrorHandler( result );
     });
 
   };
@@ -1664,11 +1576,6 @@ controller/cards
 
                   $scope.cards.splice( index, 1 );
 
-                })
-                .catch( function onError( result ){
-
-                  CF_restErrorHandler( result );
-
                 });
 
                 dialogItself.close();
@@ -1715,9 +1622,6 @@ controller/cards
           throw new Error('fail to reset!');
         }
 
-      })
-      .catch( function onError( result ) {
-        CF_restErrorHandler( result );
       });
 
     }
@@ -1770,9 +1674,6 @@ controller/cards
                 var $try = dialogItself.getButton('btn-code');
                 $try.enable();
 
-              })
-              .catch( function onError( result ) {
-                CF_restErrorHandler( result );
               });
 
             }
@@ -1799,10 +1700,6 @@ controller/cards
                 var $save = dialogItself.getButton('btn-save');
                 $save.enable(true);
 
-
-              })
-              .catch( function onError( result ) {
-                CF_restErrorHandler( result );
               });
 
             }
@@ -1827,11 +1724,8 @@ controller/cards
               .then( function onSuccess( response ) {
                 $('#cardStyleSheet').attr( "href", $('#cardStyleSheet').attr( "href" ) + (Math.random() * 10).toString() );
                 dialogItself.close();
-              })
-              .catch( function onError( result ) {
-                CF_restErrorHandler( result );
               });
-              
+
             }
         }]
     });
@@ -2150,17 +2044,7 @@ controller/calculate
 
           });
 
-        })
-        .catch( function onError( result ) {
-
-          CF_restErrorHandler( result );
-
         });
-
-      })
-      .catch( function onError( result ) {
-
-        CF_restErrorHandler( result );
 
       });
 
@@ -2187,13 +2071,7 @@ controller/calculate
 
     }
 
-  })
-  .catch( function onError( result ) { 
-
-      CF_restErrorHandler( result ); // pGetCards
-
   });
-
 
   /************
      METHODS
@@ -2302,11 +2180,6 @@ controller/pay
             // we keep the calculated payment text that displays on the screen separate from the actual numeric val.
             $scope.calculated_payment_text = $scope.selected.calculated_payment;
 
-          })
-          .catch( function onError( result ) { // pGetEvent
-
-              CF_restErrorHandler( result );
-
           });
 
         }
@@ -2339,11 +2212,6 @@ controller/pay
       });
 
     }
-
-  })
-  .catch( function onError( result ) { 
-
-    CF_restErrorHandler( result ); // pGetCards
 
   });
 
@@ -2458,11 +2326,6 @@ controller/pay
             }
         }]
       });
-
-    })
-    .catch( function onError( result ) {
-
-      CF_restErrorHandler( result );
 
     });
 
@@ -2854,9 +2717,6 @@ controller/main
 
       });
 
-    })
-    .catch( function onError( result ){
-      CF_restErrorHandler( result );
     });
 
   };
@@ -2872,11 +2732,6 @@ controller/main
 
       $scope.plan = response.plan;
 
-    })
-    .catch( function onError( result ) {
-
-      CF_restErrorHandler( result );
-
     });
 
   };
@@ -2890,6 +2745,21 @@ controller/main
     $cookies.put( 'DD-SKIN', prefs );
 
   };
+
+  $scope.snapCard = function() {
+
+    html2canvas(document.querySelector("#card")).then(canvas => {
+      var link = document.createElement("a");
+
+      document.body.appendChild(link);
+
+      link.download = "foo.jpg";
+      link.href = canvas.toDataURL();
+      link.target = '_blank';
+      link.click();
+    });
+
+  }
 
 }) // controller/main
 
@@ -2913,11 +2783,6 @@ controller/profile
     if ( result.payment_info.card != undefined )
       $scope.paymentInfo = $scope.formatPaymentInfo(result.payment_info);
 
-  })
-  .catch( function onError( e ) {
-
-    CF_restErrorHandler( e );
-
   });
 
   /***********
@@ -2937,11 +2802,6 @@ controller/profile
       .then( function onSuccess( response ) {
 
         $scope.preferences = response.data;
-
-      })
-      .catch( function onError( result ) {
-
-        CF_restErrorHandler( result );
 
       });
 
@@ -3032,15 +2892,7 @@ controller/profile
       DDService.pGetPaymentInfo({user_id:CF_getUserID()})
       .then( function onSuccess( result ){
         $scope.paymentInfo = $scope.formatPaymentInfo(result.payment_info);
-      })
-      .catch( function onError( e ) {
-        CF_restErrorHandler( e );
       });
-
-    })
-    .catch( function onError( e ) {
-
-      CF_restErrorHandler( e );
 
     });
 

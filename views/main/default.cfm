@@ -69,7 +69,7 @@
         <div class="panel-heading">
           <div class="panel-title">
             <h1>#application.locale[session.auth.locale]['name']#</h1>
-            <h3>The Credit Card Calculator</h3>
+            <h3>Your Debt Payoff Assistant</h3>
           </div>
         </div>
         <font style="font-size: 30px; font-weight: 700;">
@@ -201,6 +201,7 @@
                 <input class="form-control credit-card-balance" type="text" placeholder="(eg. 3,275.22)" name="credit-card-balance#Evaluate(p-1)#">
               </div>
             </div>
+            <a href="javascript:void(0)" uib-tooltip-html="'Where do I specify interest rate? Due date? Minimum payment?<br/><br/>This demo uses defaults, but a full account will let you change all of that (and more)!'"><i class="far fa-question-circle"></i></a>
           </div>
           <input type="hidden" name="credit-card-label#Evaluate(p-1)#" value="The #Evaluate(p-1)##getOrdinal(Evaluate(p-1))# card">
           <!--- <div class="form-group" align="left">
@@ -250,56 +251,50 @@
   <section dir="ltr" class="focus">
     <div class="section-inner">
       <div class="text">
-        <h3>Keepin' it real (simple).</h3>
-        <p>Financial applications love throwing the kitchen sink at you. You have one problem, we have one solution: <b>take your debt and calculate the fastest payoff</b>. That's
-  all you need! Why complicate things?</p>
+        <h3>Spreadsheet + bill reminders = DEBT FREEDOM!</h3>
+        <p>Take the power of a credit card spreadsheet and add it to the convenience of a bill management app. The result? Debt Decimator: a tool that not only <b>reminds you when to pay</b>, but tells you <b>how much to pay on each debt</b>.</p>
       </div>
       <span class="splash-icon focus-icon"></span>
     </div>
   </section>
-  <section dir="ltr" class="security">
-    <div class="section-inner">
-      <span class="splash-icon security-icon"></span>
-      <div class="text-other">
-        <h3>We're on a need-to-know basis.</h3>
-        <p>Other systems often require a connection to all of your banking institutions (and in some cases, those banks
-  ask for additional fees...<em>just to connect!</em> ) With us, <b>no bank connections are required,</b> and <b>no credit card numbers stored</b>.
-  Under the hood, it's just a list of balances...we don't ask for your personal financial information, and we don't believe
-  you should have to fork it over.</p>
-      </div>
-    </div>
-  </section>
-  <section dir="ltr" class="fear">
-    <div class="section-inner">
-      <div class="text">
-        <h3>Doing what's <strike>good for business</strike> right for you.</h3>
-        <p>No machine learning. No AI. No blockchain. No bitcoin. No hooking up to your bank and charging you hidden fees.
-  No smartphone GPS tracking your location. <b>We're a calculator that does the math for you...<em>and that's it.</em></b> There won't be any rise of the
-  machines on our watch! We believe in ethical technology, so to those buzzwords we say...no thanks!</p>
-      </div>
-      <span class="splash-icon fear-icon"></span>
-    </div>
-  </section>
+
   <section dir="ltr" class="privacy">
     <div class="section-inner">
       <span class="splash-icon privacy-icon"></span>
       <div class="text-other">
-        <h3>Your data is yours and nobody else's.</h3>
-        <p>We value your freedom to choose a competitor. If you don't like us or find something better, we give you a
-  single button to access all your data. That's it! It's yours!...<em>as it should be</em>. We'd be sorry to lose
-  you, but <b>we care more about <em>your</em> success than our own.</b></p>
+        <h3>Light your debt on fire.</h3>
+        <p>No more guessing or "following your hunch" - the math is done for you. Debt Decimator's <b>hot card</b> tells you what card you should be currently paying off.</p>
       </div>
     </div>
   </section>
-  <section dir="ltr" class="support">
+
+  <section dir="ltr" class="fear">
     <div class="section-inner">
       <div class="text">
-        <h3>We're built by people like you.</h3>
-        <p>Paying off debt <em>is hard</em>. It requires discipline over a long period of time. It's tough to ask for help.<br/><br/>We know.<br/><br/>
-        No one should be excluded because of shame or a lack of funds. This is why <b>our base functionality is 100% free</b>, <b>support is one click away</b>, and we provide the means for
-  <b>others to donate/gift subscriptions to our users</b>.</p>
+        <h3>A finish line you can pinpoint.</h3>
+        <p>Finally, peace-of-mind and a plan for your debt-free future. Debt Decimator's payoff visualization allows you to <b>see the date every single debt will be paid off</b>, and the exact moment you'll live debt free.</p>
       </div>
-      <span class="splash-icon support-icon"></span>
+      <span class="splash-icon fear-icon"></span>
+    </div>
+  </section>
+
+  <section dir="ltr" class="privacy">
+    <div class="section-inner">
+      <span class="splash-icon privacy-icon"></span>
+      <div class="text-other">
+        <h3>Access anywhere, via any device.</h3>
+        <p>No need to download any apps. Debt Decimator's mobile compatibility allows you to <b>access via desktop or smartphone</b>, whichever you prefer.</p>
+      </div>
+    </div>
+  </section>
+
+  <section dir="ltr" class="fear">
+    <div class="section-inner">
+      <div class="text">
+        <h3>Your privacy, by design.</h3>
+        <p>Works to reduce your your online risk. Debt Decimator's "Privacy First" design <b>doesn't connect to your bank accounts</b>, and <b>doesn't ask for information that isn't needed</b> to perform its calculations.</p>
+      </div>
+      <span class="splash-icon fear-icon"></span>
     </div>
   </section>
 

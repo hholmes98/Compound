@@ -10,7 +10,9 @@ component accessors=true {
 
   */
 
-  remote function fantabulousCard( string cardName="FantabulousCard", cardClass="", numeric width=120, height=70, struct data = {}, string hash="" ) {
+  /* init */
+  remote function fantabulousCard( string cardName="FantabulousCard", 
+    cardClass="", numeric width=120, height=70, struct data = {}, string hash="", size="all", id="" ) {
 
     variables.cardName = arguments.cardName;
 
@@ -29,6 +31,8 @@ component accessors=true {
     variables.height = arguments.height;
     variables.height_small = Round(arguments.height / 2);
     variables.height_large = arguments.height * 2;
+
+    variables.id = arguments.id;
 
     variables.fc_data = StructNew();
     variables.properties = StructNew();
@@ -60,9 +64,13 @@ component accessors=true {
 
   }
 
-  remote boolean function isHexShaHash( string hash ) {
+  /*****************
+      PRIVATE
+  *****************/
 
-    if ( !reFindNoCase( "^[0-9A-F]{56,64}$", arguments.hash, 1, false ) ) {
+  private boolean function isHexShaHash( string hash ) {
+
+    if ( !ReFindNoCase( "^[0-9A-F]{56,64}$", arguments.hash, 1, false ) ) {
       return false;
     }
 
@@ -70,7 +78,7 @@ component accessors=true {
 
   }
 
-  remote function decodeProperties( string c ) {
+  private function decodeProperties( string c ) {
 
     /*
     TECH SPEC v1
@@ -129,7 +137,7 @@ component accessors=true {
 
   }
 
-  remote function initProperties( struct fc_data ) {
+  private function initProperties( struct fc_data ) {
 
     variables.properties = {
       'border-color': arguments.fc_data['border_color'],
@@ -163,7 +171,7 @@ component accessors=true {
 
   }
 
-  remote string function buildBackground( numeric value ) {
+  private string function buildBackground( numeric value ) {
 
     var choice = arguments.value MOD 13;
 
@@ -206,7 +214,7 @@ component accessors=true {
 
   }
 
-  remote string function getGradient( numeric value ) {
+  private string function getGradient( numeric value ) {
 
     var choice = arguments.value MOD 4;
 
@@ -228,7 +236,7 @@ component accessors=true {
 
   }
 
-  remote string function buildRadialGradient() {
+  private string function buildRadialGradient() {
 
     var shape = getShape(variables.fc_data['shape']);
     var start = variables.fc_data['secondary_color'];
@@ -241,7 +249,7 @@ component accessors=true {
 
   }
 
-  remote string function buildRepeatingLinearGradient() {
+  private string function buildRepeatingLinearGradient() {
 
     var angle = getAngle(variables.fc_data['angle']);
     var start = variables.fc_data['secondary_color'];
@@ -266,7 +274,7 @@ component accessors=true {
     return txt;
   }
 
-  remote string function buildLinearGradient() {
+  private string function buildLinearGradient() {
 
     var angle = getAngle(variables.fc_data['angle']);
     var start = variables.fc_data['secondary_color'];
@@ -278,7 +286,7 @@ component accessors=true {
 
   }
 
-  remote string function buildMarrakesh() {
+  private string function buildMarrakesh() {
 
     var nl = chr(13) & chr(10);
     var position = getPercentage(variables.fc_data['position']);
@@ -308,7 +316,7 @@ component accessors=true {
 
   }
 
-  remote string function buildZigZag() {
+  private string function buildZigZag() {
 
     var nl = chr(13) & chr(10);
     var start = variables.fc_data['secondary_color'];
@@ -327,7 +335,7 @@ component accessors=true {
 
   }
 
-  remote string function buildStairs() {
+  private string function buildStairs() {
 
     var nl = chr(13) & chr(10);
     var start = variables.fc_data['secondary_color'];
@@ -345,7 +353,7 @@ component accessors=true {
 
   }
 
-  remote string function buildRainbowBokeh() {
+  private string function buildRainbowBokeh() {
 
     var perc1 = getPercentage(variables.fc_data['position']);
     var perc2 = getPercentage(variables.fc_data['girth']);
@@ -366,7 +374,7 @@ component accessors=true {
 
   }
 
-  remote string function buildMicrobialMat() {
+  private string function buildMicrobialMat() {
 
     var size1 = getPercentage(variables.fc_data['position'], 4, 25);
     var size2 = getPercentage(variables.fc_data['girth'], 10, 50);
@@ -384,7 +392,7 @@ component accessors=true {
     return txt;
   }
 
-  remote string function buildSegaiha() {
+  private string function buildSegaiha() {
 
     var color1 = variables.fc_data['primary_color'];
     var color2 = variables.fc_data['secondary_color'];
@@ -404,7 +412,7 @@ component accessors=true {
 
   }
 
-  remote string function buildTartan() {
+  private string function buildTartan() {
 
     var color = variables.fc_data['primary_color'];
     var width1 = getPercentage(variables.fc_data['girth'], 50, 182);
@@ -457,7 +465,7 @@ component accessors=true {
 
   }
 
-  remote string function buildCarbon() {
+  private string function buildCarbon() {
 
     var color = variables.fc_data['primary_color'];
     var hsl_color = color2hsl( hex2color( color ) );
@@ -482,7 +490,7 @@ background-size: 8% 11%;';
 
   }
 
-  remote string function buildWaves() {
+  private string function buildWaves() {
 
     var color = variables.fc_data['primary_color'];
     var pos = getFrequency(variables.fc_data['position'], 4);
@@ -496,11 +504,11 @@ background-size: 8% 11%;';
 
   }
 
-  remote numeric function hex2dec( string hex ) {
+  private numeric function hex2dec( string hex ) {
     return InputBaseN( arguments.hex, 16 );
   }
 
-  remote string function dec2hex( numeric value ) {
+  private string function dec2hex( numeric value ) {
 
     var tmp = FormatBaseN( arguments.value, 16 );
 
@@ -511,13 +519,13 @@ background-size: 8% 11%;';
     return tmp;
   }
 
-  remote string function formatHSL( struct in_hsl ) {
+  private string function formatHSL( struct in_hsl ) {
 
     return 'hsl(' & Round(arguments.in_hsl.h) & ', ' & Round(arguments.in_hsl.s * 100) & '%, ' & Round(arguments.in_hsl.l * 100) & '%)';
 
   }
 
-  remote struct function lightenHSL( struct in_hsl, numeric factor ) {
+  private struct function lightenHSL( struct in_hsl, numeric factor ) {
 
     var old_l = in_hsl.l;
     var fac = arguments.factor / 100;
@@ -539,7 +547,7 @@ background-size: 8% 11%;';
 
   }
 
-  remote struct function color2hsl( struct in_color ) {
+  private struct function color2hsl( struct in_color ) {
 
     var rgb = ArrayNew(1);
     var r = in_color.r;
@@ -610,11 +618,11 @@ background-size: 8% 11%;';
 
   }
 
-  remote string function color2hex( struct in_color ) {
+  private string function color2hex( struct in_color ) {
     return dec2hex(arguments.in_color.r) & dec2hex(arguments.in_color.g) & dec2hex(arguments.in_color.b);
   }
 
-  remote struct function hex2color( string hex ) {
+  private struct function hex2color( string hex ) {
     var data = {};
 
     var R = Left(arguments.hex, 2);
@@ -629,7 +637,7 @@ background-size: 8% 11%;';
   }
 
   /* https://stackoverflow.com/questions/1855884/determine-font-color-based-on-background-color */
-  remote string function contrastColor( string hex ) {
+  private string function contrastColor( string hex ) {
     var in_color = hex2color(arguments.hex);
     var d=0;
 
@@ -645,7 +653,7 @@ background-size: 8% 11%;';
 
   }
 
-  remote struct function getVendor( numeric value ) {
+  private struct function getVendor( numeric value ) {
 
     var data = {
       name: '',
@@ -685,7 +693,7 @@ background-size: 8% 11%;';
 
   }
 
-  remote struct function getVendorPosition( numeric value ) {
+  private struct function getVendorPosition( numeric value ) {
 
     var pos = {
       top: 0,
@@ -728,7 +736,7 @@ background-size: 8% 11%;';
 
   }
 
-  remote string function getVendorColor( numeric value ) {
+  private string function getVendorColor( numeric value ) {
 
     var textColor = contrastColor(variables.fc_data['primary_color']);
 
@@ -736,7 +744,7 @@ background-size: 8% 11%;';
 
   }
 
-  remote boolean function hasVendor( numeric value ) {
+  private boolean function hasVendor( numeric value ) {
 
     var choice = arguments.value MOD 2;
 
@@ -751,7 +759,7 @@ background-size: 8% 11%;';
 
   }
 
-  remote string function getShape( numeric value ) {
+  private string function getShape( numeric value ) {
 
     var choice = arguments.value MOD 6;
 
@@ -778,7 +786,7 @@ background-size: 8% 11%;';
 
   }
 
-  remote struct function getChipPosition( numeric value ) {
+  private struct function getChipPosition( numeric value ) {
 
     var pos = {
       top: 0,
@@ -802,7 +810,7 @@ background-size: 8% 11%;';
 
   }
 
-  remote function getChipColor( numeric value ) {
+  private function getChipColor( numeric value ) {
 
     var choice = arguments.value MOD 2;
 
@@ -817,7 +825,7 @@ background-size: 8% 11%;';
 
   }
 
-  remote boolean function hasChip( numeric value ) {
+  private boolean function hasChip( numeric value ) {
 
     var choice = arguments.value MOD 2;
 
@@ -832,7 +840,7 @@ background-size: 8% 11%;';
 
   }
 
-  remote numeric function getPercentage( numeric value, numeric min=0, numeric max=0 ) {
+  private numeric function getPercentage( numeric value, numeric min=0, numeric max=0 ) {
 
     var choice = Round( 100 / 256 * arguments.value );
 
@@ -845,7 +853,7 @@ background-size: 8% 11%;';
 
   }
 
-  remote numeric function getAngle( numeric value ) {
+  private numeric function getAngle( numeric value ) {
 
     var choice = Round( arguments.value / 256 * 360 );
 
@@ -853,7 +861,7 @@ background-size: 8% 11%;';
 
   }
 
-  remote struct function getFrequency( numeric value, numeric stages ) {
+  private struct function getFrequency( numeric value, numeric stages ) {
 
     var choice = arguments.value MOD arguments.stages;
 
@@ -896,8 +904,7 @@ background-size: 8% 11%;';
 
   }
 
-
-  remote string function getBorderStyle( numeric value ) {
+  private string function getBorderStyle( numeric value ) {
 
     var choice = arguments.value MOD 9;
 
@@ -932,7 +939,7 @@ background-size: 8% 11%;';
     }
   }
 
-  private string function getVendorCSS() {
+  private string function getVendorCSS( string size="all" ) {
 
     var vendorCSS = '.' & variables.cardClass & ':after {
   content: "' & variables.properties['vendor'].name & '";
@@ -942,60 +949,65 @@ background-size: 8% 11%;';
   color: ' & variables.properties['vendor'].color & ';
   transform: matrix(' & variables.properties['vendor'].transform & ');
   position: absolute;
-    ';
+';
 
     if ( variables.properties['vendor'].position.top > 0 ) {
-      vendorCSS = vendorCSS & '
-  top: ' & variables.properties['vendor'].position.top & '%;
-      ';
+      vendorCSS &='  top: ' & variables.properties['vendor'].position.top & '%;
+';
     }
 
     if ( variables.properties['vendor'].position.left > 0 ) {
-      vendorCSS = vendorCSS & '
-  left: ' & variables.properties['vendor'].position.left & '%;
-      ';
+      vendorCSS &= '  left: ' & variables.properties['vendor'].position.left & '%;
+';
     }
 
     if ( variables.properties['vendor'].position.bottom > 0 ) {
-      vendorCSS = vendorCSS & '
-  bottom: ' & variables.properties['vendor'].position.bottom & '%;
-      ';
+      vendorCSS &= '  bottom: ' & variables.properties['vendor'].position.bottom & '%;
+';
     }
 
     if ( variables.properties['vendor'].position.right > 0 ) {
-      vendorCSS = vendorCSS & '
-  right: ' & variables.properties['vendor'].position.right & '%;
-      ';
+      vendorCSS &= '  right: ' & variables.properties['vendor'].position.right & '%;
+';
     }
 
     cfloop( list=StructKeyList(variables.properties['vendor']), index="item" ) {
 
       if ( !ReFindNoCase( "(name|transform|position|color)", item ) ) {
-        vendorCSS = vendorCSS & '
+        vendorCSS &= '
   ' & LCase(item) & ':' & variables.properties['vendor'][item] & ';
         ';
       }
 
     }
 
-    vendorCSS = vendorCSS & '
-  z-index: 2;
+    vendorCSS &= '  z-index: 2;
 }
+';
 
+    if ( arguments.size == "all" || arguments.size == "small" ) {
+
+      vendorCSS &= '
 .' & variables.cardClass & '.small:after {
   font-size: 6px;
 }
+      ';
+    }
 
+    if ( arguments.size == "all" || arguments.size == "large" ) {
+
+      vendorCSS &= '
 .' & variables.cardClass & '.large:after {
   font-size: 28px;
 }
-    ';
+      ';
+    }
 
     return vendorCSS;
 
   }
 
-  private string function getChipCSS() {
+  private string function getChipCSS( string size="all" ) {
 
     var chipCSS = '.' & variables.cardClass & ':before {
   content: '''';
@@ -1008,25 +1020,35 @@ background-size: 8% 11%;';
   left: ' & variables.properties['chipPosition'].left & '%;
   z-index: 1;
 }
+    ';
 
+    if ( arguments.size == "all" || arguments.size == "small" ) {
+
+      chipCSS &= '
 .' & variables.cardClass & '.small:before {
   height: 6px;
   width: 9px;
   border-radius: 1px;
 }
+      ';
+    }
 
+    if ( arguments.size == "all" || arguments.size == "large" ) {
+
+      chipCSS &= '
 .' & variables.cardClass & '.large:before {
   height: 24px;
   width: 36px;
   border-radius: 4px;
 }
-    ';
+      ';
+    }
 
     return chipCSS;
 
   }
 
-  remote string function getHolderCSS() {
+  private string function getHolderCSS( string size="all" ) {
 
     var holderCSS = '
 .holder {
@@ -1034,23 +1056,35 @@ background-size: 8% 11%;';
   width: ' & variables.width & 'px;
   height: ' & variables.height & 'px;
 }
+    ';
 
+    if ( arguments.size == "all" || arguments.size == "small" ) {
+
+      holderCSS &= '
 .holder.small {
   width: ' & variables.width_small & 'px;
   height: ' & variables.height_small & 'px;
 }
+      ';
 
+    }
+
+    if ( arguments.size == "all" || arguments.size == "large" ) {
+
+      holderCSS &= '
 .holder.large {
   width: ' & variables.width_large & 'px;
   height: ' & variables.height_large & 'px;
 }
-    ';
+      ';
+
+    }
 
     return holderCSS;
 
   }
 
-  remote string function getCSS() {
+  private string function getCardCSS( string size="all" ) {
 
     var cssString = '
 .' & variables.cardClass & ' {
@@ -1062,100 +1096,157 @@ background-size: 8% 11%;';
   border-style: ' & variables.properties['border-style'] & ';
   ' & variables.properties['background'] & ';
 }
+    ';
 
+    if ( arguments.size == "all" || arguments.size == "small" ) {
+
+      cssString &= '
 .' & variables.cardClass & '.small {
   height: ' & variables.height_small & 'px;
   width: ' & variables.width_small & 'px;
   border-radius: 6px;
 }
+      ';
 
+    }
+
+    if ( arguments.size == "all" || arguments.size == "large" ) {
+
+      cssString &= '
 .' & variables.cardClass & '.large {
   height: ' & variables.height_large & 'px;
   width: ' & variables.width_large & 'px;
   border-radius: 12px;
 }
-    ';
-
-    if ( hasChip( variables.properties['hasChip'] ) ) {
-      cssString = cssString & '
-' & getChipCSS() & '
-
       ';
 
     }
 
-    if ( hasVendor( variables.properties['hasVendor'] ) ) {
-      cssString = cssString & '
-' & getVendorCSS() & '
+    if ( hasChip( variables.properties['hasChip'] ) ) {
+      cssString &= '
+' & getChipCSS( arguments.size );
 
-      ';
+    }
+
+    if ( hasVendor( variables.properties['hasVendor'] ) ) {
+      cssString &= '
+' & getVendorCSS( arguments.size );
+
     }
 
     return cssString;
 
   }
 
-  // this method is only intended for remote testing
-  remote string function getCompleteCSS( string cardName="FantabulousCard", cardClass="", numeric width=120, height=70, struct data = {}, string hash="" ) {
+  /*******************
+      REMOTE
+  *******************/
 
-    // init
-    fantabulousCard( argumentCollection=arguments );
+  /*
+  - you should be able to call these all from a browser.
+  - these will all require the params to be passed in, so nothing here should behave as if properties are stateful
+  */
 
-    // return getHolderCss & getCSS() method
-    return getHolderCSS() & getCSS();
+  /* render() is the odd one out, as it actually pushes output to the browser -- the rest are string returns */
+  remote string function render( string cardName="FantabulousCard", 
+    cardClass="", numeric width=120, height=70, struct data = {}, string hash="", size="all", id="" ) {
+
+    var html = getCompleteHTML( argumentCollection=arguments );
+
+    cfcontent( type="text/html" );
+    writeOutput( html );
 
   }
 
-  remote string function getHTML( string cardName="FantabulousCard", cardClass="", numeric width=120, height=70, struct data = {}, string hash="" ) {
+  remote string function getCompleteHTML( string cardName="FantabulousCard", 
+    cardClass="", numeric width=120, height=70, struct data = {}, string hash="", size="all", id="" ) {
 
-    var css = getCompleteCSS( argumentCollection=arguments );
+    var css = getCSS( argumentCollection=arguments );
 
-    var html='
-    <html>
-    <head>
-      <style>' & css & '</style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="row">
-          <div class="col">
-            <div class="holder small">
-              <div class="#variables.cardClass# small"></div>
-            </div>
-          </div>
-        </div>
-        <br/>
-        <div class="row">
-          <div class="col">
-            <div class="holder">
-              <div class="#variables.cardClass#"></div>
-            </div>
-          </div>
-        </div>
-        <br/>
-        <div class="row">
-          <div class="col">
-            <div class="holder large">
-              <div class="#variables.cardClass# large"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </body>
-    </html>
+    var html='<html>
+  <head>
+    <style>' & css & '</style>
+  </head>
+  <body>' & getHTML( argumentCollection=arguments ) & '</body>
+  </html>
 ';
 
     return html;
 
   }
 
-  remote string function render( string cardName="FantabulousCard", cardClass="", numeric width=120, height=70, struct data = {}, string hash="" ) {
+  // this method is only intended for remote testing
+  remote string function getCSS( string cardName="FantabulousCard", 
+    cardClass="", numeric width=120, height=70, struct data = {}, string hash="", size="all", id="" ) {
 
-    var html = getHTML( argumentCollection=arguments );
+    // init
+    fantabulousCard( argumentCollection=arguments );
 
-    cfcontent( type="text/html" );
-    writeOutput( html );
+    return getHolderCSS( arguments.size ) & getCardCSS( arguments.size );
 
   }
+
+  /* just returns the HTML fragment (div) that's needed */
+  remote string function getHTML( string cardName="FantabulousCard", 
+    cardClass="", numeric width=120, height=70, struct data = {}, string hash="", size="all", id="" ) {
+
+    var html = '';
+
+    // init
+    fantabulousCard( argumentCollection=arguments );
+
+    if ( arguments.size == "all" || arguments.size == "small" ) {
+      html &= '<div class="container">
+      <div class="row">
+        <div class="col">
+          <div class="holder small">
+            <div';
+            if ( Len(variables.id) ) {
+              html &= ' id="#variables.id#_small"';
+            }
+            html &= ' class="#variables.cardClass# small"></div>
+          </div>
+        </div>
+      </div>
+      <br/>
+';
+    }
+
+    if ( arguments.size == "all" || arguments.size == "regular" ) {
+      html &= '<div class="row">
+        <div class="col">
+          <div class="holder">
+            <div';
+            if ( Len(variables.id) ) {
+              html &= ' id="#variables.id#"';
+            }
+            html &= ' class="#variables.cardClass#"></div>
+          </div>
+        </div>
+      </div>
+      <br/>
+';
+    }
+
+    if ( arguments.size == "all" || arguments.size == "large" ) {
+      html &= '<div class="row">
+        <div class="col">
+          <div class="holder large">
+            <div';
+            if ( Len(variables.id) ) {
+              html &= ' id="#variables.id#_large"';
+            }
+            html &= ' class="#variables.cardClass# large"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+';
+    }
+
+    return html;
+
+  }
+
 
 }

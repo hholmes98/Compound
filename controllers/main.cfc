@@ -8,6 +8,7 @@ component accessors = true {
   property cardService;
   property fantabulousCardService;
   property tokenService;
+  property generatedCardService;
 
   function init( fw, beanFactory ) {
 
@@ -79,14 +80,14 @@ component accessors = true {
   function features( struct rc ) {
 
     rc.pageTitle = application.app_name & " features";
-    rc.pageDescription = application.app_name & " features that make it the only credit card caluclator you'll ever need.";
+    rc.pageDescription = application.app_name & " features that make it your personalized debt payoff assistant.";
   }
 
   function pricing( struct rc ) {
 
 
     rc.pageTitle = application.app_name & " pricing";
-    rc.pageDescription = "Affordable pricing plans for eliminating credit card debt with " & application.app_name;
+    rc.pageDescription = "Affordable pricing plans for eliminating debt with " & application.app_name;
   }
 
   function contact( struct rc ) {
@@ -102,6 +103,30 @@ component accessors = true {
 
     rc.codes = cardService.getCardCodes( limit=10 );
     rc.fantabulous = fantabulousCardService;
+  }
+
+  function card( struct rc ) {
+
+    if ( !IsNumeric(rc.cid) )
+      rc.cid = 0;
+
+    rc.card = generatedCardService.get( rc.cid );
+
+    //https://developers.pinterest.com/docs/rich-pins/products/
+    rc.productType = 'og:product';
+    rc.pageTitle = application.app_name & ': Featured Card Design';
+    rc.pageDescription = 'Download this custom design for your own credit card';
+
+    // our FANTABULOUS card service will perform the rendering
+    rc.fantabulous = fantabulousCardService;
+
+    rc.inlineStyle = rc.fantabulous.getCSS( cardName="featured", hash=rc.card.getCode(), size="large" );
+    rc.cardHTML = rc.fantabulous.getHTML( cardName="featured", hash=rc.card.getCode(), size="large", id="shell" );
+    rc.raw = rc.fantabulous.getCompleteHTML( cardName="featured", hash=rc.card.getCode(), size="large", id="shell" );
+
+    cfdocument( format="PDF", filename="tmp.pdf", overwrite="true" ) {
+      writeOutput(rc.raw);
+    }
   }
 
   /* raw json methods */
