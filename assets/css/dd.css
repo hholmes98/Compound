@@ -649,6 +649,10 @@ label {
   border-color: #171717;
 }
 
+.panel-title {
+  margin-right: 2px;
+}
+
 .nav-tabs {
   border-bottom: 1px solid #171717;
 }

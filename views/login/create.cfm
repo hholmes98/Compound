@@ -1,7 +1,14 @@
 <!-- views/login/create.cfm -->
+<cfsilent>
+  <cfparam name="rc.marketingContent" default="" />
+</cfsilent>
 <div class="row">
 
-  <div class="col-md-4 col-md-offset-4">
+  <cfif Len(rc.marketingContent)>
+    <cfoutput>#rc.marketingContent#</cfoutput>
+  </cfif>
+
+  <div class="col-md-4<cfif !Len(rc.marketingContent)> col-md-offset-4</cfif>">
 
     <div class="panel-heading">
      <div class="panel-title">
@@ -79,7 +86,7 @@
 
   </div>
 
-  <div class="col-md-4"></div>
+  <div class="<cfif !Len(rc.marketingContent)>col-md-4<cfelse>col-md-2</cfif>"></div>
 
 </div>
 

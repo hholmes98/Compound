@@ -678,6 +678,10 @@ label {
   border-color: #49bfb1;
 }
 
+.panel-title {
+  margin-right: 2px;
+}
+
 .nav-tabs {
   border-bottom: 1px solid #49bfb1;
 }
