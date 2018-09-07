@@ -98,12 +98,14 @@
                 <span ng-show="innerForm.label.$invalid" class="help-block">Must name this card.</span>
               </div>
 
-              <!--- LIFE HACKER (PAID) --->
-              <cfif session.auth.user.getAccount_Type_Id() == 4>
+              <!--- BUGETER (PAID) or LIFE HACKER (PAID) --->
+              <cfif session.auth.user.getAccount_Type_Id() GT 2>
 
                 <br/>
                 <div class="row">
                   <div class="col-md-8">
+                    <!--- LIFE HACKER (PAID) only --->
+                    <cfif session.auth.user.getAccount_Type_Id() == 4>
                     <div ng-class="{'has-error': innerForm.zero_apr_end_date.$invalid }">
                       <font size="-1" tooltip="This is the date that interest will start accruing on any balance that remains">0% APR Expires</font>
                       <div class="input-group">
@@ -113,6 +115,7 @@
                       <span ng-show="innerForm.zero_apr_end_date.$error.min" class="help-block">Date must be some date in the future.</span>
                       <span ng-show="innerForm.zero_apr_end_date.$error.date" class="help-block">Date must be valid.</span>
                     </div>
+                    </cfif><!--- // LIFE HACKER --->
                   </div>
                 </div>
 
@@ -136,6 +139,8 @@
                 <br/>
                 <div class="row">
                   <div class="col-md-8">
+                    <!--- LIFE HACKER (PAID) only --->
+                    <cfif session.auth.user.getAccount_Type_Id() == 4>
                     <div>
                       <font size="-1">Pay this card:</font>
                     </div>
@@ -152,6 +157,7 @@
                           }">
                       </rzslider>
                     </div>
+                    </cfif><!--- // LIFE HACKER --->
                   </div>
                 </div>
 

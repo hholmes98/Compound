@@ -590,7 +590,7 @@ component accessors=true {
     var nonzero_cards = plan.getNonZeroCalculatedPaymentCards();
 
     // PAID ACCOUNTS
-    if ( user.getAccount_Type_Id() == 4 ) {
+    if ( user.getAccount_Type_Id() > 2 ) {  // paid accounts 3 and 4 gain access to card due dates
 
       for ( var card in nonzero_cards ) {
 
