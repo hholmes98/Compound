@@ -22,12 +22,13 @@
     <cfoutput>
     <h3>#application.locale[session.auth.locale]['name']#</h3>
     <h3>#application.locale[session.auth.locale]['motto']#</h3>
+    <br/>
     </cfoutput>
-    <cfif get_started is 'home'>
+    <!--- <cfif get_started is 'home'>
       <button class="btn btn-default" id="returnTop"> Get started</button>
-    <cfelse>
+    <cfelse> --->
       <cfoutput><button class="btn btn-default" onClick="location.href='#buildUrl('login.create')#'"> Get started</button></cfoutput>
-    </cfif>
+    <!--- </cfif> --->
     <footer id="footer-sitemap">
       <div class="footer-container">
         <div class="sitemap">

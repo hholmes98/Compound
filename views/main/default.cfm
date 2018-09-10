@@ -248,19 +248,19 @@
 
 <div class="about">
 
-  <section dir="ltr" class="focus">
+  <section dir="ltr" class="spreadsheetplus">
     <div class="section-inner">
       <div class="text">
         <h3>Spreadsheet + bill reminders = DEBT FREEDOM!</h3>
         <p>Take the power of a credit card spreadsheet and add it to the convenience of a bill management app. The result? Debt Decimator: a tool that not only <b>reminds you when to pay</b>, but tells you <b>how much to pay on each debt</b>.</p>
       </div>
-      <span class="splash-icon focus-icon"></span>
+      <span class="splash-icon spreadsheetplus-icon"></span>
     </div>
   </section>
 
-  <section dir="ltr" class="privacy">
+  <section dir="ltr" class="hotcard">
     <div class="section-inner">
-      <span class="splash-icon privacy-icon"></span>
+      <span class="splash-icon hotcard-icon"></span>
       <div class="text-other">
         <h3>Light your debt on fire.</h3>
         <p>No more guessing or "following your hunch" - the math is done for you. Debt Decimator's <b>hot card</b> tells you what card you should be currently paying off.</p>
@@ -268,19 +268,19 @@
     </div>
   </section>
 
-  <section dir="ltr" class="fear">
+  <section dir="ltr" class="finishline">
     <div class="section-inner">
       <div class="text">
         <h3>A finish line you can pinpoint.</h3>
         <p>Finally, peace-of-mind and a plan for your debt-free future. Debt Decimator's payoff visualization allows you to <b>see the date every single debt will be paid off</b>, and the exact moment you'll live debt free.</p>
       </div>
-      <span class="splash-icon fear-icon"></span>
+      <span class="splash-icon finishline-icon"></span>
     </div>
   </section>
 
-  <section dir="ltr" class="privacy">
+  <section dir="ltr" class="desktop-mobile">
     <div class="section-inner">
-      <span class="splash-icon privacy-icon"></span>
+      <span class="splash-icon desktop-mobile-icon"></span>
       <div class="text-other">
         <h3>Access anywhere, via any device.</h3>
         <p>No need to download any apps. Debt Decimator's mobile compatibility allows you to <b>access via desktop or smartphone</b>, whichever you prefer.</p>
@@ -288,13 +288,13 @@
     </div>
   </section>
 
-  <section dir="ltr" class="fear">
+  <section dir="ltr" class="security">
     <div class="section-inner">
       <div class="text">
         <h3>Your privacy, by design.</h3>
         <p>Works to reduce your your online risk. Debt Decimator's "Privacy First" design <b>doesn't connect to your bank accounts</b>, and <b>doesn't ask for information that isn't needed</b> to perform its calculations.</p>
       </div>
-      <span class="splash-icon fear-icon"></span>
+      <span class="splash-icon security-icon"></span>
     </div>
   </section>
 

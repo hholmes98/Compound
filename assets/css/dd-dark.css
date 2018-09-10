@@ -818,7 +818,7 @@ label {
   width: 345px;
 }
 
-/* left-text */
+/* text on the left */
 .text {
   vertical-align: middle;
   display: inline-block;
@@ -826,28 +826,27 @@ label {
   padding: 0 30px 0 0;
 }
 
-/* right-tiles */
-.section-inner .focus-icon,
-.section-inner .fear-icon,
-.section-inner .support-icon {
+/* tiles on right */
+.section-inner .spreadsheetplus-icon,
+.section-inner .finishline-icon,
+.section-inner .security-icon {
   width: 330px;
   height: 220px;
-  border: 2px solid #fff;
-  border-radius: 6px;
-}
-
-/* left tiles */
-.section-inner .security-icon, 
-.section-inner .privacy-icon {
-  width: 330px;
-  height: 220px;
-  background-size: 330px 230px;
-  /*background-position: 0 -270px;*/
   border: 2px solid #e5e5e5;
   border-radius: 6px;
 }
 
-/* right-text */
+/* tiles on left */ 
+.section-inner .hotcard-icon,
+.section-inner .desktop-mobile-icon {
+  width: 330px;
+  height: 220px;
+  background-size: 330px 230px;
+  border: 2px solid #e5e5e5;
+  border-radius: 6px;
+}
+
+/* text on the right */
 .text-other {
   vertical-align: middle;
   display: inline-block;
@@ -862,43 +861,53 @@ label {
   padding-top: 1200px;
 }
 
-.focus, .fear, .support {
+/* tiles on right */
+.spreadsheetplus, .finishline, .security {
   position: relative;
   top: 0;
   background-color: #333333;
 }
 
-/* the tiles themselves */
-.focus-icon {
+/* tiles on right */
+.spreadsheetplus-icon {
   top: 0;
   display: inline-block;
-  background-image: url(/path/to/img);
+  background-image: url(/assets/img/spreadsheet-plus-bill.jpg);
+  background-size: 330px;
+}
+
+.finishline-icon {
+  top: 0;
+  display: inline-block;
+  background-image: url(/assets/img/finishline.jpg);
+  background-size: 330px;
 }
 
 .security-icon {
   top: 0;
   display: inline-block;
   background-image: url(/assets/img/security.png);
+  background-size: 330px;
+  background-position: 0px -226px;
+}
+
+/* tiles on left */
+.hotcard-icon {
+  top: 0;
+  display: inline-block;
+  background-image: url(/assets/img/hotcard.jpg);
+  background-size: 330px;
   margin: 0 30px 0 0;
+  background-position: 0px -237px;
 }
 
-.fear-icon {
+.desktop-mobile-icon {
   top: 0;
   display: inline-block;
-  background-image: url(/path/to/img);
-}
-
-.privacy-icon {
-  top: 0;
-  display: inline-block;
-  background-image: url(/path/to/img);
+  background-image: url(/assets/img/desktop-mobile.jpg);
+  background-size: 330px;
   margin: 0 30px 0 0;
-}
-
-.support-icon {
-  top: 0;
-  display: inline-block;
-  background-image: url(/path/to/img);
+  background-position: 0px -237px;
 }
 
 /* footer section */
