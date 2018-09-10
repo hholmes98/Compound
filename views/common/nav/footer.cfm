@@ -26,7 +26,7 @@
     <cfif get_started is 'home'>
       <button class="btn btn-default" id="returnTop"> Get started</button>
     <cfelse>
-      <cfoutput><button class="btn btn-default" onClick="location.href='#buildUrl('main')#'"> Get started</button></cfoutput>
+      <cfoutput><button class="btn btn-default" onClick="location.href='#buildUrl('login.create')#'"> Get started</button></cfoutput>
     </cfif>
     <footer id="footer-sitemap">
       <div class="footer-container">

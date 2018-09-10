@@ -21,7 +21,7 @@
     <link rel="shortcut icon" href="#request.abs_url#/favicon.ico" />
     <link rel="icon" href="#request.abs_url#/assets/img/#application.skins[COOKIE["dd-skin"]].favicon#" /><!--- TODO: make sure this is 192x192 --->
     <link rel="apple-touch-icon" href="#request.abs_url#/assets/img/#application.skins[COOKIE["dd-skin"]].favicon#" />
-    <link rel="canonical" href="#request.abs_url##request._fw1.CgiPathInfo#" />
+    <link rel="canonical" href="#CGI.request_url#" />
 
     <meta name="language" content="#ListFirst(session.auth.locale,"-")#">
     <meta name="viewport" content="width=device-width, initial-scale=1">

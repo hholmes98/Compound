@@ -68,6 +68,9 @@ component accessors = true {
   /* landing on the login page is what instatiates the XSRF-TOKEN */
   function default( struct rc ) {
 
+    rc.pageTitle = "Sign In";
+    rc.pageDescription = application.app_name & " secure sign in page";
+
     createCookie( arguments.rc );
 
   }
