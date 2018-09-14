@@ -68,9 +68,8 @@
         </div>
 
         <div class="row panel-header"id="top-form">
-          <div class="col-md-4">{{budgetPercent | number:0}}% <strong>of Budget</strong></div>
           <div class="col-md-4"><strong>Debt Load:</strong> <font style="color:red">{{totalDebtLoad | currency}}</font></div>
-          <div class="col-md-4"><strong>Monthly Payments:</strong> {{totalMinPayment | currency}}</div>
+          <div class="col-md-8"><strong>Monthly Payments:</strong> {{totalMinPayment | currency}} ({{budgetPercent | number:0}}% <strong>of budget</strong>)</div>
         </div>
 
         <div class="row panel-header col-names">

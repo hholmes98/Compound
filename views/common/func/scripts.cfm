@@ -109,12 +109,6 @@ profile.basic
   --->
 
   <cfif getEnvironment() is 'development'>
-    <script src="/node_modules/fullpage.js/vendors/scrolloverflow.js" type="text/javascript"></script>
-  <cfelse>
-    <script src="/node_modules/fullpage.js/vendors/scrolloverflow.min.js" type="text/javascript"></script>
-  </cfif>
-
-  <cfif getEnvironment() is 'development'>
     <script src="/node_modules/fullpage.js/dist/fullpage.js" type="text/javascript"></script>
   <cfelse>
     <script src="/node_modules/fullpage.js/dist/fullpage.min.js" type="text/javascript"></script>

@@ -2144,55 +2144,43 @@ controller/pay
 
     if ( Object.keys($scope.all_cards).length ) {
 
-      $('#pan-main').fullpage({
-        licenseKey:'OPEN-SOURCE-GPLV3-LICENSE', //TODO: buy a license
-        animateAnchor: false,
-        controlArrows: false,
-        scrollOverflow: true,
-         scrollOverflowOptions: {
-           scrollbars: false,
-           bounce: false,
-           momentum: false, // allegedly a good perf boost even with them hidden tho?
-           fadeScrollbars: false,
-           disableTouch: true
-         },
-        responsiveWidth: 2000,
-        autoScrolling: true,
-        recordHistory: true,
-        verticalCentered: false,
-        fitToSection: false,
-        keyboardScrolling: false,
-        bigSectionsDestination: "top",
-        anchors:['list'],
-        afterRender: function() {
+      DDService.pGetEvent({user_id:CF_getUserID()})
+      .then( function onSuccess( response ) {
 
-          DDService.pGetEvent({user_id:CF_getUserID()})
-          .then( function onSuccess( response ) {
+        //success
+        $scope.all_cards = response.event.cards; // this is for resets after pruning through noPaymentFilter
 
-            //success
-            $scope.all_cards = response.event.cards; // this is for resets after pruning through noPaymentFilter
+        // this will reduce
+        $scope.cards = $filter('noPaymentFilter')($scope.all_cards, $scope.showAllCards);
 
-            // this will reduce
-            $scope.cards = $filter('noPaymentFilter')($scope.all_cards, $scope.showAllCards);
+        // this should stay the same
+        $scope.cards = $filter('cardSorter')($scope.cards, $scope.orderByField, $scope.reverseSort);
 
-            // this should stay the same
-            $scope.cards = $filter('cardSorter')($scope.cards, $scope.orderByField, $scope.reverseSort);
+        // by default, just pick the first one.
+        $scope.selected = $scope.cards[Object.keys($scope.cards)[0]];
 
-            // by default, just pick the first one.
-            $scope.selected = $scope.cards[Object.keys($scope.cards)[0]];
+        // we keep the calculated payment text that displays on the screen separate from the actual numeric val.
+        $scope.calculated_payment_text = $scope.selected.calculated_payment;
 
-            // we keep the calculated payment text that displays on the screen separate from the actual numeric val.
-            $scope.calculated_payment_text = $scope.selected.calculated_payment;
+        $('#pan-main').fullpage({
+          licenseKey:'OPEN-SOURCE-GPLV3-LICENSE', //TODO: buy a license
+          animateAnchor: false,
+          controlArrows: false,
+          responsiveWidth: 2000,
+          autoScrolling: true,
+          recordHistory: true,
+          verticalCentered: false,
+          fitToSection: false,
+          keyboardScrolling: false,
+          bigSectionsDestination: "top",
+          anchors:['list']
+        }); // end fullpage.js
 
-          });
+        //disabling scrolling
+        fullpage_api.setAllowScrolling(false, 'left, right'); // no touch scrolling please
+        fullpage_api.setKeyboardScrolling(false, 'left, right'); // no touch scrolling please
 
-        }
-
-      }); // end fullpage.js
-
-      //disabling scrolling
-      fullpage_api.setAllowScrolling(false, 'left, right'); // no touch scrolling please
-      fullpage_api.setKeyboardScrolling(false, 'left, right'); // no touch scrolling please
+      });
 
     } else {
 

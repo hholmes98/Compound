@@ -10,18 +10,21 @@
     <cfoutput>
     <div align="center">
       <span align="left">
+        
         <button class="btn button btn-default btn-tile" ng-disable="loadingBills==true" onClick="location.hash='##list/cards'">
           <i class="fas fas-large fa-dollar-sign"></i>
           <br/><br/> PAY my<br/>bills
         </button>
       </span>
       <span align="center">
+        
         <button class="btn button btn-default btn-tile" ng-disable="loadingBills==true" ng-click="navigateTo('#buildUrl('manage.budget')#')">
           <i class="fas fas-large fa-chart-pie"></i>
           <br/><br/> UPDATE my<br/>budget
         </button>
       </span>
       <span align="right">
+        
         <button class="btn button btn-default btn-tile" ng-disable="loadingBills==true" ng-click="navigateTo('#buildUrl('calculate.future')#')">
           <svg class="icon-dd-calculator icon-large">
             <use xlink:href="/assets/img/icons.svg##icon-dd-calculator"></use>
