@@ -60,6 +60,9 @@ component accessors = true {
       variables.fw.redirect( application.auth_start_page );
     }
 
+    rc.title = application.app_name & " - The Fastest Online Debt Elimination Tool";
+    rc.pageDescription = "Calculate the fastest possible credit card payoff with " & application.app_name & ", your personal debt payoff assistant.";
+
   }
 
   /* alias of default, but with demo drawer already open */

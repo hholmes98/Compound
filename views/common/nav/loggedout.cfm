@@ -21,23 +21,23 @@
         <li class="dropdown">
           <a href="##" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fas fa-info-circle"></i> <span class="nav-label">About</span> <span class="caret"></span></a>
           <ul class="dropdown-menu">
-            <li<cfif REQUEST.item is 'about'> class="active"</cfif>><a href="#buildUrl('main.about')#"><i class="fas fa-question-circle"></i> What is #application.app_name#?</span></a></li>
+            <li<cfif REQUEST.item is 'about'> class="active"</cfif>><a href="#buildUrl('main.about')#" role="menuitem"><i class="fas fa-question-circle"></i> What is #application.app_name#?</span></a></li>
             <li<cfif REQUEST.item is 'contact'> class="active"</cfif>><a href="#buildUrl('main.contact')#"><i class="fas fa-envelope"></i> Contact us</a></li>
           </ul>
         </li>
-        <li<cfif REQUEST.item is 'features'> class="active"</cfif>><a href="#buildUrl('main.features')#"><i class="fas fa-sliders-h"></i> Features</a></li>
+        <li<cfif REQUEST.item is 'features'> class="active"</cfif>><a href="#buildUrl('main.features')#" role="menuitem"><i class="fas fa-sliders-h"></i> Features</a></li>
         <li<cfif REQUEST.item is 'pricing'> class="active"</cfif>><a href="#buildUrl('main.pricing')#"><i class="fas fa-dollar-sign"></i> Pricing</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li class="dropdown">
           <a href="##" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fas fa-bullhorn"></i> <span class="nav-label">What's New?</span> <span class="caret"></span></a>
           <ul class="dropdown-menu">
-            <li><a href="https://blog.#application.site_domain#"><i class="far fa-newspaper"></i> <span class="nav-label">News</span></a></li>
-            <li><a href="https://forum.#application.site_domain#"><i class="fab fa-discourse"></i> <span class="nav-label">Discussion</span></a></li>
+            <li><a href="https://blog.#application.site_domain#" role="menuitem"><i class="far fa-newspaper"></i> <span class="nav-label">News</span></a></li>
+            <li><a href="https://forum.#application.site_domain#" role="menuitem"><i class="fab fa-discourse"></i> <span class="nav-label">Discussion</span></a></li>
             <li><a href="#buildUrl('main.top')#"><i class="fas fa-trophy"></i> <span class="nav-label">Top Cards</span></a></li>
           </ul>
         </li>
-        <li<cfif REQUEST.section is 'login'> class="active"</cfif>><a href="#buildUrl('login')#"><i class="fas fa-lock"></i> Sign In</a></li>
+        <li<cfif REQUEST.section is 'login'> class="active"</cfif>><a href="#buildUrl('login')#" role="menuitem"><i class="fas fa-lock"></i> Sign In</a></li>
       </ul>
     </div>
   </div>
