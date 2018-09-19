@@ -18,6 +18,8 @@ component accessors = true {
   }
 
   function before( struct rc ) {
+    param name="rc.kc" default="0"; // kc = keyword code
+    param name="rc.cc" default="0"; // cc = (ad) copy code
 
     rc.robots = "index,follow,archive";
 
@@ -31,6 +33,72 @@ component accessors = true {
       case 'contact':
         rc.cache = 1;
         break;
+
+    }
+
+    // mktgTitle = Should mirror the keywords used for the adgroup (ie. what the user searched for)
+    // mktgBody = Should mirror the content of the ad (tailored to the ad that was clicked)
+
+    if ( arguments.rc.kc ) {
+
+      switch ( arguments.rc.kc ) {
+        case 1:
+          rc.mktgTitle = "Calculate Your Own Payoff";
+          break;
+        case 2:
+          rc.mktgTitle = "Pay Off Debt Yourself";
+          break;
+        case 3:
+          rc.mktgTitle = "Credit Card Advice";
+          break;
+        case 4:
+          rc.mktgTitle = "Don't Go Deeper Into Debt";
+          break;
+        case 5:
+          rc.mktgTitle = "Pay Off Cards Yourself";
+          break;
+        case 6:
+          rc.mktgTitle = "A Credit Card Calculator & More!";
+          break;
+        case 7:
+          rc.mktgTitle = "New Debt Snowball Calculator";
+          break;
+        case 8:
+          rc.mktgTitle = "A Snowball Calculator & More!";
+          break;
+        default:
+          break;
+      }
+
+    }
+
+    if ( arguments.rc.cc ) {
+
+      switch ( arguments.rc.cc ) {
+        case 1:
+          rc.mktgBody = "Tell us your debt and we'll tell you the fastest way to pay it off!";
+          break;
+        case 2:
+          rc.mktgBody = "Manage your debt reduction budget. What cards to pay off first, and by how much.";
+          break;
+        case 3:
+          rc.mktgBody = "Our credit card calculator advises you on what to pay and when.";
+          break;
+        case 4:
+          rc.mktgBody = "Don't know how to pay off your credit cards? Our app tells you what to pay.";
+          break;
+        case 5:
+          rc.mktgBody = "Tell us your credit card balances and we'll tell you the fastest way to pay them off.";
+          break;
+        case 6:
+          rc.mktgBody = "Manage your credit card payoff: what cards to pay off first, and by how much.";
+          break;
+        case 7:
+          rc.mktgBody = "A credit card calculator that advises the fastest payoff to financial freedom.";
+          break;
+        default:
+          break;
+      }
 
     }
 
@@ -106,6 +174,13 @@ component accessors = true {
 
     rc.codes = cardService.getCardCodes( limit=10 );
     rc.fantabulous = fantabulousCardService;
+  }
+
+  function calculator( struct rc ) {
+    param name="rc.debtLabel" default="Credit Card";
+
+    rc.title = rc.debtLabel & " Payoff Calculator - " & application.app_name;
+    rc.pageDescription = application.app_name & "'s " & LCase(rc.debtLabel) &  " calculator will tell you how much to pay and how long it will take to pay off.";
   }
 
   function card( struct rc ) {
@@ -185,6 +260,7 @@ component accessors = true {
   /* back-end actions */
   public void function calculate( struct rc ) {
     param name="rc.budget" default=0;
+    param name="rc.anotherCalcURL" default="";
 
     /* shut down direct access */
     if ( !(IsNumeric(rc.budget) && rc.budget > 0) ) 
@@ -198,7 +274,7 @@ component accessors = true {
     // store the temp. budget
     session.tmp.preferences.budget = Trim(rc.budget);
 
-    // count the number of cards submitted by enumerating fieldlist via 'credit-card'
+    // count the number of cards submitted by enumerating fieldlist via 'credit-card-label'
     for ( field in rc.fieldnames ) {
 
       if ( field CONTAINS 'credit-card-label' ) {
@@ -222,6 +298,16 @@ component accessors = true {
 
       }
 
+      if ( IsDefined( rc['credit-card-interest-rate' & a] ) ) {
+        card.interest_rate = Val(Trim(rc['credit-card-interest-rate' & a]));
+
+        if (card.interest_rate > 70)
+          card.interest_rate = 70;
+
+        if (card.interest_rate < 0)
+          card.interest_rate = 0;
+      }
+
       if ( capture ) {
 
         card.card_id = CreateUUID();
@@ -237,7 +323,7 @@ component accessors = true {
     }
 
     // redirect to the plan
-    variables.fw.redirect( 'main.plan' );
+    variables.fw.redirect( action='main.plan', preserve="anotherCalcURL" );
 
   }
 

@@ -1,8 +1,11 @@
 <!-- views/main/plan.cfm -->
-<cfif StructIsEmpty( session.tmp.preferences )>
-  <!--- someone tried to go directly this page, send 'em back --->
-  <cflocation url="/" addtoken="false" />
-</cfif>
+<cfsilent>
+  <cfif StructIsEmpty( session.tmp.preferences )>
+    <!--- someone tried to go directly this page, send 'em back --->
+    <cflocation url="/" addtoken="false" />
+  </cfif>
+  <cfparam name="rc.anotherCalcURL" default="#buildUrl('main.demo')#" />
+</cfsilent>
 
 <!--- this mirrors plan.default, but shows to anonymous/non-auth'd users --->
 
@@ -17,7 +20,7 @@
 
       <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 bottom-buffer" align="center">
         <cfoutput>
-          <button class="btn button btn-default btn-lg" onClick="location.href='#buildUrl('main.demo')#';">
+          <button class="btn button btn-default btn-lg" onClick="location.href='#rc.anotherCalcURL#';">
             <svg class="icon-dd-calculator">
               <use xlink:href="/assets/img/icons.svg##icon-dd-calculator"></use>
             </svg> Run Another Calculation
