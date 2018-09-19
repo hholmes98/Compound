@@ -66,6 +66,18 @@ component accessors = true {
         case 8:
           rc.mktgTitle = "A Snowball Calculator & More!";
           break;
+        case 9:
+          rc.mktgTitle = "Calculate Your Loan Payoff";
+          break;
+        case 10:
+          rc.mktgTitle = "Pay Off Loans Yourself";
+          break;
+        case 11:
+          rc.mktgTitle = "Loan Payoff Advice";
+          break;
+        case 12:
+          rc.mktgTitle = "A Loan Payoff Calculator & More!";
+          break;
         default:
           break;
       }
@@ -95,6 +107,18 @@ component accessors = true {
           break;
         case 7:
           rc.mktgBody = "A credit card calculator that advises the fastest payoff to financial freedom.";
+          break;
+        case 8:
+          rc.mktgBody = "Tell us your loans and we'll tell you the fastest way to pay them off!";
+          break;
+        case 9:
+          rc.mktgBody = "Manage your loan payoff: what loans to pay off first, and by how much.";
+          break;
+        case 10:
+          rc.mktgBody = "Our loan payoff calculator advises you on what to pay and when.";
+          break;
+        case 11:
+          rc.mktgBody = "A loan payoff calculator that advises the fastest payoff to financial freedom.";
           break;
         default:
           break;
