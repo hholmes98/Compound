@@ -408,6 +408,25 @@ directives
 filters
 
 ***************/
+.filter('budgetPercentFilter', function( $sce ) {
+
+  return function(number) {
+
+    if ( isNaN(number) )
+      return number;
+    else {
+      if ( number <= 33 ) {
+        return $sce.trustAsHtml("<font style='color:green;'>" + number.toString() + "</font>");
+      } else if ( number > 33 && number <= 66 ) {
+        return $sce.trustAsHtml("<font style='color:yellow;'>" + number.toString() + "</font>");
+      } else if ( number > 66 && number < 100 ) {
+        return $sce.trustAsHtml("<font style='color:orange;'>" + number.toString() + "</font>");
+      } else { // 100+
+        return $sce.trustAsHtml("<font style='color:red;'>" + number.toString() + "</font>");
+      }
+    }
+  };
+})
 .filter('calculatedPaymentFilter', function( $sce ) {
 
   return function(number) {

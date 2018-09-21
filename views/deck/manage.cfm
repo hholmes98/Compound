@@ -69,7 +69,7 @@
 
         <div class="row panel-header"id="top-form">
           <div class="col-md-4"><strong>Debt Load:</strong> <font style="color:red">{{totalDebtLoad | currency}}</font></div>
-          <div class="col-md-8"><strong>Monthly Payments:</strong> {{totalMinPayment | currency}} ({{budgetPercent | number:0}}% <strong>of budget</strong>)</div>
+          <div class="col-md-8"><strong>Total of Min. Payments:</strong> {{totalMinPayment | currency}} (<span ng-bind-html="budgetPercent|number:1|budgetPercentFilter"></span>% <strong>of budget</strong>)</div>
         </div>
 
         <div class="row panel-header col-names">
@@ -302,7 +302,7 @@
 </div><!-- /panel -->
 
 <div class="menu pmd-floating-action" role="navigation">
-  <a class="btn btn-primary pmd-floating-action-btn pmd-button-fab pmd-button-raised" ng-click="newCard(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>)" data-title="Add a new card" href="javascript:void(0);">
+  <a class="btn btn-primary pmd-floating-action-btn pmd-button-fab pmd-button-raised" ng-click="cardManagerTab=true;emergencyTab=false;budgetTab=false;paycheckFrequencyTab=false;newCard(<cfoutput>#session.auth.user.getUser_id()#</cfoutput>)" data-title="Add a new card" href="javascript:void(0);">
     <i class="fas fa-credit-card"></i>
   </a>
 </div>
