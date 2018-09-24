@@ -140,7 +140,7 @@ main.plan
 calculate.default
 --->
 <cfif sectionDetection( 'main.plan,calculate.default' )>
-  <script src="/node_modules/highcharts/highstock.js" type="text/javascript"></script>
+  <script src="/node_modules/highcharts/highstock.js?v=6.1.1" type="text/javascript"></script>
 </cfif>
 
 <!-- screenshots -->
