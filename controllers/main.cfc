@@ -39,7 +39,7 @@ component accessors = true {
     // mktgTitle = Should mirror the keywords used for the adgroup (ie. what the user searched for)
     // mktgBody = Should mirror the content of the ad (tailored to the ad that was clicked)
 
-    if ( arguments.rc.kc ) {
+    if ( IsNumeric(arguments.rc.kc) ) {
 
       switch ( arguments.rc.kc ) {
         case 1:
@@ -84,7 +84,7 @@ component accessors = true {
 
     }
 
-    if ( arguments.rc.cc ) {
+    if ( IsNumeric(arguments.rc.cc) ) {
 
       switch ( arguments.rc.cc ) {
         case 1:
