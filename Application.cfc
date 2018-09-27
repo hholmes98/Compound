@@ -124,13 +124,13 @@ component extends = "framework.one" {
     application.skins = ArrayNew(1);
     application.skins[1] = {
       name: 'Jackson (Light)',
-      path: 'dd.css?v=1.21.02',
+      path: 'dd.css?v=1.21.03',
       favicon: 'dd-logo-light.png',
       themeColor: '##1c6a3a'
     };
     application.skins[2] = {
       name: '80s ATM (Dark)',
-      path: 'dd-dark.css?v=1.21.02',
+      path: 'dd-dark.css?v=1.21.03',
       favicon: 'dd-logo-dark.png',
       themeColor: '##000000'
     };
