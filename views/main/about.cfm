@@ -1,6 +1,6 @@
 <!-- views/main/about -->
 
-<div class="top-buffer">
+<div class="top-screen-buffer">
 
   <section>
 

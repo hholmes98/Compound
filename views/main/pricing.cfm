@@ -1,4 +1,6 @@
 <!-- views/main/pricing -->
+
+<div class="top-screen-quarter-buffer"></div>
 <div id="generic_price_table">
 
   <section>
