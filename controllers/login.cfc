@@ -515,13 +515,16 @@ component accessors = true {
     payload_o["name"] = arguments.user.getName(); // name will become the full name on Discourse if the user is new or SiteSetting.sso_overrides_name is set.
     payload_o["suppress_welcome_message"] = true;
 
+    // prep default
+    payload_o["add_groups"] = "Registered";
+
     if ( arguments.user.getRole_Id() == 1) {
       payload_o["admin"] = true;
     }
 
     // paid access
     if ( arguments.user.getAccount_Type_Id() == 4 ) {  // 4 is the one with special access to premiere support + beta
-      payload_o["add_groups"] = "Paid";
+      payload_o["add_groups"] = ListAppend(payload_o["add_groups"], "Paid");
     } else {
       payload_o["remove_groups"] = "Paid";
     }
