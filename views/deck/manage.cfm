@@ -31,6 +31,8 @@
 </cfsilent>
 
 <!-- views/cards/manage -->
+<div class="top-screen-quarter-buffer"></div>
+
 <div class="page-header">
   <h1>Update Your Budget</h1>
   <h3>This is where you decimate your debt.</h3>

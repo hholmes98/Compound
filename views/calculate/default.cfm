@@ -1,5 +1,7 @@
 <!-- views/calculate/default -->
 
+<div class="top-screen-quarter-buffer"></div>
+
 <div class="page-header">
   <h1>Calculate Your Payoff</h1>
   <h3>Chin up. <cfoutput>#session.auth.user.getName()#</cfoutput>'s debt-free future is in sight. <em>Literally</em>.</h3>

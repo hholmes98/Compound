@@ -29,6 +29,14 @@
           Life happens, dollars come and go. <cfoutput>#application.locale[session.auth.locale]['name']#</cfoutput> makes sure you always pay the right amount...<em>and not a penny more</em>.
         </div>
 
+        <div class="col-md-4">
+          <cfoutput>
+            <video preload="auto" width="360" poster="#request.abs_url#/assets/img/f1-recalculate-poster.png" autoplay="" loop="" muted alt="example of instant recalculation">
+              <source width="360" src="#request.abs_url#/assets/video/f1-recalculate.mp4" type="video/mp4">
+            </video>
+          </cfoutput>
+        </div>
+
       </div>
     </div>
 

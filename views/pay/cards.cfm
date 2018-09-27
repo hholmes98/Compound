@@ -2,6 +2,8 @@
 
 <!--- <div class="spacer" ng-cloak="!(loaded)"></div> --->
 
+<div class="top-screen-quarter-buffer"></div>
+
 <div class="pan-page pan-page-2 slide" data-anchor="cards" ng-cloak>
   <div class="container">
 
@@ -136,11 +138,11 @@
           <span class="col-md-2"></span>
           <span class="col-md-8">
             <cfoutput>
-              <button class="btn button btn-default" ng-show="!customAmount" ng-click="selected.actual_payment=selected.calculated_payment;makePayment()" ng-disabled="calculated_payment_text=='Thinking...'">
+              <button class="btn button btn-default bottom-buffer" ng-show="!customAmount" ng-click="selected.actual_payment=selected.calculated_payment;makePayment()" ng-disabled="calculated_payment_text=='Thinking...'">
                 <i class="fas fa-check"></i> Mark as Paid: {{selected.calculated_payment|currency}}
               </button>
               &nbsp;
-              <button class="btn button btn-default" ng-show="!customAmount" ng-disabled="calculated_payment_text=='Thinking...'" ng-click="customAmount=true">
+              <button class="btn button btn-default bottom-buffer" ng-show="!customAmount" ng-disabled="calculated_payment_text=='Thinking...'" ng-click="customAmount=true">
                 <i class="fas fa-check-circle"></i> Let Me Mark a Custom Amount
               </button>
               <span ng-show="customAmount">

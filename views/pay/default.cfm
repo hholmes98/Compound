@@ -1,5 +1,7 @@
 <!-- views/pay/default -->
 
+<div class="top-screen-quarter-buffer"></div>
+
 <div class="pan-page pan-page-1 slide" data-anchor="choose">
   <div class="container">
 

@@ -418,7 +418,7 @@ filters
       if ( number <= 33 ) {
         return $sce.trustAsHtml("<font style='color:green;'>" + number.toString() + "</font>");
       } else if ( number > 33 && number <= 66 ) {
-        return $sce.trustAsHtml("<font style='color:yellow;'>" + number.toString() + "</font>");
+        return $sce.trustAsHtml("<font style='color:#c7c701;'>" + number.toString() + "</font>");
       } else if ( number > 66 && number < 100 ) {
         return $sce.trustAsHtml("<font style='color:orange;'>" + number.toString() + "</font>");
       } else { // 100+
