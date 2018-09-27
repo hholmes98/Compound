@@ -10,9 +10,28 @@
 
         <div class="col-md-12">
           <div class="price-heading clearfix">
-            <h1>Priced For You</h1>
+            <h1>Upgrade Your Debt Elimination Powers</h1>
             <h3>Decimate your debt without decimating your wallet</h3>
           </div>
+        </div>
+
+      </div>
+      <div class="row">
+
+        <div class="col-md-12 standard-text">
+          <p>
+            <strong>The core functionality of <cfoutput>#application.app_name#</cfoutput> is 100% free.</strong> But for those interested
+            in taking their debt management abilities to the next level, we offer a number of paid powerups.
+
+            <h2 shadow-text="Powerup Highlights:">Powerup Highlights:</h2>
+            <ul>
+              <li>Pay for the features you want.</li>
+              <li>Cancel any time.</li> 
+              <li>Switch between differerent plans - you can even go from free to paid, then back to free again.</li>
+              <li>Your account data remains <em>intact</em>, regardless of powerups.</li>
+              <li>You can export your data anytime you want.</li>
+            </ul>
+          </p>
         </div>
 
       </div>
@@ -221,25 +240,6 @@
   <div>
     <br><br>&nbsp;
   </div>
-
-  <section>
-
-    <div class="container">
-      <div class="row">
-
-        <div class="col-md-12">
-          Pay for the features you want. Cancel any time. Switch between differerent plans. You can even go from free to paid and back to free
-          again. Your account data remains intact, regardless of plan, and you can export your data anytime you want.
-        </div>
-
-      </div>
-    </div>
-
-    <div>
-      &nbsp;<br><br><br>
-    </div>
-
-  </section>
 
   <cfoutput>#view('common/nav/footer')#</cfoutput>
 

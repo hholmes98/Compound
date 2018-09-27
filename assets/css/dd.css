@@ -194,6 +194,10 @@ html, body {
   font-weight: 400;
 }
 
+.standard-text {
+  font-family: 'Nunito', sans-serif;
+}
+
 /* https://stackoverflow.com/questions/37504626/css-effect-to-render-a-font-with-rubber-stamp-effect*/
 .rubber {
   box-shadow: 0 0 0 3px #a94442, 0 0 0 2px #a94442 inset;

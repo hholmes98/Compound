@@ -86,7 +86,7 @@
 
         <div class="col-md-12">
           <div align="center">
-            <h2 shadow-text="Paid Features">Paid Features</h2>
+            <h2 shadow-text="Powerups">Powerups</h2>
             <h3>Like the free version so much that you're willing to<br> pay us for a bit more? We've got you covered.</h3>
           </div>
         </div>

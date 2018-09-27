@@ -26,7 +26,7 @@
           </ul>
         </li>
         <li<cfif REQUEST.item is 'features'> class="active"</cfif>><a href="#buildUrl('main.features')#" role="menuitem"><i class="fas fa-sliders-h"></i> Features</a></li>
-        <li<cfif REQUEST.item is 'pricing'> class="active"</cfif>><a href="#buildUrl('main.pricing')#"><i class="fas fa-dollar-sign"></i> Pricing</a></li>
+        <li<cfif REQUEST.item is 'pricing'> class="active"</cfif>><a href="#buildUrl('main.pricing')#"><i class="fas fa-bolt"></i> Powerups</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li class="dropdown">
