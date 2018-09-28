@@ -11,8 +11,8 @@
       <h1>Pay Your Bills</h1>
       <h3>Pick a card. Any card.</h3>
       <p>
-        Get your recommended payment for any card. If the balance and/or minimumn payment have changed, you can update them
-        on-the-fly and your recommended payment will be re-calculated instantly.
+        Get your recommended payment for any card. If the <strong>balance</strong> and/or <strong>minimum payment</strong> have changed, you can update them
+        on-the-fly and your recommended payment will be recalculated instantly.
       </p>
     </div>
 
