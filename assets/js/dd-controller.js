@@ -789,12 +789,18 @@ services
 
   service.pGetEvent = function( data ) {
 
-    var key = deepGet(data,'user_id');
     var deferred = $q.defer();
+
+    var key = deepGet(data,'user_id');
+    var month = deepGet(data,'month');
+    var year = deepGet(data,'year');
+    var endUrl = '/index.cfm/rest/eventsFirst/user_id/' + key;
+    if (month != null && year != null)
+      endUrl += '/month/' + month.toString() + '/year/' + year.toString();
 
     $http({
       method: 'GET',
-      url: '/index.cfm/rest/eventsFirst/user_id/' + key
+      url: endUrl
     })
     .then( function onSuccess( response ) {
 
@@ -2153,6 +2159,10 @@ controller/pay
 
   $scope.all_cards = {};
 
+  $scope.today = moment();
+  $scope.currentDate = moment();
+  $scope.trackingMonth = moment($scope.currentDate).format("MMMM") + " " + moment($scope.currentDate).format("YYYY");
+
   /*********/
   /* main  */
   /*********/
@@ -2255,6 +2265,46 @@ controller/pay
     location.href = path;
   };
 
+  $scope.isToday = function() {
+    return $scope.currentDate.isSame(date, 'month');
+  }
+
+  $scope.moveMonth = function( delta ) {
+
+    $scope.currentDate = moment($scope.currentDate).add( delta, 'months');
+
+    var _m = $scope.currentDate.get('month');
+    var _y = $scope.currentDate.get('year');
+
+    var in_data = {
+      user_id: CF_getUserID(),
+      month: (_m+1), // CF months are 1-based
+      year: _y
+    }
+
+    DDService.pGetEvent( in_data )
+    .then( function onSuccess( response ) {
+
+      $scope.trackingMonth = moment($scope.currentDate).format("MMMM") + " " + moment($scope.currentDate).format("YYYY");
+
+      //success
+      $scope.all_cards = response.event.cards; // this is for resets after pruning through noPaymentFilter
+
+      // this will reduce
+      $scope.cards = $filter('noPaymentFilter')($scope.all_cards, $scope.showAllCards);
+
+      // this should stay the same
+      $scope.cards = $filter('cardSorter')($scope.cards, $scope.orderByField, $scope.reverseSort);
+
+      // by default, just pick the first one.
+      $scope.selected = $scope.cards[Object.keys($scope.cards)[0]];
+
+      // we keep the calculated payment text that displays on the screen separate from the actual numeric val.
+      $scope.calculated_payment_text = $scope.selected.calculated_payment;
+    });
+
+  }
+
   $scope.selectCard = function( card ) {
     $scope.selected = card;
     $scope.calculated_payment_text = $scope.selected.calculated_payment;
@@ -2317,6 +2367,28 @@ controller/pay
       /******
       TRIVIA
       ******/
+      var gratzArray = [
+        'SWEET!',
+        'AWESOME!',
+        'NICE ONE!',
+        'MAGNIFICENT!',
+        'LIKE A BOSS!',
+        'WRECK THAT DEBT!',
+        'SICK!',
+        'AND BOOM GOES THE DYNAMITE!'
+      ];
+
+      var whichG = Math.floor(Math.random() * gratzArray.length); 
+
+      var messageArray = [
+        'You\'re nailing this!',
+        'Those bills don\'t stand a chance!',
+        'Yo, that debt got <b>decimated</b>.',
+        'One step closer to financial freedom.',
+        'Another bill bites the dust.'
+      ];
+
+      var whichM = Math.floor(Math.random() * messageArray.length); 
 
       // TODO: message will be populated with real stats based on the user's performance.
       BootstrapDialog.show({
@@ -2326,7 +2398,7 @@ controller/pay
         closeByBackdrop: false,
         closeByKeyboard: false,
         title: 'PAYMENT RECORDED',
-        message: 'SWEET!! You\'re nailing this!<br><br><b>BONUS:</b> You are now a part of the <b>96.67%</b> of customers that pay their debts! AWESOME!!',
+        message: gratzArray[whichG] + '<br/><br/>' + messageArray[whichM],
         buttons: [{
             id: 'btn-close',
             label: 'Thanks!',

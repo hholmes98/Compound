@@ -21,9 +21,17 @@
         <table class="table table-striped table-bordered table-valign-middle">
           <thead>
             <tr>
-              <th colspan="3" align="center">
+              <th colspan="3" style="text-align:center;">
                 <span style="font-weight:400;">Cards to Show:</span>
                 <toggle id="show_all" name="show_all" ng-model="showAllCards" ng-change="showAllCards==!showAllCards;filterBy()" on="All" off="Payment Due" onstyle="btn-default" offstyle="btn-primary btn-sm"></toggle>
+              </th>
+            </tr>
+            <tr>
+              <th colspan="3" style="text-align:center;">
+                <button class="btn button btn-default" uib-tooltip-html="'Previous Month'" ng-disabled="isToday()" ng-click="moveMonth(-1)"><i class="fas fa-caret-left"></i> <i class="fas fa-calendar-alt"></i></button>
+                <span style="font-weight:400;">Payments for: </span>
+                <span ng-bind-html="trackingMonth"></span>
+                <button class="btn button btn-default" uib-tooltip-html="'Next Month'" ng-click="moveMonth(1)"> <i class="fas fa-calendar-alt"></i> <i class="fas fa-caret-right"></i></button>
               </th>
             </tr>
             <tr>
