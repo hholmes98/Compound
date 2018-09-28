@@ -2323,22 +2323,29 @@ controller/pay
 
     $scope.calculated_payment_text = 'Thinking...'; // setting this to a non-number will trigger the || output filter on the display, which is 'Recalculating...'
 
+    card['month'] = $scope.currentDate.month() + 1; // cf dates are 1-based
+    card['year'] = $scope.currentDate.year();
+
     DDService.pSaveCard( card )
     .then( DDService.pGetCard )
     .then( DDService.pDeletePlans )
     .then( DDService.pDeleteJourney )
-    .then( DDService.pGetEvent )
-    .then( function( response ) {
+    .then( function( res ) {
 
-      $scope.all_cards = response.event.cards;
-      $scope.cards = $scope.all_cards;
+      DDService.pGetEvent(card)
+      .then( function( response ) {
 
-      $scope.selected = $scope.cards[$scope.selected.card_id];
-      $scope.calculated_payment_text = $scope.selected.calculated_payment;
+        $scope.all_cards = response.event.cards;
+        $scope.cards = $scope.all_cards;
 
-      // and then you have re-filter and re-sort
-      $scope.cards = $filter('noPaymentFilter')($scope.all_cards, $scope.showAllCards);
-      $scope.cards = $filter('cardSorter')($scope.cards, $scope.orderByField, $scope.reverseSort);
+        $scope.selected = $scope.cards[$scope.selected.card_id];
+        $scope.calculated_payment_text = $scope.selected.calculated_payment;
+
+        // and then you have re-filter and re-sort
+        $scope.cards = $filter('noPaymentFilter')($scope.all_cards, $scope.showAllCards);
+        $scope.cards = $filter('cardSorter')($scope.cards, $scope.orderByField, $scope.reverseSort);
+
+      });
 
     });
 

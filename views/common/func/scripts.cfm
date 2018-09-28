@@ -170,4 +170,4 @@ calculate.default
 <cfoutput>#scrollUp#</cfoutput>
 
 <!-- last but not least, our own logic! -->
-<script src="/assets/js/dd-controller.js?v=1.3.01"></script>
+<script src="/assets/js/dd-controller.js?v=1.3.02"></script>
