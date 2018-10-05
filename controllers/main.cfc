@@ -322,7 +322,7 @@ component accessors = true {
 
       }
 
-      if ( IsDefined( rc['credit-card-interest-rate' & a] ) ) {
+      if ( IsDefined( 'rc.credit-card-interest-rate' & a ) ) {
         card.interest_rate = Val(Trim(rc['credit-card-interest-rate' & a]));
 
         if (card.interest_rate > 70)

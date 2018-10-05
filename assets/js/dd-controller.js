@@ -2326,6 +2326,22 @@ controller/pay
     card['month'] = $scope.currentDate.month() + 1; // cf dates are 1-based
     card['year'] = $scope.currentDate.year();
 
+    /* due to the new functionality of calculating a payment for a month other than the current
+    we now need to:
+
+    1. Save the card,
+    2. Purge the plans and journey
+    3. *new* get the plan,
+    4. *new* get the event for the month / year and question
+    5. splice the pay_dates from the event onto the recommended payments of the plan
+
+    why? because based on the architecture now, if you call pGetEvent with a month from the future, that's going to return
+    part of the journey which is calculated *into the future* -- meaning, the balance of the card is less than it is now
+    ...and that's what's updating the interface and causing bizarre visual behavior.
+
+    *sigh*
+        */
+
     DDService.pSaveCard( card )
     .then( DDService.pGetCard )
     .then( DDService.pDeletePlans )
