@@ -39,7 +39,11 @@
   profile.basic
   --->
   <cfif sectionDetection( 'profile.basic,pay.default,pay.cards' )>
-    <link href="//ziscloud.github.io/angular-bootstrap-toggle/css/angular-bootstrap-toggle.min.css" rel="stylesheet" />
+    <cfif getEnvironment() is 'development'>
+      <link href="/assets/css/angular-bootstrap-toggle.css" rel="stylesheet" />
+    <cfelse>
+      <link href="/assets/css/angular-bootstrap-toggle.min.css" rel="stylesheet" />
+    </cfif>
   </cfif>
 
   <!--- only needed on pages that use the Bootstrap Dialog

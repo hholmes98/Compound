@@ -53,7 +53,11 @@
 profile.basic
 --->
 <cfif sectionDetection( 'profile.basic,pay.default,pay.cards' )>
-  <script src="//ziscloud.github.io/angular-bootstrap-toggle/js/angular-bootstrap-toggle.min.js"></script>
+  <cfif getEnvironment() is 'development'>
+    <script src="/assets/js/angular-bootstrap-toggle.js" rel="stylesheet"></script>
+  <cfelse>
+    <script src="/assets/js/angular-bootstrap-toggle.min.js" rel="stylesheet"></script>
+  </cfif>
 </cfif>
 
 <!--- any page with an icon --->
