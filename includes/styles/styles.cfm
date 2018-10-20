@@ -29,9 +29,9 @@
   <link href="//fonts.googleapis.com/css?family=Nunito:400,600,700,900|Ultra|Days+One|Slabo+13px|Oswald:400,600|Allerta+Stencil" rel="stylesheet" />
 
   <cfif getEnvironment() is 'development'>
-    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link href="/node_modules/bootstrap/dist/css/bootstrap.css" rel="stylesheet" />
   <cfelse>
-    <link href="/node_modules/bootstrap/dist/css/bootstrap.css" rel="stylesheet" /> 
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
   </cfif>
 
   <!--- http://www.bootstraptoggle.com/ --->

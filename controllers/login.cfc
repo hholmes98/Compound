@@ -80,6 +80,10 @@ component accessors = true {
     param name="rc.kc" default="0"; // kc = keyword code
     param name="rc.cc" default="0"; // cc = (ad) copy code
 
+    if ( !application.allow_new_users ) {
+      variables.fw.redirect( 'login.subscribe' );
+    }
+
     // mktgTitle = Should mirror the keywords used for the adgroup (ie. what the user searched for)
     // mktgBody = Should mirror the content of the ad (tailored to the ad that was clicked)
 

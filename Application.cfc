@@ -83,6 +83,7 @@ component extends = "framework.one" {
     application.app_show_version = XmlSearch( conf, '//app/show-version' )[1].XmlText;
 
     application.secure = XmlSearch( conf, '//app/secure' )[1].XmlText;
+    application.allow_new_users = XmlSearch( conf, '//app/allow-new-users' )[1].XmlText;
 
     // locales
     application.locale = StructNew();
